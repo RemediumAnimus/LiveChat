@@ -44,14 +44,22 @@ var ioEvents = function(io) {
             if (!data) {
                 return callback(`Message can't be empty`)
             }
-            return callback(`Message can't be empty`)
+
             // Get user data
-            const user = users.get(socket.id)
+            var user = users.get(socket.id)
 
             if(user){
 
+                // Form response data
+                var collectionData = {
+                    'attributes': {
+                        'body': data.text
+                    },
+                    'user': user
+                }
+
                 // We send the message to all users who are attached to sockets
-                io.to(user.attributes.room).emit('message:new', message(data.name, data.text, data.id, data.roles))
+                io.to(user.attributes.room).emit('message:new', collectionData)
             }
 
             // Call the callback function

@@ -1,10 +1,10 @@
 {
 	"db": {
-		"username": "root",
-		"password": "",
-		"host": "127.0.0.1",
+		"username": "admin",
+		"password": "admin1",
+		"host": "192.168.123.210",
 		"port": "3306",
-		"name": "chat_db"
+		"name": "node_db"
 	},
 	"sessionSecret": "0540656Haqwrsf404Awr066w0",
 	"chat": {
