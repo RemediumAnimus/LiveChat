@@ -1,0 +1,20 @@
+{
+	"db": {
+		"username": "root",
+		"password": "",
+		"host": "127.0.0.1",
+		"port": "3306",
+		"name": "chat_db"
+	},
+	"sessionSecret": "0540656Haqwrsf404Awr066w0",
+	"chat": {
+		"roles": {
+			"client": "GUEST",
+			"operator": "BOOKER"
+		},
+		"template": {
+			"client": "chat_user",
+			"operator": "chat"
+		}
+	}
+}
