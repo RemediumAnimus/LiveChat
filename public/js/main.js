@@ -1,7 +1,9 @@
 'use strict';
 
+// Connect to sockets
 const socket = io();
 
+// Define a new component
 Vue.component('chat-message', {
     props: ['message', 'user'],
     template: `
@@ -13,6 +15,7 @@ Vue.component('chat-message', {
   `
 })
 
+// Create a new instance of Vue
 new Vue({
     el: '#app',
     data: {
@@ -27,7 +30,11 @@ new Vue({
         }
     },
     methods: {
+
+        // Method of sending messages
         sendMessage() {
+
+            // Body message
             const message = {
                 text:   this.message,
                 name:   this.user.name,
@@ -35,6 +42,7 @@ new Vue({
                 roles:  this.user.roles
             }
 
+            // Sending a new message
             socket.emit('message:create', message, err => {
                 if (err) {
                     console.error(err)
@@ -43,39 +51,50 @@ new Vue({
                 }
             })
         },
+
+        // Initialize event audition
         initializeConnection() {
+
+            // Listen to the update event of users in the room
             socket.on('users:update', users => {
                 this.users = [...users]
             })
 
+            // Listen to the user status update event.
             socket.on('users:status', user => {
-                //console.log(this.usersList) // Получаем всех клиентов(список неизменный)
-                console.log('Получаем пользователя')
-                console.log(user);
+                for(let j = 0; j < this.usersList.length; j++) {
+                    if(this.usersList[j].id === user.attributes.id) {
+                        if(this.usersList[j].online === true){
+                            this.usersList[j].online = false;
+                        } else {
+                            this.usersList[j].online = true;
+                        }
+                    }
+                }
             })
 
+            // Listen to the event of receiving a list of online users
             socket.on('users:get', user => {
-                console.log(user) // Получаем всех клиентов онлайн при входе в систему
+                for(let i = 0; i < user.length; i++){
+                    var j = this.usersList.findIndex(u => u.id === user[i].attributes.id)
+                    if(j != undefined){
+                        this.usersList[j].online = true;
+                    }
+                }
             })
 
+            // Listen to the message receiving event
             socket.on('message:new', message => {
+                console.log(message)
                 this.messages.push(message)
                 scrollToBottom(this.$refs.messages)
             })
 
+            // Omit scroll to the last message
             scrollToBottom(this.$refs.messages)
         },
-        changeSoket(room) {
-            this.user.room = room;
 
-            socket.emit('join', this.user, data => {
-                if (typeof data === 'string') {
-                    console.error(data)
-                } else {
-                    this.user.id = data.userId;
-                }
-            })
-        },
+        // Initialize connections of the authorized user
         initializeSocket() {
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {
@@ -87,12 +106,21 @@ new Vue({
                 }
             })
         },
+
+        // Initialize a new dialogue with the client
         initializeRoom(data) {
-            console.log(this.users)
-            console.log(data)
-            //this.changeSoket(data.room)
+            this.user.room = data.room;
+            socket.emit('join', this.user, data => {
+                if (typeof data === 'string') {
+                    console.error(data)
+                } else {
+                    this.user.id = data.userId;
+                }
+            })
         }
     },
+
+    // Initialize the hook after creating the instance
     created() {
         axios.post('users/get').then(response => {
             if(response.status == 200){
@@ -105,6 +133,8 @@ new Vue({
             console.log(error);
         })
     },
+
+    // Initialize the hook before instantiating the instance
     mounted() {
         axios.post('users/list').then(response => {
             if(response.status == 200) {

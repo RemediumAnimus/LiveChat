@@ -61,12 +61,16 @@ var getAllUsers = function () {
  *
  */
 var getByList = function (done) {
-    mysql.query("SELECT `id`, `name`, `roles`, `room` FROM `users` WHERE `roles` = 'GUEST'", function(err,rows){
+    mysql.query("SELECT `id`, `name` FROM `users` WHERE `roles` = 'GUEST'", function(err,rows){
         if (err)
             return done(err);
         if (!rows.length) {
             return done(null, false);
         }
+
+        rows.forEach(function(index, elem) {
+            index.online = false;
+        });
 
         // All is well, return successful user
         return done(null, rows);

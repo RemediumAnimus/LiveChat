@@ -44,7 +44,7 @@ var ioEvents = function(io) {
             if (!data) {
                 return callback(`Message can't be empty`)
             }
-
+            return callback(`Message can't be empty`)
             // Get user data
             const user = users.get(socket.id)
 
@@ -75,7 +75,7 @@ var ioEvents = function(io) {
         socket.on('disconnect', () => {
 
             // Receives user information
-            const collection = users.get(socket.id);
+            const userCollection = users.get(socket.id);
 
             // We delete connection with the user
             const user = users.remove(socket.id);
@@ -86,7 +86,7 @@ var ioEvents = function(io) {
                 io.to(user.attributes.room).emit('users:update', users.getByRoom(user.attributes.room));
 
                 // Sends request to add online user
-                socket.broadcast.emit('users:status', collection);
+                socket.broadcast.emit('users:status', userCollection);
             }
         })
     })
