@@ -52,7 +52,8 @@ new Vue({
                 //console.log(this.usersList) // Получаем всех клиентов(список неизменный)
                 console.log('Получаем пользователя')
                 console.log(user);
-                console.log(123);
+                console.log("Git");
+                console.log("Git kuzminskii");
             })
 
             socket.on('users:get', user => {
