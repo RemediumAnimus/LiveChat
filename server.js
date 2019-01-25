@@ -17,8 +17,8 @@ const flash 		= require('connect-flash');
 const routes 	= require('./app/routes');
 const session 	= require('./app/session');
 const passport  = require('./app/auth');
-const port      = process.env.PORT || 3000
 const ioServer 	= require('./app/socket')(app);
+const port      = process.env.PORT || 3000
 /**
  * View engine setup
  *
