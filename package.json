@@ -1,6 +1,6 @@
 {
   "name": "glavbuh-assistant-chat",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Glavbuh Assistant Chat",
   "main": "app.engine.js",
   "engines": {
@@ -15,7 +15,7 @@
     "socketio",
     "vuejs"
   ],
-  "author": "Kuzminskii Artem",
+  "author": "kuzminskii97@mail.ru",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
