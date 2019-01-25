@@ -19,7 +19,6 @@ const session 	= require('./app/session');
 const passport  = require('./app/auth');
 const port      = process.env.PORT || 3000
 const ioServer 	= require('./app/socket')(app);
-
 /**
  * View engine setup
  *

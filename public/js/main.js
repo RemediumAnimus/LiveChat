@@ -51,7 +51,8 @@ new Vue({
             socket.on('users:status', user => {
                 //console.log(this.usersList) // Получаем всех клиентов(список неизменный)
                 console.log('Получаем пользователя')
-                console.log(user)
+                console.log(user);
+                console.log(123);
             })
 
             socket.on('users:get', user => {
