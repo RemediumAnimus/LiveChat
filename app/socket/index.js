@@ -1,7 +1,7 @@
 'use strict';
 
-var users   = require('../models/users')
-var message = (name, text, id, roles) => ({name, text, id, roles})
+var users       = require('../models/users')
+var messages    = require('../models/messages')
 
 /**
  * Encapsulates all code for emitting and listening to socket events
@@ -46,20 +46,31 @@ var ioEvents = function(io) {
             }
 
             // Get user data
-            var user = users.get(socket.id)
+            let user = users.get(socket.id)
 
             if(user){
 
-                // Form response data
-                var collectionData = {
-                    'attributes': {
-                        'body': data.text
-                    },
-                    'user': user
-                }
+                // Write a new message to the database
+                messages.save(user.id, user.room, data.text, data.attachments, function(err, result) {
+                    let collectionData              = {};
+                        collectionData.message      = {};
+                        collectionData.message.body = data.text;
+                        collectionData.user         = user;
+                    if (err) {
+                        collectionData.success = false;
 
-                // We send the message to all users who are attached to sockets
-                io.to(user.attributes.room).emit('message:new', collectionData)
+                        // Send message back to user
+                        socket.emit('message:new', collectionData)
+                    }
+
+                    if(result) {
+                        collectionData.success    = true;
+                        collectionData.message.id = result;
+
+                        // Send the message to all users who are attached to sockets
+                        io.to(user.room).emit('message:new', collectionData)
+                    }
+                })
             }
 
             // Call the callback function
@@ -91,7 +102,7 @@ var ioEvents = function(io) {
             if(user) {
 
                 // We update the list of users in the dialog
-                io.to(user.attributes.room).emit('users:update', users.getByRoom(user.attributes.room));
+                io.to(user.room).emit('users:update', users.getByRoom(user.room));
 
                 // Sends request to add online user
                 socket.broadcast.emit('users:status', userCollection);
@@ -106,8 +117,8 @@ var ioEvents = function(io) {
  */
 var init = function(app){
 
-	var server 	= require('http').Server(app);
-	var io 		= require('socket.io')(server);
+	let server 	= require('http').Server(app);
+	let io 		= require('socket.io')(server);
 
 	// Define all Events
 	ioEvents(io);

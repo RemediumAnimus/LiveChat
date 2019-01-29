@@ -5,9 +5,9 @@ const socket = io();
 Vue.component('chat-message', {
     props: ['message', 'user'],
     template: `
-    <div class="message" :class="{'owner': message.user.socket.id === user.id}">
+    <div class="message" :class="{'owner': message.user.socket_id === user.id, 'error': message.success === false}">
         <div class="message-content z-depth-1">
-            {{message.user.attributes.name}}: {{message.attributes.body}}
+            {{message.user.name}}: {{message.message.body}}
         </div>
     </div>
   `
@@ -48,6 +48,7 @@ new Vue({
 
             socket.on('message:new', message => {
                 this.messages.push(message)
+                console.log(message)
                 scrollToBottom(this.$refs.messages)
             })
 

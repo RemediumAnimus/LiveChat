@@ -1,11 +1,15 @@
 'use strict';
 
-var express	 = require('express');
-var passport = require('passport');
-var router 	 = express.Router();
+const express	 = require('express');
+const passport   = require('passport');
+const path       = require('path')
+const router 	 = express.Router();
+const crypto     = require('crypto');
 
-var User     = require('../models/users');
-var config   = require('../config');
+const User     = require('../models/users');
+const Uploads  = require('../models/uploads');
+const Images   = require('../models/images');
+const config   = require('../config');
 
 /**
  * Home page
@@ -111,5 +115,79 @@ router.post('/users/get', function(req, res) {
         return res.status(401).json('Data not received');
     }
 })
+
+/**
+ * Uploads router
+ * Gets information about unfinished downloads
+ */
+router.post('/uploads/attachments', function(req, res) {
+
+    if (Object.keys(req.user).length == 0) {
+        return res.status(400).json({status: false, err: 'No authorized.'});
+    }
+
+    let objectUser      = req.user;
+    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id)).digest('hex');
+
+    Uploads.get(objectPassword, function(err, result) {
+        if (err)
+            return res.status(500).send(err);
+        if (result) {
+            return res.status(200).json({status: true, attachments: result});
+        } else {
+            return res.status(500).send(err);
+        }
+    })
+})
+
+/**
+ * Upload router
+ * Redirects to the chat page if the user is logged in
+ */
+router.post('/upload/loading', function(req, res) {
+
+    if (Object.keys(req.files).length == 0) {
+        return res.status(400).json({status: false, err: 'No files were uploaded.'});
+    }
+
+    if (!req.user) {
+        return res.status(400).json({status: false, err: 'No authorized.'});
+    }
+
+    // Get files
+    let objectFile      = req.files.file;
+    let objectUser      = req.user;
+
+    let objectOrigName  = objectFile.name;
+    let objectType      = objectFile.mimetype;
+    let objectExt       = path.extname(objectOrigName);
+    let objectName      = crypto.randomBytes(20).toString('hex');
+    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id)).digest('hex');
+
+    let objectUploadPath = 'upload/'+objectName+'_original'+objectExt+'';
+    let objectResize     = objectFile.mimetype.match(/image.*/)
+        ? true
+        : false;
+
+    // Use the mv() method to place the file somewhere on your server
+    objectFile.mv(objectUploadPath, function(err) {
+        if (err)
+            return res.status(500).send(err);
+
+        Uploads.save(objectOrigName, objectName, objectPassword, objectType, objectExt, function(err, result) {
+            if (err)
+                return res.status(500).send(err);
+            if (result) {
+                if(objectResize) {
+                    Images.resizeXS(objectUploadPath, objectName, objectExt);
+                    Images.resizeSM(objectUploadPath, objectName, objectExt);
+                }
+                return res.status(200).json({status: true, id: result});
+            } else {
+                return res.status(500).send(err);
+            }
+        })
+    });
+});
 
 module.exports = router;

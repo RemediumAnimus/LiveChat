@@ -54,7 +54,7 @@
                     v-for="u in users"
                     :class="{'active': u.id === user.id}"
             >
-                {{u.attributes.name}}
+                {{u.name}}
             </a>
         </div>
 
@@ -76,6 +76,19 @@
                 :disabled="message.length === 0"
         >Send</button>
     </div>
+    <div class="actions">
+        <div class="file-field input-field">
+          <div class="btn">
+            <span>File</span>
+            <input type="file" name="uploadFiles" id="in-upload-input" value="Upload" multiple @change="initializeUploadFile($event)">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Upload one or more files">
+          </div>
+        </div>
+    </div>
+
+    <ul id="preview"></ul>
 
 </div>
 

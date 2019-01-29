@@ -62,3 +62,11 @@ html, body {
 .collection-item.online {
     border-right: 2px solid #26a69a;
 }
+.message.error .message-content {
+    color: #fff;
+    background: #e21f27;
+}
+.img-absolute {
+    width: 40px;
+    height: 40px;
+}

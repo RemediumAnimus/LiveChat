@@ -1,22 +1,24 @@
 'use strict';
 
-var mysql = require('../database');
-var userModel = [];
-var OPERATOR_ROLES = 'BOOKER';
-var CLIENT_ROLES = 'GUEST';
+const mysql             = require('../database');
+const sql               = require('sqlstring');
+const OPERATOR_ROLES    = 'BOOKER';
+const CLIENT_ROLES      = 'GUEST';
+
+let userModel = [];
+
 
 /**
  * Creates a new user
  *
  */
-var add = function (id, user_id, name, room, roles){
+const add = function (id, user_id, name, room, roles){
     userModel.push({
-        'socket': {
-            id
-        },
-        'attributes': {
-            'id': user_id, name, room, roles
-        }
+        'socket_id' : id,
+        'id'        : user_id,
+        'name'      : name,
+        'room'      : room,
+        'roles'     : roles
     })
 }
 
@@ -24,18 +26,18 @@ var add = function (id, user_id, name, room, roles){
  * Gets user data
  *
  */
-var get = function (id) {
-    return userModel.find(u => u.socket.id === id)
+const get = function (id) {
+    return userModel.find(u => u.socket_id === id)
 }
 
 /**
  * Deletes user
  *
  */
-var remove = function (id) {
+const remove = function (id) {
     const user = get(id);
     if(user) {
-        userModel = userModel.filter(u => u.socket.id !== user.socket.id)
+        userModel = userModel.filter(u => u.socket_id !== user.socket_id)
     }
     return user;
 }
@@ -44,36 +46,36 @@ var remove = function (id) {
  *  Getting a user's room
  *
  */
-var getByRoom = function (room) {
-    return userModel.filter(u => u.attributes.room === room)
+const getByRoom = function (room) {
+    return userModel.filter(u => u.room === room)
 }
 
 /**
  *  Getting all list users (client)
  *
  */
-var getAllUsers = function () {
-    return userModel.filter(u => u.attributes.roles === CLIENT_ROLES)
+const getAllUsers = function () {
+    return userModel.filter(u => u.roles === CLIENT_ROLES)
 }
 
 /**
  *  Get by lists users
  *
  */
-var getByList = function (done) {
-    mysql.query("SELECT `id`, `name` FROM `users` WHERE `roles` = 'GUEST'", function(err,rows){
+const getByList = function (done) {
+    mysql.query(sql.format('SELECT `id`, `name`, `room` FROM `users` WHERE `roles` = ?', ['GUEST']), function(err, result){
         if (err)
             return done(err);
-        if (!rows.length) {
+        if (!result.length) {
             return done(null, false);
         }
 
-        rows.forEach(function(index, elem) {
+        result.forEach(function(index, elem) {
             index.online = false;
         });
 
         // All is well, return successful user
-        return done(null, rows);
+        return done(null, result);
     });
 }
 
@@ -81,7 +83,7 @@ var getByList = function (done) {
  * A middleware allows user to get access to pages ONLY if the user is already logged in.
  *
  */
-var isAuthenticated = function (req, res, next) {
+const isAuthenticated = function (req, res, next) {
     if(req.isAuthenticated()){
         next();
     } else{
@@ -93,7 +95,7 @@ var isAuthenticated = function (req, res, next) {
  * A middleware allows user to get access to pages ONLY if the user is an operator.
  *
  */
-var isOperator = function (req, done) {
+const isOperator = function (req, done) {
     if(req.user.roles === OPERATOR_ROLES){
         return done(null);
     } else {
