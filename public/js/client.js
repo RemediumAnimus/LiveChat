@@ -20,6 +20,7 @@ new Vue({
         messages: [],
         users: [],
         usersOnline: [],
+        attachments: [],
         user: {
             name: '',
             room: '',
@@ -30,7 +31,8 @@ new Vue({
         sendMessage() {
             const message = {
                 id:     this.user.id,
-                text:   this.message
+                text:   this.message,
+                attachments: this.attachments
             }
 
             socket.emit('message:create', message, err => {
