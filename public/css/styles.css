@@ -70,3 +70,19 @@ html, body {
     width: 40px;
     height: 40px;
 }
+
+.notify {
+    animation: opacity 1s infinite;
+}
+
+@keyframes opacity {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}

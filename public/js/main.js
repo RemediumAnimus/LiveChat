@@ -85,14 +85,17 @@ new Vue({
 
             // Listen to the message receiving event
             socket.on('message:new', message => {
-                console.log(123);
                 this.messages.push(message);
                 console.log(this.messages)
                 this.scrollToBottom(this.$refs.messages)
             })
 
             socket.on('hiddenMessage:new', message => {
-                console.log(message);
+                this.usersList.forEach(function(elem) {
+                    if (elem.id == message.user.id) {
+                        elem.notify = true;
+                    }
+                })
             })
 
             // Omit scroll to the last message
@@ -117,6 +120,7 @@ new Vue({
          *
          */
         initializeRoom(data) {
+            data.notify = false;
             this.user.room = data.room;
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {
