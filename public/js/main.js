@@ -1,23 +1,15 @@
 'use strict';
 
-// Connect to sockets
+/**
+ * Connect to sockets
+ *
+ */
 const socket = io();
 
-// Define a new component
-Vue.component('chat-message', {
-    props: ['message', 'user'],
-    template: `
-    <div class="message" 
-        :class="{'owner': message.user.roles === 'BOOKER', 'error': message.success === false}"
-    >
-        <div class="message-content z-depth-1">
-            {{message.user.name}}: {{message.message.body}}
-        </div>
-    </div>
-  `
-})
-
-// Create a new instance of Vue
+/**
+ * Create a new instance of Vue
+ *
+ */
 new Vue({
     el: '#app',
     data: {
@@ -41,9 +33,9 @@ new Vue({
 
             // Body message
             const message = {
-                id:     this.user.id,
-                text        :   this.message,
-                attachments: this.attachments
+                id          : this.user.id,
+                text        : this.message,
+                attachments : this.attachments
             }
 
             // Sending a new message
@@ -51,7 +43,8 @@ new Vue({
                 if (err) {
                     console.error(err)
                 } else {
-                    this.message = ''
+                    this.message = '';
+                    this.attachments = []
                 }
             })
         },
@@ -93,6 +86,7 @@ new Vue({
             // Listen to the message receiving event
             socket.on('message:new', message => {
                 this.messages.push(message);
+                console.log(this.messages)
                 this.scrollToBottom(this.$refs.messages)
             })
 
@@ -119,12 +113,23 @@ new Vue({
          */
         initializeRoom(data) {
             this.user.room = data.room;
-            console.log(data)
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {
                     console.error(data)
                 } else {
                     this.user.id = data.userId;
+
+                    axios.post('messages/all?transport=messages&uid='+data.userId+'', {'room_id': this.user.room})
+                        .then(function (response) {
+                            if(response.status === 200){
+                                console.log(response)
+                            } else {
+                                console.log('ошибка')
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        })
                 }
             })
         },
@@ -153,7 +158,7 @@ new Vue({
                      .then(function (response) {
                         if(response.status === 200){
                             this_clone.statusProgress(random);
-                            attachments.push(response.data.id);
+                            attachments.push(response.data.attachment);
                         } else {
                             console.log('ошибка')
                         }
@@ -246,7 +251,7 @@ new Vue({
                 }
              })
              .catch(error => {
-                console.log(error);
+                console.error(error);
              })
 
         // Get attachments information
@@ -280,4 +285,21 @@ new Vue({
                 console.log(error);
              })
     }
+})
+
+/**
+ * Define a new component
+ *
+ */
+Vue.component('chat-message', {
+    props: ['message', 'user'],
+    template: `
+    <div class="message" 
+        :class="{'owner': message.user.roles === 'BOOKER', 'error': message.success === false}"
+    >
+        <div class="message-content z-depth-1">
+            {{message.user.name}}: {{message.message.body}}
+        </div>
+    </div>
+  `
 })

@@ -3,12 +3,13 @@
 const express	 = require('express');
 const passport   = require('passport');
 const path       = require('path')
-const router 	 = express.Router();
 const crypto     = require('crypto');
+const router 	 = express.Router();
 
 const User     = require('../models/users');
 const Uploads  = require('../models/uploads');
 const Images   = require('../models/images');
+const Messages = require('../models/messages');
 const config   = require('../config');
 
 /**
@@ -107,8 +108,10 @@ router.post('/users/list', function(req, res) {
  * Redirects to the chat page if the user is logged in
  */
 router.post('/users/get', function(req, res) {
-
     if(req.user) {
+        if(req.user.room === null){
+            delete(req.user.room);
+        }
         return res.status(200).json(req.user);
     }
     else {
@@ -150,7 +153,7 @@ router.post('/upload/loading', function(req, res) {
         return res.status(400).json({status: false, err: 'No files were uploaded.'});
     }
 
-    if (!req.user) {
+    if (Object.keys(req.user).length == 0) {
         return res.status(400).json({status: false, err: 'No authorized.'});
     }
 
@@ -164,7 +167,7 @@ router.post('/upload/loading', function(req, res) {
     let objectName      = crypto.randomBytes(20).toString('hex');
     let objectPassword  = crypto.createHmac('sha256', String(objectUser.id)).digest('hex');
 
-    let objectUploadPath = 'upload/'+objectName+'_original'+objectExt+'';
+    let objectUploadPath = 'upload/'+objectName+objectExt+'';
     let objectResize     = objectFile.mimetype.match(/image.*/)
         ? true
         : false;
@@ -182,12 +185,41 @@ router.post('/upload/loading', function(req, res) {
                     Images.resizeXS(objectUploadPath, objectName, objectExt);
                     Images.resizeSM(objectUploadPath, objectName, objectExt);
                 }
-                return res.status(200).json({status: true, id: result});
+                return res.status(200).json({status: true, attachment: { id             : result,
+                                                                         original_name  : objectOrigName,
+                                                                         name           : objectName,
+                                                                         type           : objectType,
+                                                                         ext            : objectExt }
+                });
             } else {
                 return res.status(500).send(err);
             }
         })
     });
 });
+
+/**
+ * Messages router
+ * Gets messages for room
+ */
+router.post('/messages/all', [User.isAuthenticated, function(req, res) {
+
+    if (Object.keys(req.body).length == 0) {
+        return res.status(400).json({status: false, err: 'Body response empty!'});
+    }
+
+    // Get the data
+    let room_id = req.body.room_id;
+
+    Messages.get(room_id, function(err, result) {
+        if (err)
+            return res.status(500).send(err);
+        if (result) {
+            return res.status(200).json({status: true, messages: result});
+        } else {
+            return res.status(500).send(err);
+        }
+    })
+}])
 
 module.exports = router;

@@ -52,10 +52,11 @@ var ioEvents = function(io) {
 
                 // Write a new message to the database
                 messages.save(user.id, user.room, data.text, data.attachments, function(err, result) {
-                    let collectionData              = {};
-                        collectionData.message      = {};
-                        collectionData.message.body = data.text;
-                        collectionData.user         = user;
+                    let collectionData                      = {};
+                        collectionData.message              = {};
+                        collectionData.message.body         = data.text;
+                        collectionData.message.attachments  = data.attachments;
+                        collectionData.user                 = user;
                     if (err) {
                         collectionData.success = false;
 

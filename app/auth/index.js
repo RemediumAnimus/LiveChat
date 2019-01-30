@@ -1,17 +1,19 @@
 'use strict';
 
-var config 		= require('../config');
-var passport 	= require('passport');
-var mysql 		= require('../database');
+const config 	 = require('../config');
+const passport 	 = require('passport');
+const mysql 	 = require('../database');
+const sql        = require('sqlstring');
+const crypto     = require('crypto');
 
-var LocalStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 
 /**
  * Encapsulates all code for authentication 
  * Either by using username and password
  *
  */
-var init = function(){
+const init = function(){
 
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
@@ -20,7 +22,7 @@ var init = function(){
 
     // used to deserialize the user
     passport.deserializeUser(function(id, done) {
-        mysql.query("SELECT `id`, `name`, `roles`, `room` FROM `users` WHERE `id` = "+id,function(err,rows){
+        mysql.query(sql.format('SELECT u.`id`, u.`name`, u.`roles`, r.`id` AS `room` FROM `users` u LEFT JOIN `rooms` r ON u.id = r.id_user WHERE u.`id` = ?', [id]), function(err, rows){
             done(err, rows[0]);
         });
     });
@@ -33,7 +35,7 @@ var init = function(){
 	},
     // Callback with email and password from our form
 	function(req, email, password, done) {
-		mysql.query("SELECT `id`, `name`, `roles`, `room`, `password` FROM `users` WHERE `email` = '" + email + "'", function(err,rows){
+		mysql.query(sql.format('SELECT u.`id`, u.`name`, u.`roles`, r.`id` AS `room`, u.`password` FROM `users` u LEFT JOIN `rooms` r ON u.id = r.id_user WHERE u.`email` = ?', [email]), function(err, rows){
 			if (err)
 				return done(err);
 			if (!rows.length) {
@@ -43,10 +45,14 @@ var init = function(){
 			}
 
 			// if the user is found but the password is wrong
-			if (!(rows[0].password == password))
+			if (!(rows[0].password === crypto.createHmac('sha256', String(password)).digest('hex')))
 
 				// Create the loginMessage and save it to session as flashdata
 				return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
+
+			if(rows[0].room === null)
+
+				delete(rows[0].room);
 
 			// All is well, return successful user
 			return done(null, rows[0]);
