@@ -11,7 +11,7 @@ new Vue({
 
             // Receives values ​​with the incoming form
             this.username = this.$refs.username.value;
-            this.password = this.$refs.room.value;
+            this.password = this.$refs.password.value;
 
             // Sends authorization request
             axios.post('login', {'username': this.username,
@@ -20,9 +20,11 @@ new Vue({
                 if(response.status == 200)
                 {
                     window.location = "/chat"
+                } else {
+                    alert('No Authorized!')
                 }
             }).catch(error => {
-                console.log(error);
+                console.error(error);
             })
         }
     }
