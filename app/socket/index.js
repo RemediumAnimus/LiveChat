@@ -47,7 +47,6 @@ var ioEvents = function(io) {
 
             // Get user data
             let user = users.get(socket.id)
-
             if(user){
 
                 // Write a new message to the database
@@ -68,7 +67,9 @@ var ioEvents = function(io) {
                         collectionData.message.id = result;
 
                         // Send the message to all users who are attached to sockets
+                        console.log(collectionData);
                         io.to(user.room).emit('message:new', collectionData)
+                        socket.broadcast.emit('hiddenMessage:new', collectionData);
                     }
                 })
             }

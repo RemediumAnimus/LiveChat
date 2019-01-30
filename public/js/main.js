@@ -92,8 +92,13 @@ new Vue({
 
             // Listen to the message receiving event
             socket.on('message:new', message => {
+                console.log(123);
                 this.messages.push(message);
                 this.scrollToBottom(this.$refs.messages)
+            })
+
+            socket.on('hiddenMessage:new', message => {
+                console.log(message);
             })
 
             // Omit scroll to the last message
