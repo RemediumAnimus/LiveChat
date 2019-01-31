@@ -19,6 +19,8 @@ var ioEvents = function(io) {
                 return callback('Enter valid user data')
             }
 
+            console.log(user);
+
             // Call the callback function
             callback({userId: socket.id})
 

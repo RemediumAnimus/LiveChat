@@ -19,7 +19,8 @@ const add = function (id, user_id, name, room, roles){
         'name'      : name,
         'room'      : room,
         'roles'     : roles,
-        'notify'    : false
+        'notify'    : false,
+        'current'   : false
     })
 }
 
@@ -74,6 +75,7 @@ const getByList = function (done) {
         result.forEach(function(index, elem) {
             index.online = false;
             index.notify = false;
+            index.current = false;
         });
 
         // All is well, return successful user

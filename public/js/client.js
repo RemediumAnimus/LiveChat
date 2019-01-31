@@ -50,7 +50,6 @@ new Vue({
 
             socket.on('message:new', message => {
                 this.messages.push(message)
-                console.log(message)
                 scrollToBottom(this.$refs.messages)
             })
 
