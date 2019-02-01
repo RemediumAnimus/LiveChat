@@ -19,6 +19,8 @@ var ioEvents = function(io) {
                 return callback('Enter valid user data')
             }
 
+            console.log(user);
+
             // Call the callback function
             callback({userId: socket.id})
 
@@ -47,7 +49,6 @@ var ioEvents = function(io) {
 
             // Get user data
             let user = users.get(socket.id)
-
             if(user){
 
                 // Write a new message to the database
@@ -70,6 +71,7 @@ var ioEvents = function(io) {
 
                         // Send the message to all users who are attached to sockets
                         io.to(user.room).emit('message:new', collectionData)
+                        socket.broadcast.emit('hiddenMessage:new', collectionData);
                     }
                 });
 
@@ -162,3 +164,4 @@ var init = function(app){
 }
 
 module.exports = init;
+

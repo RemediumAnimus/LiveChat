@@ -91,6 +91,16 @@ new Vue({
                 this.scrollToBottom(this.$refs.messages)
             })
 
+            socket.on('hiddenMessage:new', message => {
+                this.usersList.forEach(function(elem) {
+                    console.log(message)
+                    console.log(elem);
+                    if (elem.id == message.user.id && !elem.current) {
+                        elem.notify = true;
+                    }
+                })
+            })
+
             // Omit scroll to the last message
             this.scrollToBottom(this.$refs.messages)
         },
@@ -113,6 +123,13 @@ new Vue({
          *
          */
         initializeRoom(data) {
+            for (let i=0; i<this.usersList.length; i++) {
+                this.usersList[i].current = false;
+                if (this.usersList[i].id == data.id) {
+                    this.usersList[i].current = true;
+                }
+            }
+            data.notify = false;
             this.user.room = data.room;
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {

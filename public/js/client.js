@@ -20,7 +20,7 @@ new Vue({
         messages: [],
         users: [],
         usersOnline: [],
-        attachments : [],
+        attachments: [],
         user: {
             name: '',
             room: '',
@@ -50,7 +50,6 @@ new Vue({
 
             socket.on('message:new', message => {
                 this.messages.push(message)
-                console.log(message)
                 scrollToBottom(this.$refs.messages)
             })
 
