@@ -70,7 +70,7 @@ var ioEvents = function(io) {
                         collectionData.message.id = result;
 
                         // Send the message to all users who are attached to sockets
-                        io.to(user.room).emit('message:new', collectionData)
+                        io.to(user.room).emit('message:new', collectionData);
                         socket.broadcast.emit('hiddenMessage:new', collectionData);
                     }
                 });
