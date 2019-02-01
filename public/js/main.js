@@ -35,7 +35,8 @@ new Vue({
             const message = {
                 id          : this.user.id,
                 text        : this.message,
-                attachments : this.attachments
+                attachments : this.attachments,
+                type        : 'text'
             }
 
             // Sending a new message
@@ -86,7 +87,7 @@ new Vue({
             // Listen to the message receiving event
             socket.on('message:new', message => {
                 this.messages.push(message);
-                console.log(this.messages)
+                console.log( this.messages)
                 this.scrollToBottom(this.$refs.messages)
             })
 
@@ -116,19 +117,39 @@ new Vue({
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {
                     console.error(data)
-                } else {
+                }
+                else {
                     this.user.id = data.userId;
+                    let messages = this.messages;
 
-                    axios.post('messages/all?transport=messages&uid='+data.userId+'', {'room_id': this.user.room})
+                    axios.post('messages/all?transport=messages', {'room_id': this.user.room})
                         .then(function (response) {
-                            if(response.status === 200){
-                                console.log(response)
+                            if(response.status === 200) {
+                                if(response.data.messages.length) {
+                                    response.data.messages.forEach(function(element) {
+                                        messages.push(element)
+                                    });
+                                    console.log(messages)
+                                }
                             } else {
                                 console.log('ошибка')
                             }
                         })
                         .catch(error => {
                             console.error(error);
+                        })
+
+                    // Get attachments information
+                    axios.post('uploads/attachments?transport=uploads', {'room_id': this.user.room})
+                        .then(response => {
+                            if(response.status === 200){
+                                console.log('Есть неотправленные вложения')
+                                this.attachments = response.data.attachments;
+                                this.reloadPreview(response.data.attachments);
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
                         })
                 }
             })
@@ -153,6 +174,7 @@ new Vue({
 
                 this.renderPreview(event.target.files[i], random, reader);
                 data.append('file', event.target.files[i]);
+                data.append('room', this.user.room);
 
                 axios.post('upload/loading?transport=uploads&sid='+random+'', data, settings)
                      .then(function (response) {
@@ -195,6 +217,32 @@ new Vue({
                 document.getElementById('preview').appendChild(item);
             });
             reader.readAsDataURL(file);
+        },
+
+        /**
+         * Render preview for upload after reload window
+         *
+         */
+        reloadPreview(file, item, img, preload) {
+            for(let i = 0; i < file.length; i++) {
+                item = document.createElement("li");
+                item.className = "item";
+                item.setAttribute("data-id", file[i].id);
+
+                img = document.createElement("img");
+                img.className = "img-absolute";
+                img.src = file[i].type.match(/image.*/)
+                    ? 'upload/'+file[i].name+file[i].ext
+                    : event.target.result;
+
+                preload = document.createElement("span");
+                preload.className = "item-preload";
+
+                item.appendChild(img);
+                item.appendChild(preload);
+
+                document.getElementById('preview').appendChild(item);
+            }
         },
 
         /**
@@ -253,18 +301,6 @@ new Vue({
              .catch(error => {
                 console.error(error);
              })
-
-        // Get attachments information
-        axios.post('uploads/attachments?transport=uploads')
-             .then(response => {
-                if(response.status === 200){
-                    console.log('Есть неотправленные вложения')
-                    this.attachments = response.data.attachments;
-                }
-             })
-             .catch(error => {
-                console.log(error);
-             })
     },
 
     /**
@@ -293,12 +329,14 @@ new Vue({
  */
 Vue.component('chat-message', {
     props: ['message', 'user'],
+    inheritAttrs: false,
     template: `
     <div class="message" 
         :class="{'owner': message.user.roles === 'BOOKER', 'error': message.success === false}"
     >
         <div class="message-content z-depth-1">
             {{message.user.name}}: {{message.message.body}}
+            <img class="img" v-if="message.message.upload" v-bind:src="'upload/'+message.message.upload.name+'_196'+message.message.upload.ext"></img>
         </div>
     </div>
   `

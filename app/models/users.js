@@ -63,7 +63,16 @@ const getAllUsers = function () {
  *
  */
 const getByList = function (done) {
-    mysql.query(sql.format('SELECT u.`id`, u.`name`, r.`id` AS `room` FROM `users` u INNER JOIN `rooms` r ON u.id = r.id_user WHERE u.`roles` = ?', ['GUEST']), function(err, result){
+
+    let queryString = 'SELECT   u.`id`,                 ' +
+        '                       u.`name`,               ' +
+        '                       r.`id` AS `room`,       ' +
+        '                       u.`roles`               ' +
+        'FROM  users u                                  ' +
+        'INNER JOIN `rooms` r ON u.`id` = r.`id_user`   ' +
+        'WHERE u.`roles` = ?                            ' ;
+
+    mysql.query(sql.format(queryString, ['GUEST']), function(err, result){
         if (err)
             return done(err);
         if (!result.length) {
@@ -86,7 +95,7 @@ const getByList = function (done) {
 const isAuthenticated = function (req, res, next) {
     if(req.isAuthenticated()){
         next();
-    } else{
+    } else {
         res.redirect('/');
     }
 }

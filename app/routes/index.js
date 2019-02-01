@@ -130,7 +130,9 @@ router.post('/uploads/attachments', function(req, res) {
     }
 
     let objectUser      = req.user;
-    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id)).digest('hex');
+    let objectRoom      = req.body.room_id;
+
+    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex');
 
     Uploads.get(objectPassword, function(err, result) {
         if (err)
@@ -160,15 +162,16 @@ router.post('/upload/loading', function(req, res) {
     // Get files
     let objectFile      = req.files.file;
     let objectUser      = req.user;
+    let objectRoom      = req.body.room;
 
     let objectOrigName  = objectFile.name;
     let objectType      = objectFile.mimetype;
     let objectExt       = path.extname(objectOrigName);
     let objectName      = crypto.randomBytes(20).toString('hex');
-    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id)).digest('hex');
+    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex');
 
     let objectUploadPath = 'upload/'+objectName+objectExt+'';
-    let objectResize     = objectFile.mimetype.match(/image.*/)
+    let objectResize     = objectType.match(/image.*/)
         ? true
         : false;
 
@@ -181,6 +184,7 @@ router.post('/upload/loading', function(req, res) {
             if (err)
                 return res.status(500).send(err);
             if (result) {
+
                 if(objectResize) {
                     Images.resizeXS(objectUploadPath, objectName, objectExt);
                     Images.resizeSM(objectUploadPath, objectName, objectExt);
@@ -199,8 +203,29 @@ router.post('/upload/loading', function(req, res) {
 });
 
 /**
+ * Uploads router
+ * Receive`s the requested file
+ */
+router.get("/upload/:name", (req, res) => {
+
+    if (Object.keys(req.user).length == 0) {
+        return res.status(403).json({status: false, err: 'Access denied!'});
+    }
+
+    var options = {
+        root: __dirname + '/../../upload/',
+        headers: {
+            'x-timestamp': Date.now(),
+            'x-sent': true
+        }
+    };
+
+    res.sendFile(req.params.name, options);
+});
+
+/**
  * Messages router
- * Gets messages for room
+ * Get`s messages for room
  */
 router.post('/messages/all', [User.isAuthenticated, function(req, res) {
 
@@ -217,9 +242,10 @@ router.post('/messages/all', [User.isAuthenticated, function(req, res) {
         if (result) {
             return res.status(200).json({status: true, messages: result});
         } else {
-            return res.status(500).send(err);
+            return res.status(200).send({status: false, messages: []});
         }
     })
 }])
+
 
 module.exports = router;

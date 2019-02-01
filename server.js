@@ -34,14 +34,13 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static('public'));
+app.use('/static', express.static('public'));
 
 app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.use(fileUpload({useTempFiles : true, tempFileDir : '/tmp/', fileSize: 50 * 1024 * 1024}));
-
-app.disable('view cache');
+app.use(fileUpload());
 
 /**
  * Routes

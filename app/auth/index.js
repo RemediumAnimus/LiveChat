@@ -35,7 +35,17 @@ const init = function(){
 	},
     // Callback with email and password from our form
 	function(req, email, password, done) {
-		mysql.query(sql.format('SELECT u.`id`, u.`name`, u.`roles`, r.`id` AS `room`, u.`password` FROM `users` u LEFT JOIN `rooms` r ON u.id = r.id_user WHERE u.`email` = ?', [email]), function(err, rows){
+
+        let queryString = 'SELECT   u.`id`,                 ' +
+            '                       u.`name`,               ' +
+            '                       u.`roles`,  			' +
+            '                       r.`id` AS room,         ' +
+            '                       u.`password`            ' +
+            'FROM  users u                                  ' +
+            'LEFT JOIN `rooms` r ON u.`id` = r.`id_user`   	' +
+            'WHERE u.`email` = ?                            ' ;
+
+		mysql.query(sql.format(queryString, [email]), function(err, rows){
 			if (err)
 				return done(err);
 			if (!rows.length) {

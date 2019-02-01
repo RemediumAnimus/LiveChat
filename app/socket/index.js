@@ -51,11 +51,11 @@ var ioEvents = function(io) {
             if(user){
 
                 // Write a new message to the database
-                messages.save(user.id, user.room, data.text, data.attachments, function(err, result) {
+                messages.save(user.id, user.room, data.type, data.text, null, function(err, result) {
                     let collectionData                      = {};
                         collectionData.message              = {};
                         collectionData.message.body         = data.text;
-                        collectionData.message.attachments  = data.attachments;
+                        collectionData.message.type         = data.type;
                         collectionData.user                 = user;
                     if (err) {
                         collectionData.success = false;
@@ -71,7 +71,40 @@ var ioEvents = function(io) {
                         // Send the message to all users who are attached to sockets
                         io.to(user.room).emit('message:new', collectionData)
                     }
-                })
+                });
+
+                //
+                if(data.attachments) {
+                    for(let i = 0; i < data.attachments.length; i++) {
+
+                        let type = data.attachments[i].type.match(/image.*/)
+                            ? 'image'
+                            : 'document';
+
+                        messages.save(user.id, user.room, type, 'NULL', data.attachments[i].id, function(err, result) {
+                            let collectionFile                  = {};
+                            collectionFile.message              = {};
+                            collectionFile.message.body         = null;
+                            collectionFile.message.type         = type;
+                            collectionFile.message.upload       = data.attachments[i];
+                            collectionFile.user                 = user;
+                            if (err) {
+                                collectionFile.success = false;
+
+                                // Send message back to user
+                                socket.emit('message:new', collectionFile)
+                            }
+
+                            if(result) {
+                                collectionFile.success    = true;
+                                collectionFile.message.id = result;
+
+                                // Send the message to all users who are attached to sockets
+                                io.to(user.room).emit('message:new', collectionFile)
+                            }
+                        })
+                    }
+                }
             }
 
             // Call the callback function

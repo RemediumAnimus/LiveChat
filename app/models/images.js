@@ -15,7 +15,7 @@ var resizeXS = function (tempFilePath, objectName, objectExt){
         .then(done => {
             return done
                 .resize(sizeFile, Jimp.AUTO)
-                //.quality(qualityFile)
+                .quality(qualityFile)
                 .write(uploadPath);
         })
         .catch(err => {
@@ -36,7 +36,7 @@ var resizeSM = function (tempFilePath, objectName, objectExt, callback) {
         .then(done => {
             return done
                 .resize(sizeFile, Jimp.AUTO)
-                //.quality(qualityFile)
+                .quality(qualityFile)
                 .write(uploadPath);
         })
         .catch(err => {

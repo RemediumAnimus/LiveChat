@@ -8,7 +8,15 @@ const sql   = require('sqlstring');
  *
  */
 const save = function (original_name, name, password, type, ext, done){
-    mysql.query(sql.format('INSERT INTO uploads (`original_name`, `name`, `password`, `type`, `ext`) VALUES (?, ?, ?, ?, ?)', [original_name, name, password, type, ext]), function(err, result){
+
+    let queryString = 'INSERT INTO uploads (`original_name`,        ' +
+        '                                   `name`,                 ' +
+        '                                   `password`,             ' +
+        '                                   `type`,                 ' +
+        '                                   `ext`)                  ' +
+        'VALUES                             (?, ?, ?, ?, ?)         ' ;
+
+    mysql.query(sql.format(queryString, [original_name, name, password, type, ext]), function(err, result){
 
         if (err)
             return done(err);
@@ -26,7 +34,17 @@ const save = function (original_name, name, password, type, ext, done){
  *
  */
 const get = function (password, done){
-    mysql.query(sql.format('SELECT `id`, `original_name`, `name`, `type`, `ext` FROM uploads WHERE `password` = ? AND id_message IS NULL', [password]), function(err, result){
+
+    let queryString = 'SELECT   u.`id`,                 ' +
+        '                       u.`original_name`,      ' +
+        '                       u.`name`,               ' +
+        '                       u.`type`,               ' +
+        '                       u.`ext`                 ' +
+        'FROM   uploads u                               ' +
+        'WHERE  u.`password` = ?                        ' +
+        'AND    u.`id_message` IS NULL                  ' ;
+
+    mysql.query(sql.format(queryString, [password]), function(err, result){
         if (err)
             return done(err);
         if (!result)
