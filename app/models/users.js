@@ -66,13 +66,18 @@ const getAllUsers = function () {
  */
 const getByList = function (done) {
 
-    let queryString = 'SELECT   u.`id`,                 ' +
-        '                       u.`name`,               ' +
-        '                       r.`id` AS `room`,       ' +
-        '                       u.`roles`               ' +
-        'FROM  users u                                  ' +
-        'INNER JOIN `rooms` r ON u.`id` = r.`id_user`   ' +
-        'WHERE u.`roles` = ?                            ' ;
+    let queryString = 'SELECT   u.`id`,                                           ' +
+        '                       u.`name`,                                         ' +
+        '                       r.`id` AS `room`,                                 ' +
+        '                       u.`roles`,                                         ' +
+        '                       m.`is_read`                                       ' +
+        'FROM  users u                                                            ' +
+        'INNER JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +
+        'INNER JOIN (select from_id, is_read from messages ORDER BY id DESC) as m ' +
+        'WHERE u.`roles` = ?                                                      ' +
+        'AND m.`from_id` = u.`id`                                                 ' +
+        'GROUP BY u.id'
+    ;
 
     mysql.query(sql.format(queryString, ['GUEST']), function(err, result){
         if (err)
@@ -82,12 +87,28 @@ const getByList = function (done) {
         }
 
         result.forEach(function(index, elem) {
+            if (!index.is_read) {
+                index.notify = true;
+            } else {
+                index.notify = false;
+            }
+
             index.online = false;
-            index.notify = false;
             index.current = false;
         });
 
         // All is well, return successful user
+        return done(null, result);
+    });
+}
+
+const updateUserMessage = function (collection, done) {
+    let queryString = 'update messages as m ' +
+        'set m.`is_read` = 1                ' +
+        'where m.`is_read` = 0              ' +
+        'and m.`from_id` = ?                ';
+
+    mysql.query(sql.format(queryString, collection.id_user), function(err, result){
         return done(null, result);
     });
 }
@@ -124,5 +145,6 @@ module.exports = {
     getByList,
     isAuthenticated,
     isOperator,
-    getAllUsers
+    getAllUsers,
+    updateUserMessage
 };

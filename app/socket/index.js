@@ -118,7 +118,6 @@ var ioEvents = function(io) {
 
             // Get user data (roles = GUEST)
             const usersCollection = users.getAllUsers();
-
             if(usersCollection){
 
                 // We send the message to all users who are attached to sockets

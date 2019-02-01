@@ -123,13 +123,30 @@ new Vue({
          *
          */
         initializeRoom(data) {
+
             for (let i=0; i<this.usersList.length; i++) {
                 this.usersList[i].current = false;
                 if (this.usersList[i].id == data.id) {
-                    this.usersList[i].current = true;
+                    this.usersList[i].current = true; // set current, if current user is selected
                 }
             }
+
+            axios.post('users/update_user_message?transport=users',{
+                params: {
+                    id_user: data.id
+                }
+            })
+                .then(response => {
+                    if(response.status == 200) {
+                        console.log('Обновление прочитанных сообщений')
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+
             data.notify = false;
+
             this.user.room = data.room;
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {

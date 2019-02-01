@@ -11,6 +11,23 @@
 </head>
 <body>
 
+<form class="login-form-operator" @submit.prevent="login">
+    <input ref="username" type="hidden" value="operator">
+    <input ref="password" type="hidden" value="12345">
+    <button class="btn" type="submit">Оператор</button>
+</form>
+
+<form class="login-form-client1" @submit.prevent="login">
+    <input ref="username" type="hidden" value="client1">
+    <input ref="password" type="hidden" value="12345">
+    <button class="btn" type="submit">Клиент1</button>
+</form>
+
+<form class="login-form-client2" @submit.prevent="login">
+    <input ref="username" type="hidden" value="client2">
+    <input ref="password" type="hidden" value="12345">
+    <button class="btn" type="submit">Клиент2</button>
+</form>
 
 <form class="login-form" @submit.prevent="login">
     <div class="card">

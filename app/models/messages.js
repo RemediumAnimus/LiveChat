@@ -52,6 +52,7 @@ const get = function (room_id, done) {
         '                       m.`body`,               ' +
         '                       m.`type`,               ' +
         '                       m.`datetime`,           ' +
+        '                       m.`is_read`,            ' +
         '                       u.`id`      u_id,       ' +
         '                       u.`name`    u_name,     ' +
         '                       u.`roles`   u_roles,    ' +
@@ -97,6 +98,7 @@ const get = function (room_id, done) {
             object[j].message.id            = result[i].id;
             object[j].message.body          = result[i].body;
             object[j].message.type          = result[i].type;
+            object[j].message.is_read       = result[i].is_read;
 
             if(result[i].up_id) {
                 object[j].message.upload    = { id              : result[i].up_id,

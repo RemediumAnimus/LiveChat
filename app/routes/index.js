@@ -104,6 +104,27 @@ router.post('/users/list', function(req, res) {
 })
 
 /**
+ *
+ * Update the user list of read messages by operator.
+ */
+
+router.post('/users/update_user_message', function(req, res) {
+
+    if (!req.body.params.id_user)
+        return res.status(401).json('Data not received');
+
+    let collection = {
+        'id_user' : req.body.params.id_user
+    }
+
+    User.updateUserMessage(collection, function(err, rows){
+        if(rows) {
+            res.status(200).json(rows);
+        }
+    })
+})
+
+/**
  * Users router
  * Redirects to the chat page if the user is logged in
  */

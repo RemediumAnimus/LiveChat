@@ -26,7 +26,7 @@
             <a
                     class="collection-item "
                     v-for="u in usersList"
-                    v-bind:class="{'online': u.online, 'notify': u.notify }"
+                    :class="{'online': u.online, 'notify': u.notify }"
                     @click="initializeRoom(u)"
             >
                 {{u.name}}
