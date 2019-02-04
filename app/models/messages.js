@@ -86,6 +86,7 @@ const get = function (room_id, done) {
 
         for(let i = 0; i < result.length; i++) {
 
+            // If an object with such a stack exists in the array
             if(i > 0 && object[object.length - 1].message.stack === result[i].stack_id) {
                 if(result[i].type !== config.chat.messages.type.text) {
                     object[object.length - 1].message.upload.push({ id              : result[i].up_id,
@@ -102,6 +103,7 @@ const get = function (room_id, done) {
                 continue;
             }
 
+            // Create`s an object
             object[i]                       = {};
             object[i].user                  = {};
             object[i].user.id               = result[i].u_id;
@@ -116,6 +118,7 @@ const get = function (room_id, done) {
             object[i].message.stack         = result[i].stack_id;
             object[i].message.is_read       = result[i].is_read;
 
+            // Add`s downloads to the object
             if(result[i].type !== config.chat.messages.type.text) {
                 object[i].message.upload.push({ id              : result[i].up_id,
                                                 id_message      : result[i].id,
@@ -126,6 +129,7 @@ const get = function (room_id, done) {
             }
         }
 
+        // Remove`s null values
         object = object.filter(function (el) {
             return el != null;
         });

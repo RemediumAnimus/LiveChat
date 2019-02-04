@@ -6,11 +6,11 @@ const path       = require('path')
 const crypto     = require('crypto');
 const router 	 = express.Router();
 
-const User     = require('../models/users');
-const Uploads  = require('../models/uploads');
-const Images   = require('../models/images');
-const Messages = require('../models/messages');
-const config   = require('../config');
+const User       = require('../models/users');
+const Uploads    = require('../models/uploads');
+const Images     = require('../models/images');
+const Messages   = require('../models/messages');
+const config     = require('../config');
 
 /**
  * Home page
@@ -96,9 +96,6 @@ router.post('/users/list', function(req, res) {
         }
         if(rows) {
             res.status(200).json(rows);
-        }
-        else {
-            //res.status(401).json(err);
         }
     })
 })

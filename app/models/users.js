@@ -1,9 +1,8 @@
 'use strict';
 
 const mysql             = require('../database');
+const config            = require('../config');
 const sql               = require('sqlstring');
-const OPERATOR_ROLES    = 'BOOKER';
-const CLIENT_ROLES      = 'GUEST';
 
 let userModel = [];
 
@@ -57,7 +56,7 @@ const getByRoom = function (room) {
  *
  */
 const getAllUsers = function () {
-    return userModel.filter(u => u.roles === CLIENT_ROLES)
+    return userModel.filter(u => u.roles === config.chat.roles.client)
 }
 
 /**
@@ -72,7 +71,8 @@ const getByList = function (done) {
         '                       u.`roles`                                         ' +
         'FROM  users u                                                            ' +
         'INNER JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +
-        'LEFT JOIN (select from_id, is_read from messages ORDER BY id DESC) as m on m.`from_id` = u.id ' +
+        'LEFT  JOIN (SELECT from_id, is_read FROM messages ORDER BY id DESC) AS m ' +
+        'ON m.`from_id` = u.`id`                                                  ' +
         'WHERE u.`roles` = ?                                                      ' +
         'GROUP BY u.id'
     ;
@@ -85,11 +85,10 @@ const getByList = function (done) {
         }
 
         result.forEach(function(index, elem) {
-            if (!index.is_read && index.is_read!== null) {
+            if (!index.is_read && index.is_read !== null) {
                 index.notify = true;
-            } else {
+            } else
                 index.notify = false;
-            }
 
             index.online = false;
             index.current = false;
@@ -128,7 +127,7 @@ const isAuthenticated = function (req, res, next) {
  *
  */
 const isOperator = function (req, done) {
-    if(req.user.roles === OPERATOR_ROLES){
+    if(req.user.roles === config.chat.roles.operator){
         return done(null);
     } else {
         return done('Access is denied!');

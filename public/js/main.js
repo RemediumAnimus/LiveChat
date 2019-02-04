@@ -18,14 +18,11 @@ new Vue({
         users       : [],
         usersList   : [],
         attachments : [],
-        user        : {
-                        name    : '',
-                        room    : '',
-                        roles   : ''
-                    }
+        user        : {}
     },
     methods: {
         /**
+         * Message`s method
          * Method of sending messages
          *
          */
@@ -56,6 +53,7 @@ new Vue({
             })
         },
         /**
+         * Socket.io method
          * Initialize event audition
          *
          */
@@ -81,7 +79,6 @@ new Vue({
 
             // Listen to the event of receiving a list of online users
             socket.on('users:get', user => {
-                console.log('Получаем список онлайн пользователей')
                 for(let i = 0; i < user.length; i++){
                     let j = this.usersList.findIndex(u => u.id === user[i].id)
                     if(j != undefined){
@@ -125,6 +122,7 @@ new Vue({
         },
 
         /**
+         * Socket.io method
          * Initialize connections of the authorized user
          *
          */
@@ -138,12 +136,13 @@ new Vue({
         },
 
         /**
+         * User`s method
          * Initialize a new dialogue with the client
          *
          */
         initializeRoom(data) {
 
-            for (let i=0; i<this.usersList.length; i++) {
+            for (let i = 0; i < this.usersList.length; i++) {
                 this.usersList[i].current = false;
                 if (this.usersList[i].id == data.id) {
 
@@ -171,18 +170,15 @@ new Vue({
                 }
                 else {
 
-                    //this.user.id = data.userId;
                     this.messages = [];
-                    let messages = this.messages;
-                    let $this    = this;
+                    let $this     = this;
 
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room})
                          .then(function (response) {
-                             console.log(response);
                             if(response.status === 200) {
                                 if(response.data.messages.length) {
                                     response.data.messages.forEach(function(element) {
-                                        messages.push(element)
+                                        $this.messages.push(element)
                                     });
 
                                     // Omit scroll to the last message
@@ -198,22 +194,25 @@ new Vue({
 
                     // Get attachments information
                     axios.post('uploads/attachments?transport=uploads', {'room_id': this.user.room})
-                        .then(response => {
-                            if(response.status === 200){
-                                console.log('Есть неотправленные вложения')
-                                this.attachments = response.data.attachments;
-                                this.reloadPreview(response.data.attachments);
+                         .then(response => {
+                            if(response.status === 200) {
+                                if(response.data.attachments.length) {
+                                    console.log('Есть неотправленные вложения')
+                                    this.attachments = response.data.attachments;
+                                    this.reloadPreview(response.data.attachments);
+                                }
                             }
-                        })
-                        .catch(error => {
+                         })
+                         .catch(error => {
                             console.log(error);
-                        })
+                         })
 
                 }
             })
         },
 
         /**
+         * Upload method
          * Initialize file upload
          *
          */
@@ -250,6 +249,7 @@ new Vue({
         },
 
         /**
+         * View method
          * Render preview for upload
          *
          */
@@ -278,6 +278,7 @@ new Vue({
         },
 
         /**
+         * View method
          * Render preview for upload after reload window
          *
          */
@@ -304,6 +305,7 @@ new Vue({
         },
 
         /**
+         * View method
          * Render status progress for file
          *
          */
@@ -318,6 +320,7 @@ new Vue({
         },
 
         /**
+         * View method
          * Upload status progress for file
          *
          */
@@ -329,6 +332,7 @@ new Vue({
         },
 
         /**
+         * View method
          * Scroll down
          *
          */
@@ -340,6 +344,7 @@ new Vue({
     },
 
     /**
+     * Vue method
      * Initialize the hook after creating the instance
      *
      */
@@ -362,6 +367,7 @@ new Vue({
     },
 
     /**
+     * Vue method
      * Initialize the hook before instantiating the instance
      *
      */
@@ -382,6 +388,7 @@ new Vue({
 })
 
 /**
+ * Vue method
  * Define a new component
  *
  */
@@ -395,7 +402,14 @@ Vue.component('chat-message', {
         <div class="message-content z-depth-1" v-if="item.message.upload.length">
             <div>{{item.message.body}}</div>
             <div v-for="(value, key) in item.message.upload">
-                <img class="img" v-bind:src="'upload/'+value.name+'_196'+value.ext"></img>
+                <div v-if="value.type.match(/image*/)">
+                    <img class="img" v-bind:src="'upload/'+value.name+'_196'+value.ext"></img>
+                </div>
+                <div v-else>
+                    <div class="document">
+                        <span>{{value.original_name}}</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="message-content z-depth-1" v-else>

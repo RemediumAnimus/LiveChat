@@ -18,7 +18,7 @@
         <div class="chat-messages" ref="messages">
             <chat-message
                     v-for="(m, idx) in messages"
-                    :message="m"
+                    :item="m"
                     :user="user"
                     :key="idx"
             ></chat-message>
