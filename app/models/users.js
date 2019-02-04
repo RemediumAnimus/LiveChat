@@ -69,15 +69,11 @@ const getByList = function (done) {
     let queryString = 'SELECT   u.`id`,                                           ' +
         '                       u.`name`,                                         ' +
         '                       r.`id` AS `room`,                                 ' +
-        '                       u.`roles`,                                        ' +
-        '                       m.`is_read`                                       ' +
+        '                       u.`roles`                                         ' +
         'FROM  users u                                                            ' +
         'INNER JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +
-        'INNER JOIN (select from_id, is_read from messages ORDER BY id DESC) as m ' +
         'WHERE u.`roles` = ?                                                      ' +
-        'AND m.`from_id` = u.`id`                                                 ' +
-        'GROUP BY u.id'
-    ;
+        'GROUP BY u.id                                                            ' ;
 
     mysql.query(sql.format(queryString, ['GUEST']), function(err, result){
         if (err)

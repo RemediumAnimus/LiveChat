@@ -31,12 +31,18 @@ new Vue({
          */
         sendMessage() {
 
+            const text = {
+                text: this.message,
+                type: 'text'
+            };
+
+            this.attachments.push(text);
+
             // Body message
             const message = {
                 id          : this.user.id,
                 text        : this.message,
-                attachments : this.attachments,
-                type        : 'text'
+                messages    : this.attachments,
             }
 
             // Sending a new message
@@ -86,15 +92,28 @@ new Vue({
 
             // Listen to the message receiving event
             socket.on('message:new', message => {
-                this.messages.push(message);
-                console.log( this.messages)
+                if(this.messages.length && this.messages[this.messages.length - 1].message.stack === message.message.stack) {
+                    let objectNew = {
+                        message : this.messages[this.messages.length - 1].message,
+                        success : this.messages[this.messages.length - 1].success,
+                        user    : this.messages[this.messages.length - 1].user
+                    };
+                    this.messages.splice(this.messages.length - 1, 1);
+                    if(message.message.upload.length) {
+                        objectNew.message.upload.push(message.message.upload[0]);
+                    }
+                    if(message.message.body) {
+                        objectNew.message.body = message.message.body;
+                    }
+                    this.messages.push(objectNew);
+                } else {
+                    this.messages.push(message);
+                }
                 this.scrollToBottom(this.$refs.messages)
             })
 
             socket.on('hiddenMessage:new', message => {
                 this.usersList.forEach(function(elem) {
-                    console.log(message)
-                    console.log(elem);
                     if (elem.id == message.user.id && !elem.current) {
                         elem.notify = true;
                     }
@@ -365,15 +384,20 @@ new Vue({
  *
  */
 Vue.component('chat-message', {
-    props: ['message', 'user'],
+    props: ['item', 'user'],
     inheritAttrs: false,
     template: `
     <div class="message" 
-        :class="{'owner': message.user.roles === 'BOOKER', 'error': message.success === false}"
+        :class="{'owner': item.user.roles === 'BOOKER', 'error': item.success === false}"
     >
-        <div class="message-content z-depth-1">
-            {{message.user.name}}: {{message.message.body}}
-            <img class="img" v-if="message.message.upload" v-bind:src="'upload/'+message.message.upload.name+'_196'+message.message.upload.ext"></img>
+        <div class="message-content z-depth-1" v-if="item.message.upload.length">
+            <div>{{item.message.body}}</div>
+            <div v-for="(value, key) in item.message.upload">
+                <img class="img" v-bind:src="'upload/'+value.name+'_196'+value.ext"></img>
+            </div>
+        </div>
+        <div class="message-content z-depth-1" v-else>
+            {{item.user.name}}: {{item.message.body}}
         </div>
     </div>
   `
