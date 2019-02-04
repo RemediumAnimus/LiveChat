@@ -8,6 +8,7 @@ Vue.component('chat-message', {
     <div class="message" :class="{'owner': message.user.socket_id === user.id, 'error': message.success === false}">
         <div class="message-content z-depth-1">
             {{message.user.name}}: {{message.message.body}}
+            <img class="img" v-if="message.message.upload" v-bind:src="'upload/'+message.message.upload.name+'_196'+message.message.upload.ext"></img>
         </div>
     </div>
   `

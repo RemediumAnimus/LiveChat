@@ -15,6 +15,11 @@
 		"template": {
 			"client": "chat_user",
 			"operator": "chat"
+		},
+		"messages": {
+			"type": {
+				"text" : "text"
+			}
 		}
 	}
 }

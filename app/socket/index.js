@@ -1,13 +1,14 @@
 'use strict';
 
-var users       = require('../models/users')
-var messages    = require('../models/messages')
+const users       = require('../models/users');
+const messages    = require('../models/messages');
+const config      = require('../config');
 
 /**
  * Encapsulates all code for emitting and listening to socket events
  *
  */
-var ioEvents = function(io) {
+const ioEvents = function(io) {
 
     // Hear the events on the users connection
     io.on('connection', socket => {
@@ -46,64 +47,46 @@ var ioEvents = function(io) {
             }
 
             // Get user data
-            let user = users.get(socket.id);
+
+            let user  = users.get(socket.id);
+            let stack = new Date().getTime()+user.id;
+
             if(user){
 
                 // Write a new message to the database
-                messages.save(user.id, user.room, data.type, data.text, null, function(err, result) {
-                    let collectionData                      = {};
+                for(let i = 0; i < data.messages.length; i++) {
+
+                    let type = messages.type(data.messages[i].type);
+
+                    messages.save(user.id, user.room, type, data.text, data.messages[i].id, stack, function(err, result) {
+                        let collectionData                  = {};
                         collectionData.message              = {};
-                        collectionData.message.body         = data.text;
-                        collectionData.message.type         = data.type;
                         collectionData.user                 = user;
-                    if (err) {
-                        collectionData.success = false;
+                        collectionData.message.type         = type;
+                        collectionData.message.stack        = stack;
+                        collectionData.message.body         = data.messages[i].text;
+                        collectionData.message.upload       = [];
 
-                        // Send message back to user
-                        socket.emit('message:new', collectionData);
-                    }
+                        if(type !== config.chat.messages.type.text) {
+                            collectionData.message.upload[0]= data.messages[i];
+                        }
 
-                    if(result) {
-                        collectionData.success    = true;
-                        collectionData.message.id = result;
+                        if (err) {
+                            collectionData.success = false;
 
-                        // Send the message to all users who are attached to sockets
-                        io.to(user.room).emit('message:new', collectionData);
-                        socket.broadcast.emit('hiddenMessage:new', collectionData);
-                    }
-                });
+                            // Send message back to user
+                            socket.emit('message:new', collectionData)
+                        }
 
-                //
-                if(data.attachments) {
-                    for(let i = 0; i < data.attachments.length; i++) {
+                        if(result) {
+                            collectionData.success    = true;
+                            collectionData.message.id = result;
 
-                        let type = data.attachments[i].type.match(/image.*/)
-                            ? 'image'
-                            : 'document';
-
-                        messages.save(user.id, user.room, type, 'NULL', data.attachments[i].id, function(err, result) {
-                            let collectionFile                  = {};
-                            collectionFile.message              = {};
-                            collectionFile.message.body         = null;
-                            collectionFile.message.type         = type;
-                            collectionFile.message.upload       = data.attachments[i];
-                            collectionFile.user                 = user;
-                            if (err) {
-                                collectionFile.success = false;
-
-                                // Send message back to user
-                                socket.emit('message:new', collectionFile)
-                            }
-
-                            if(result) {
-                                collectionFile.success    = true;
-                                collectionFile.message.id = result;
-
-                                // Send the message to all users who are attached to sockets
-                                io.to(user.room).emit('message:new', collectionFile)
-                            }
-                        })
-                    }
+                            // Send the message to all users who are attached to sockets
+                            io.to(user.room).emit('message:new', collectionData);
+                            socket.broadcast.emit('hiddenMessage:new', collectionData);
+                        }
+                    })
                 }
             }
 
