@@ -108,13 +108,13 @@ router.post('/users/list', function(req, res) {
  * Update the user list of read messages by operator.
  */
 
-router.post('/users/update_user_message', function(req, res) {
+router.post('/users/update', function(req, res) {
 
-    if (!req.body.params.id_user)
+    if (!req.body.id_user)
         return res.status(401).json('Data not received');
 
     let collection = {
-        'id_user' : req.body.params.id_user
+        'id_user' : req.body.id_user
     }
 
     User.updateUserMessage(collection, function(err, rows){

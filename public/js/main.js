@@ -127,51 +127,53 @@ new Vue({
             for (let i=0; i<this.usersList.length; i++) {
                 this.usersList[i].current = false;
                 if (this.usersList[i].id == data.id) {
-                    this.usersList[i].current = true; // set current, if current user is selected
+
+                    // Set current, if current user is selected
+                    this.usersList[i].current = true;
                 }
             }
 
-            axios.post('users/update_user_message?transport=users',{
-                params: {
-                    id_user: data.id
-                }
-            })
-                .then(response => {
+            axios.post('users/update?transport=users',{id_user: data.id})
+                 .then(response => {
                     if(response.status == 200) {
                         console.log('Обновление прочитанных сообщений')
                     }
-                })
-                .catch(error => {
+                 })
+                 .catch(error => {
                     console.log(error);
-                })
+                 })
 
             data.notify = false;
-
             this.user.room = data.room;
+
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {
                     console.error(data)
                 }
                 else {
+
                     this.user.id = data.userId;
                     let messages = this.messages;
+                    let $this    = this;
 
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room})
-                        .then(function (response) {
+                         .then(function (response) {
                             if(response.status === 200) {
                                 if(response.data.messages.length) {
                                     response.data.messages.forEach(function(element) {
                                         messages.push(element)
                                     });
-                                    console.log(messages)
+
+                                    // Omit scroll to the last message
+                                    $this.scrollToBottom($this.$refs.messages)
                                 }
                             } else {
                                 console.log('ошибка')
                             }
-                        })
-                        .catch(error => {
+                         })
+                         .catch(error => {
                             console.error(error);
-                        })
+                         })
 
                     // Get attachments information
                     axios.post('uploads/attachments?transport=uploads', {'room_id': this.user.room})
@@ -185,6 +187,7 @@ new Vue({
                         .catch(error => {
                             console.log(error);
                         })
+
                 }
             })
         },

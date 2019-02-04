@@ -69,7 +69,7 @@ const getByList = function (done) {
     let queryString = 'SELECT   u.`id`,                                           ' +
         '                       u.`name`,                                         ' +
         '                       r.`id` AS `room`,                                 ' +
-        '                       u.`roles`,                                         ' +
+        '                       u.`roles`,                                        ' +
         '                       m.`is_read`                                       ' +
         'FROM  users u                                                            ' +
         'INNER JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +

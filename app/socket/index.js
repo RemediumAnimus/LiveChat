@@ -19,8 +19,6 @@ var ioEvents = function(io) {
                 return callback('Enter valid user data')
             }
 
-            console.log(user);
-
             // Call the callback function
             callback({userId: socket.id})
 
@@ -48,7 +46,8 @@ var ioEvents = function(io) {
             }
 
             // Get user data
-            let user = users.get(socket.id)
+            let user = users.get(socket.id);
+
             if(user){
 
                 // Write a new message to the database
@@ -62,7 +61,7 @@ var ioEvents = function(io) {
                         collectionData.success = false;
 
                         // Send message back to user
-                        socket.emit('message:new', collectionData)
+                        socket.emit('message:new', collectionData);
                     }
 
                     if(result) {
