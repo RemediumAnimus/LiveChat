@@ -98,7 +98,7 @@ router.post('/users/list', function(req, res) {
             res.status(200).json(rows);
         }
         else {
-            res.status(401).json(err);
+            //res.status(401).json(err);
         }
     })
 })

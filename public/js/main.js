@@ -152,12 +152,14 @@ new Vue({
                 }
                 else {
 
-                    this.user.id = data.userId;
+                    //this.user.id = data.userId;
+                    this.messages = [];
                     let messages = this.messages;
                     let $this    = this;
 
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room})
                          .then(function (response) {
+                             console.log(response);
                             if(response.status === 200) {
                                 if(response.data.messages.length) {
                                     response.data.messages.forEach(function(element) {

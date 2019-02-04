@@ -47,7 +47,6 @@ var ioEvents = function(io) {
 
             // Get user data
             let user = users.get(socket.id);
-
             if(user){
 
                 // Write a new message to the database

@@ -73,9 +73,8 @@ const getByList = function (done) {
         '                       m.`is_read`                                       ' +
         'FROM  users u                                                            ' +
         'INNER JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +
-        'INNER JOIN (select from_id, is_read from messages ORDER BY id DESC) as m ' +
+        'LEFT JOIN (select from_id, is_read from messages ORDER BY id DESC) as m on m.`from_id` = u.id ' +
         'WHERE u.`roles` = ?                                                      ' +
-        'AND m.`from_id` = u.`id`                                                 ' +
         'GROUP BY u.id'
     ;
 
@@ -87,7 +86,7 @@ const getByList = function (done) {
         }
 
         result.forEach(function(index, elem) {
-            if (!index.is_read) {
+            if (!index.is_read && index.is_read!== null) {
                 index.notify = true;
             } else {
                 index.notify = false;
