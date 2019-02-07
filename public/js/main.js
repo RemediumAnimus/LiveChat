@@ -97,7 +97,7 @@ new Vue({
                 let inMessage       = message,
                     outMessages     = this.messages,
                     lastOutMessages = outMessages.length - 1;
-
+                console.log(inMessage)
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
 
@@ -529,7 +529,7 @@ Vue.component('message-stack', {
                     }"
      >
      
-        <div class="message-stack-photo">
+        <div class="message-stack-photo" v-if="item.user.roles === 'GUEST'">
             <span class="w-40 avatar img-circle">АК</span>
         </div>
         <div class="message-stack-content">
@@ -552,7 +552,11 @@ Vue.component('message-stack', {
                     <span class="info-message">{{value.datetime}}</span>
                 </div>
             </div>
+
         </div>    
+        <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
+            <span class="w-40 avatar img-circle">АК</span>
+        </div>
         <!--<div v-if="item.message.is_read" class="lala">
              <span>Прочитано</span>
          </div>

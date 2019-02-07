@@ -356,8 +356,8 @@
     border-radius: 500px;
 	width: 100%;
     display: flex;
-    justify-content: flex-start;
-    padding: 0 0 0 0.3rem;
+    justify-content: flex-end;
+    padding: 0 0.3rem 0 0.3rem;
 }
 .box-message .in-message .select-message  i {
 	color: rgba(33, 150, 243, 0.5);
@@ -377,8 +377,8 @@
     border-radius: 500px;
 	width: 100%;
     display: flex;
-    justify-content: flex-end;
-    padding: 0 0.3rem 0 0;;
+    justify-content: flex-start;
+    padding: 0 0.3rem 0 0.3rem;
 	z-index: 1;
 }
 .box-message .message-stack.mess-out {
@@ -389,22 +389,24 @@
 	width: 100%;
 }
 .box-message .message-stack-photo {
-	position: absolute;
-    left: 40px;
+	position: sticky;
+	left: 1rem;
     top: 0.3rem;
-    margin-right: 0.5rem;
+    margin-right: 1rem;
     z-index: 1;
     bottom: auto;
 	-webkit-user-select: none;
-	/*position: sticky;
-    align-self: flex-start;*/
+	align-self: flex-start;
+	padding-top: 0.3rem;
+	padding-bottom: 0.3rem;
 }
 .box-message .mess-out .message-stack-photo {
-	right: 40px;
-	left: auto;
+	right: 1rem;
+	left: 0;
+	margin-right: 0;
+	margin-left: 1rem;
 }
 .box-message .in-message .text-message {
-	margin-left: 90px;
 	padding: 1rem;
 	border-radius: 20px;
 	padding-top: 0.5rem;
@@ -422,7 +424,7 @@
 	content: ' ';
     position: absolute;
     width: 0;
-    left: 95px;
+    left: 5px;
     right: auto;
     top: auto;
     bottom: 0;
@@ -436,7 +438,7 @@
 	content: ' ';
     position: absolute;
     width: 0;
-    right: 105px;
+    right: 5px;
     top: auto;
     bottom: 0px;
     border: 5px solid;
@@ -462,7 +464,6 @@
 	padding-bottom: 0;
 }
 .box-message .mess-out .in-message .text-message {
-	margin-right: 100px;
 	margin-left: 0px;
 	color: #000;
 	background-color: #f4f7f9;
@@ -536,7 +537,7 @@
     bottom: 10px;
     z-index: 2;
     border-radius: 30px;
-    padding: 2px 5px 2px 5px;
+    padding: 2px 6px 2px 6px;
     color: #fff!important;
     background: rgba(0, 0, 0, 0.45);
 }

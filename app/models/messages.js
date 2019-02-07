@@ -96,8 +96,7 @@ const get = function (room_id, offset, done) {
         for(let i = 0, objectPrev, objectMessagePrev, resize = false; i < result.length; i++) {
 
             // Format date string
-            result[i].datetime = ("0" + result[i].datetime.getHours()).slice(-2) + ':' +
-                                 ("0" + result[i].datetime.getMinutes()).slice(-2);
+            result[i].datetime = time(result[i].datetime);
 
             if(i > 0) {
                 objectPrev          = object[object.length - 1],
@@ -245,9 +244,20 @@ const type = function (type) {
     return type;
 }
 
+/**
+ * TITLE        : Message method
+ * DESCRIPTION  : Get`s message datetime format(H:m)
+ *
+ */
+const time = function (datetime) {
+
+    return ("0" + datetime.getHours()).slice(-2) + ':' + ("0" + datetime.getMinutes()).slice(-2);
+}
+
 module.exports = {
     save,
     get,
     type,
-    update_read
+    update_read,
+    time
 };
