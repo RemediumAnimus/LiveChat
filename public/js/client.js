@@ -154,6 +154,7 @@ new Vue({
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room})
                          .then(function (response) {
                             if(response.status === 200) {
+                                console.log(response.data);
                                 if(response.data.messages.length) {
                                     response.data.messages.forEach(function(element) {
                                         $this.messages.push(element);

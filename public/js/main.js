@@ -97,7 +97,7 @@ new Vue({
                 let inMessage       = message,
                     outMessages     = this.messages,
                     lastOutMessages = outMessages.length - 1;
-                console.log(inMessage)
+
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
 
@@ -112,13 +112,10 @@ new Vue({
                     }
 
                     if(inMessage.collection[0].body) {
-
-                       // inMessage.collection[0].upload = outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload;
-
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
                 }
-
+                console.log(this.usersList);
                 if (message.user.id != this.user.id) {
                     for (let i=0; i<this.usersList.length; i++) {
                         if (this.usersList[i].id == message.user.id && this.usersList[i].current) {
