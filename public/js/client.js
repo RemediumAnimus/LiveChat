@@ -35,7 +35,7 @@ new Vue({
                 type: 'text'
             };
 
-            this.attachments.push(text);
+            this.uploads.push(text);
 
             // Body message
             const message = {
@@ -65,22 +65,26 @@ new Vue({
             })
 
             socket.on('message:new', message => {
-                if(this.messages.length && this.messages[this.messages.length - 1].message.stack === message.message.stack) {
-                    let objectNew = {
-                        message : this.messages[this.messages.length - 1].message,
-                        success : this.messages[this.messages.length - 1].success,
-                        user    : this.messages[this.messages.length - 1].user
-                    };
-                    this.messages.splice(this.messages.length - 1, 1);
-                    if(message.message.upload.length) {
-                        objectNew.message.upload.push(message.message.upload[0]);
+                let inMessage       = message,
+                    outMessages     = this.messages,
+                    lastOutMessages = outMessages.length - 1;
+
+                if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
+                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
+
+                    outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
+                    inMessage.collection.splice(0, 1)
+                }
+
+                if(outMessages.length && inMessage.collection.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+
+                    if(inMessage.collection[0].upload.length) {
+                        outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
                     }
-                    if(message.message.body) {
-                        objectNew.message.body = message.message.body;
+
+                    if(inMessage.collection[0].body) {
+                        outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
-                    this.messages.push(objectNew);
-                } else {
-                    this.messages.push(message);
                 }
 
                 if (message.user.id != this.user.id) {
@@ -154,9 +158,9 @@ new Vue({
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room})
                          .then(function (response) {
                             if(response.status === 200) {
-                                console.log(response.data);
-                                if(response.data.messages.length) {
-                                    response.data.messages.forEach(function(element) {
+
+                                if(response.data.result.length) {
+                                    response.data.result.forEach(function(element) {
                                         $this.messages.push(element);
                                     });
 
@@ -235,26 +239,27 @@ new Vue({
  * DESCRIPTION  : Registers a component in a vue instance
  *
  */
-Vue.component('chat-message', {
-    props: ['item', 'user'],
+Vue.component('message-stack', {
+    props: ['item', 'user', 'index'],
     template: `
     <div class="message" :class="{'owner': item.user.socket_id === user.id || item.user.roles === 'GUEST', 'error': item.success === false}">
-        <div class="message-content z-depth-1" v-if="item.message.upload.length">
-            <div>{{item.message.body}}</div>
-            <div v-for="(value, key) in item.message.upload">
-                <div v-if="value.type.match(/image*/)">
-                    <img class="img" v-if="value.resize" v-bind:src="'upload/'+user.room+'/'+value.name+'_196'+value.ext"></img>
-                    <img class="img" v-else v-bind:src="'upload/'+user.room+'/'+value.name+value.ext"></img>
-                </div>
-                <div v-else>
-                    <div class="document">
-                        <span>{{value.original_name}}</span>
+        <div v-for="(value, key) in item.collection">
+            <div class="message-content z-depth-1" v-if="value.upload.length">
+                <div>{{value.body}}</div>
+                <div v-for="(file, index) in value.upload">
+                    <div v-if="file.type.match(/image*/)">
+                        <img class="img" v-bind:src="'upload/'+user.room+'/'+file.name+'_196'+file.ext"></img>
+                    </div>
+                    <div v-else>
+                        <div class="document">
+                            <span>{{file.original_name}}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="message-content z-depth-1" v-else>
-            {{item.user.name}}: {{item.message.body}}
+            <div class="message-content z-depth-1" v-else>
+                {{item.user.name}}: {{value.body}}
+            </div>
         </div>
         <div v-if="item.message.is_read" class="lala">
              <span>Прочитано</span>

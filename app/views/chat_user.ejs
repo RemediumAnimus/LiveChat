@@ -16,12 +16,13 @@
     <div class="chat">
 
         <div class="chat-messages" ref="messages">
-            <chat-message
+            <message-stack
                     v-for="(m, idx) in messages"
                     :item="m"
                     :user="user"
+                    :index="idx"
                     :key="idx"
-            ></chat-message>
+            ></message-stack>
         </div>
     </div>
     <div class="actions">
