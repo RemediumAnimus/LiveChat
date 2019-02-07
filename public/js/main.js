@@ -1,13 +1,15 @@
 'use strict';
 
 /**
- * Connect to sockets
+ * TITLE        : Socket.io method
+ * DESCRIPTION  : Connect to sockets
  *
  */
 const socket = io();
 
 /**
- * Create a new instance of Vue
+ * TITLE        : New Vue
+ * DESCRIPTION  : Create a new instance of Vue
  *
  */
 new Vue({
@@ -15,31 +17,33 @@ new Vue({
     data: {
         message     : '',
         messages    : [],
+        user        : {},
         users       : [],
         usersList   : [],
-        attachments : [],
-        user        : {}
+        uploads     : [],
+        offset      : 0
     },
     methods: {
+
         /**
-         * Message`s method
-         * Method of sending messages
+         * TITLE        : Message method
+         * DESCRIPTION  : Method of sending messages
          *
          */
         sendMessage() {
 
             const text = {
-                text: this.message,
-                type: 'text'
+                text  : this.message,
+                type  : 'text'
             };
 
-            this.attachments.push(text);
+            this.uploads.push(text);
 
             // Body message
             const message = {
                 id          : this.user.id,
                 text        : this.message,
-                messages    : this.attachments,
+                messages    : this.uploads,
             }
 
             // Sending a new message
@@ -48,13 +52,14 @@ new Vue({
                     console.error(err)
                 } else {
                     this.message = '';
-                    this.attachments = []
+                    this.uploads = []
                 }
             })
         },
+
         /**
-         * Socket.io method
-         * Initialize event audition
+         * TITLE        : Socket.io method
+         * DESCRIPTION  : Initialize event audition
          *
          */
         initializeConnection() {
@@ -89,23 +94,32 @@ new Vue({
 
             // Listen to the message receiving event
             socket.on('message:new', message => {
-                if(this.messages.length && this.messages[this.messages.length - 1].message.stack === message.message.stack) {
-                    let objectNew = {
-                        message : this.messages[this.messages.length - 1].message,
-                        success : this.messages[this.messages.length - 1].success,
-                        user    : this.messages[this.messages.length - 1].user
-                    };
-                    this.messages.splice(this.messages.length - 1, 1);
-                    if(message.message.upload.length) {
-                        objectNew.message.upload.push(message.message.upload[0]);
-                    }
-                    if(message.message.body) {
-                        objectNew.message.body = message.message.body;
-                    }
-                    this.messages.push(objectNew);
-                } else {
-                    this.messages.push(message);
+                let inMessage       = message,
+                    outMessages     = this.messages,
+                    lastOutMessages = outMessages.length - 1;
+
+                if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
+                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
+
+                    outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
+                    inMessage.collection.splice(0, 1)
                 }
+
+                if(outMessages.length && inMessage.collection.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+
+                    if(inMessage.collection[0].upload.length) {
+                        outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
+                    }
+
+                    if(inMessage.collection[0].body) {
+
+                       // inMessage.collection[0].upload = outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload;
+
+                        outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
+                    }
+                }
+
+                console.log(this.messages)
                 this.scrollToBottom(this.$refs.messages)
             })
 
@@ -122,8 +136,8 @@ new Vue({
         },
 
         /**
-         * Socket.io method
-         * Initialize connections of the authorized user
+         * TITLE        : Socket.io method
+         * DESCRIPTION  : Initialize connections of the authorized user
          *
          */
         initializeSocket() {
@@ -135,12 +149,75 @@ new Vue({
             this.initializeConnection();
         },
 
+        loadingMessage() {
+
+            let $this = this;
+            this.offset = this.offset + 10;
+
+            axios.post('messages/all?transport=messages', {'room_id': this.user.room, 'offset': this.offset})
+                .then(function (response) {
+                    if(response.status === 200) {
+
+                        if(response.data.result.length === 0) {
+                            console.log('Сообщений больше нет')
+                            return;
+                        }
+
+                        let inMessage  = response.data.result,
+                            outMessage = $this.messages;
+
+                        if(inMessage[0].collection[inMessage[0].collection.length - 1].from_id  === outMessage[0].collection[0].from_id &&
+                           inMessage[0].collection[inMessage[0].collection.length - 1].stack_id !== outMessage[0].collection[0].stack_id){
+
+                            for(let i = inMessage[0].collection.length - 1; i >= 0; i--){
+                                outMessage[0].collection.unshift(inMessage[0].collection[i])
+                            }
+
+                            inMessage.splice(inMessage[inMessage.length - 1], 1);
+                        }
+
+                        if(inMessage.length && inMessage[0].collection[inMessage[0].collection.length - 1].stack_id === outMessage[0].collection[0].stack_id) {
+
+                            if(inMessage[0].collection[inMessage[0].collection.length - 1].upload.length) {
+
+                                inMessage[0].collection[inMessage[0].collection.length - 1].upload.forEach(function (file) {
+                                    outMessage[0].collection[0].upload.unshift(file);
+                                });
+
+                                if(!outMessage[0].collection[0].body) {
+                                    outMessage[0].collection[0].body = inMessage[0].collection[inMessage[0].collection.length - 1].body;
+                                    outMessage[0].collection[0].type = inMessage[0].collection[inMessage[0].collection.length - 1].type;
+                                }
+
+                                inMessage[0].collection.splice(0, 1);
+                            }
+
+                            inMessage[0].collection.forEach(function(element) {
+                                outMessage[outMessage.length - 1].collection.unshift(element)
+                            });
+
+                            inMessage.splice(0, 1);
+                        }
+
+                        inMessage.forEach(function(item) {
+                            outMessage.unshift(item)
+                        });
+
+                    } else {
+                        console.log('Error getting message list...')
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+        },
+
         /**
-         * User`s method
-         * Initialize a new dialogue with the client
+         * TITLE        : User`s method
+         * DESCRIPTION  : Initialize a new dialogue with the client
          *
          */
-        initializeRoom(data) {
+        initializeRoom(data, event) {
 
             for (let i = 0; i < this.usersList.length; i++) {
                 this.usersList[i].current = false;
@@ -151,7 +228,7 @@ new Vue({
                 }
             }
 
-            axios.post('users/update?transport=users',{id_user: data.id})
+            axios.post('users/update?transport=users', {id_user: data.id})
                  .then(response => {
                     if(response.status == 200) {
                         console.log('Обновление прочитанных сообщений')
@@ -161,8 +238,8 @@ new Vue({
                     console.log(error);
                  })
 
-            data.notify = false;
-            this.user.room = data.room;
+            data.notify     = false;
+            this.user.room  = data.room;
 
             socket.emit('join', this.user, data => {
                 if (typeof data === 'string') {
@@ -176,11 +253,11 @@ new Vue({
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room})
                          .then(function (response) {
                             if(response.status === 200) {
-                                if(response.data.messages.length) {
-                                    response.data.messages.forEach(function(element) {
-                                        $this.messages.push(element)
+                                if(response.data.result.length) {
+                                    response.data.result.forEach(function(element) {
+                                        $this.messages.unshift(element)
                                     });
-
+                                    console.log($this.messages)
                                     // Omit scroll to the last message
                                     $this.scrollToBottom($this.$refs.messages)
                                 }
@@ -198,7 +275,7 @@ new Vue({
                             if(response.status === 200) {
                                 if(response.data.attachments.length) {
                                     console.log('Есть неотправленные вложения')
-                                    this.attachments = response.data.attachments;
+                                    this.uploads = response.data.attachments;
                                     this.reloadPreview(response.data.attachments);
                                 }
                             }
@@ -212,8 +289,8 @@ new Vue({
         },
 
         /**
-         * Upload method
-         * Initialize file upload
+         * TITLE        : Upload method
+         * DESCRIPTION  : Initialize file upload
          *
          */
         initializeUploadFile(event) {
@@ -222,35 +299,35 @@ new Vue({
                 let data        = new FormData();
                 let this_clone  = this;
                 let random      = Math.random().toString(16).slice(2);
-                let attachments = this.attachments;
+                let uploads     = this.uploads;
                 let reader      = new FileReader();
                 let settings    = {
-                    headers: {'Content-Type': 'multipart/form-data'},
-                    onUploadProgress: this.uploadProgress(random)
+                    headers: {'Content-Type': 'multipart/form-data'}/*,
+                    onUploadProgress: this.uploadProgress(random)*/
                 };
 
-                this.renderPreview(event.target.files[i], random, reader);
+                //this.renderPreview(event.target.files[i], random, reader);
                 data.append('file', event.target.files[i]);
                 data.append('room', this.user.room);
 
                 axios.post('upload/loading?transport=uploads&sid='+random+'', data, settings)
                      .then(function (response) {
                         if(response.status === 200){
-                            this_clone.statusProgress(random);
-                            attachments.push(response.data.attachment);
+                            //this_clone.statusProgress(random, true);
+                            uploads.push(response.data.attachment);
                         } else {
-                            console.log('ошибка')
+                            //this_clone.statusProgress(random, false);
                         }
                      })
                      .catch(error => {
-                        console.log(error);
+                         //this_clone.statusProgress(random, true);
                      })
             }
         },
 
         /**
-         * View method
-         * Render preview for upload
+         * TITLE        : View method
+         * DESCRIPTION  : Render preview for upload
          *
          */
         renderPreview(file, random, reader, item, img, preload) {
@@ -278,8 +355,8 @@ new Vue({
         },
 
         /**
-         * View method
-         * Render preview for upload after reload window
+         * TITLE        : View method
+         * DESCRIPTION  : Render preview for upload after reload window
          *
          */
         reloadPreview(file, item, img, preload) {
@@ -305,8 +382,8 @@ new Vue({
         },
 
         /**
-         * View method
-         * Render status progress for file
+         * TITLE        : View method
+         * DESCRIPTION  : Render status progress for file
          *
          */
         uploadProgress(identity) {
@@ -320,20 +397,25 @@ new Vue({
         },
 
         /**
-         * View method
-         * Upload status progress for file
+         * TITLE        : View method
+         * DESCRIPTION  : Upload status progress for file
          *
          */
-        statusProgress(identity) {
+        statusProgress(identity, status) {
             let preview = document.getElementById('preview');
             let item = preview.querySelectorAll('[data-id="'+identity+'"]');
 
-            item[0].getElementsByClassName('item-preload')[0].innerHTML = 'Загружено';
+            if(status === true) {
+                item[0].getElementsByClassName('item-preload')[0].innerHTML = 'Загружено';
+            } else {
+                item[0].getElementsByClassName('item-preload')[0].innerHTML = 'Ошибка';
+            }
+
         },
 
         /**
-         * View method
-         * Scroll down
+         * TITLE        : View method
+         * DESCRIPTION  : Scroll down
          *
          */
         scrollToBottom(node) {
@@ -344,8 +426,8 @@ new Vue({
     },
 
     /**
-     * Vue method
-     * Initialize the hook after creating the instance
+     * TITLE        : Vue method
+     * DESCRIPTION  : Initialize the hook after creating the instance
      *
      */
     created() {
@@ -367,8 +449,8 @@ new Vue({
     },
 
     /**
-     * Vue method
-     * Initialize the hook before instantiating the instance
+     * TITLE        : Vue method
+     * DESCRIPTION  : Initialize the hook before instantiating the instance
      *
      */
     mounted() {
@@ -388,33 +470,45 @@ new Vue({
 })
 
 /**
- * Vue method
- * Define a new component
- *
+ * TITLE        : Component registration
+ * DESCRIPTION  : Registers a component in a vue instance
+ * 'hide'     : item.collection.length === 1 && index === length - 1 && item.collection[item.collection.length - 1].upload.length > 1
  */
-Vue.component('chat-message', {
-    props: ['item', 'user'],
+Vue.component('message-stack', {
+    props: ['item', 'user', 'index', 'length'],
     inheritAttrs: false,
-    template: `
-    <div class="message" 
-        :class="{'owner': item.user.roles === 'BOOKER', 'error': item.success === false}"
-    >
-        <div class="message-content z-depth-1" v-if="item.message.upload.length">
-            <div>{{item.message.body}}</div>
-            <div v-for="(value, key) in item.message.upload">
-                <div v-if="value.type.match(/image*/)">
-                    <img class="img" v-bind:src="'upload/'+value.name+'_196'+value.ext"></img>
+    template:
+     `<div class="message-stack m-b"
+            :class="{'mess-in'  : item.user.roles === 'GUEST', 
+                     'mess-out' : item.user.roles === 'BOOKER',
+                     'error'    : item.success    === false
+                    }"
+     >
+     
+        <div class="message-stack-photo">
+            <span class="w-40 avatar img-circle">АК</span>
+        </div>
+        <div class="message-stack-content">
+            <div class="in-message" v-for="(value, key) in item.collection" data-msgid="">
+                <div class="select-message">
+                    <span><i class="ion-checkmark-circled"></i></span>
                 </div>
-                <div v-else>
-                    <div class="document">
-                        <span>{{value.original_name}}</span>
+                <div class="text-message in-message_media" v-if="value.upload.length">
+                    <div class="body-message">
+                        <span>{{value.body}}</span>
+                        <a href="#" v-for="(file, index) in value.upload">
+                            <img class="img" v-if="file.type.match(/image*/)" v-bind:src="'upload/'+user.room+'/'+file.name+'_196'+file.ext"></img>
+                            <span v-else>{{file.original_name}}</span>
+                        </a>     
                     </div>
+                    <span class="info-message">{{value.datetime}}</span>
+                </div>
+                <div class="text-message" v-else>
+                    <span class="body-message">{{value.body}}</span>
+                    <span class="info-message">{{value.datetime}}</span>
                 </div>
             </div>
         </div>
-        <div class="message-content z-depth-1" v-else>
-            {{item.user.name}}: {{item.message.body}}
-        </div>
-    </div>
-  `
+     </div>`
+
 })

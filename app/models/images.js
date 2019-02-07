@@ -1,46 +1,53 @@
 'use strict';
 
-var Jimp = require('jimp');
-
 /**
- * Resize image
+ * DESCRIPTION  : Declares variables
  *
  */
-var resizeXS = function (tempFilePath, objectName, objectExt){
+const Jimp = require('jimp');
+
+/**
+ * TITLE        : Images method
+ * DESCRIPTION  : Resize image (196x196)
+ *
+ */
+const resizeXS = function (tempFilePath, objectRoom, objectName, objectExt, callback){
     const sizeFile      = 196;
     const qualityFile   = 80;
     const nameFile      = objectName+'_196';
-    const uploadPath    = 'upload/'+nameFile+objectExt;
+    const uploadPath    = 'upload/'+objectRoom+'/'+nameFile+objectExt;
+
     Jimp.read(tempFilePath)
         .then(done => {
             return done
                 .resize(sizeFile, Jimp.AUTO)
                 .quality(qualityFile)
-                .write(uploadPath);
+                .write(uploadPath, callback(null, uploadPath));
         })
         .catch(err => {
-            console.log(err)
+            callback(err, null)
         });
 }
 
 /**
- * Resize image
+ * TITLE        : Images method
+ * DESCRIPTION  : Resize image (600x600)
  *
  */
-var resizeSM = function (tempFilePath, objectName, objectExt, callback) {
+const resizeSM = function (tempFilePath, objectRoom, objectName, objectExt, callback) {
     const sizeFile      = 600;
     const qualityFile   = 100;
     const nameFile      = objectName+'_600';
-    const uploadPath    = 'upload/'+nameFile+objectExt;
+    const uploadPath    = 'upload/'+objectRoom+'/'+nameFile+objectExt;
     Jimp.read(tempFilePath)
         .then(done => {
             return done
                 .resize(sizeFile, Jimp.AUTO)
                 .quality(qualityFile)
-                .write(uploadPath);
+                .write(uploadPath, callback(null, uploadPath));
         })
         .catch(err => {
-            console.log(err)
+            callback(err, null)
         });
 }
 

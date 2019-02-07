@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Клиенты ГБА - LiveChat</title>
+  <meta name="description" content="Responsive, Bootstrap, BS4" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- for ios 7 style, multi-resolution icon of 152x152 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-barstyle" content="black-translucent">
+  <link rel="apple-touch-icon" href="img/logo.png">
+  <meta name="apple-mobile-web-app-title" content="Flatkit">
+  
+  <!-- for Chrome on Android, multi-resolution icon of 196x196 -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="shortcut icon" sizes="196x196" href="img/logo.png">
+  
+  <!-- style -->
+  <link rel="stylesheet" href="/css/Operator/animate.css/animate.min.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/glyphicons/glyphicons.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/magnific-popup/magnific-popup.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/font-awesome/css/font-awesome.min.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/material-design-icons/material-design-icons.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/ionicons/css/ionicons.min.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/simple-line-icons/css/simple-line-icons.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/bootstrap/dist/css/bootstrap.min.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/ekko-lightbox/ekko-lightbox.css" type="text/css" />
+
+  <!-- build:css css/styles/app.min.css -->
+  <link rel="stylesheet" href="/css/Operator/styles/app.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/styles/style.css" type="text/css" />
+  
+  <!-- endbuild -->
+  <link rel="stylesheet" href="/css/Operator/styles/font.css" type="text/css" />
+  
+</head>
+<body>
+
+  <!-- ############ LAYOUT START-->
+  <div class="app" id="app">
+
+	<!-- aside -->
+	<div id="aside" class="app-aside fade nav-dropdown black">
+  
+		<!-- fluid app aside -->
+		<div class="navside dk" data-layout="column">
+			<div class="navbar no-radius">
+				<!-- brand -->
+				<a href="index.html" class="navbar-brand">
+					<div data-ui-include="'img/logo.svg'"></div>
+					<img src="img/logo.svg" alt="." class="">
+					<span class="hidden-folded inline">Клиенты ГБА</span>
+				</a>
+				<!-- / brand -->
+			</div>
+			<div data-flex class="hide-scroll">
+				<nav class="scroll nav-stacked nav-stacked-rounded nav-color">
+					<ul class="nav" data-ui-nav>
+						<li class="nav-header hidden-folded">
+							<span class="text-xs">Основные</span>
+						</li>
+						<li>
+							<a href="#" class="b-info">
+							  <span class="nav-icon text-white no-fade">
+								<i class="ion-chatbubble-working"></i>
+							  </span>
+							  <span class="nav-text">Чат</span>
+							</a>
+						</li>
+					    <li>
+							<a href="#" class="b-default">
+							  <span class="nav-icon">
+								<i class="ion-gear-b"></i>
+							  </span>
+							  <span class="nav-text">Настройки</span>
+							</a>
+					    </li>
+						<li>
+							<li class="nav-header hidden-folded m-t">
+								<span class="text-xs">Дополнительные</span>
+							</li>
+							<li>
+								<a>
+								  <span class="nav-caret">
+									<i class="fa fa-caret-down"></i>
+								  </span>
+								  <span class="nav-icon">
+									<i class="ion-plus-circled"></i>
+								  </span>
+								  <span class="nav-text">UI kit</span>
+								</a>
+								<ul class="nav-sub nav-mega nav-mega-3">
+								  <li>
+									<a href="ui.arrow.html" >
+									  <span class="nav-text">Arrow</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.box.html" >
+									  <span class="nav-text">Box</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.button.html" >
+									  <span class="nav-text">Button</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.color.html" >
+									  <span class="nav-text">Color</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.dropdown.html" >
+									  <span class="nav-text">Dropdown</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.grid.html" >
+									  <span class="nav-text">Grid</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.icon.html" >
+									  <span class="nav-text">Icon</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.label.html" >
+									  <span class="nav-text">Label</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.list.html" >
+									  <span class="nav-text">List Group</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.modal.html" >
+									  <span class="nav-text">Modal</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.nav.html" >
+									  <span class="nav-text">Nav</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.progress.html" >
+									  <span class="nav-text">Progress</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.social.html" >
+									  <span class="nav-text">Social</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.sortable.html" >
+									  <span class="nav-text">Sortable</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.streamline.html" >
+									  <span class="nav-text">Streamline</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.timeline.html" >
+									  <span class="nav-text">Timeline</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="map.vector.html" >
+									  <span class="nav-text">Vector Map</span>
+									</a>
+								  </li>
+								  <li>
+									<a href="ui.widget.html" >
+									  <span class="nav-text">Widget</span>
+									</a>
+								  </li>
+								</ul>
+							</li>
+						</li>
+					</ul>
+				</nav>
+			</div>
+			<div data-flex-no-shrink>
+				<div class="nav-fold">
+					<div class="pull-right text-sm text-muted">v 1.0.1</div>
+					<span class="text-sm text-muted">Главбух Ассистент</span>
+				</div>
+			</div>
+		</div>
+	</div>
+    <!-- / -->
+  
+    <!-- content -->
+	<div id="content" class="app-content box-shadow-z2 pjax-container" role="main">
+
+		<div class="app-body">
+
+			<!-- ############ PAGE START-->
+
+			<div class="app-body-inner">
+				<div class="row-col">
+					<div class="col-xs-4 w-lg modal fade aside aside-sm  b-r" id="list">
+						<div class="row-col dark-white">
+						
+							<!-- header -->
+							<div class="list-users__top ">
+								<div class="list-search__top">
+									<form>
+										<div class="input-group b-a b-transparent">
+											<span class="input-group-btn">
+												<button class="btn no-bg no-shadow" type="button" data-toggle="modal" data-target="#aside">
+													<i class="ion-navicon"></i>
+												</button>
+											</span>
+											<input type="text" class="form-control no-border" placeholder="Введите имя пользователя">
+											<!--<span class="input-group-btn">
+												<button class="btn no-bg no-shadow" type="button">
+													<i class="fa fa-search"></i>
+												</button>
+											</span>-->
+										</div>
+									</form>
+								</div>
+							</div>
+							<!-- / -->
+							
+							<!-- flex content -->
+							<div class="list-users__list row-row">
+								<div class="row-body scrollable hover">
+									<div class="row-inner">
+									
+										<!-- left content -->
+										<div class="list inset" data-ui-list="info">
+											<div class="list-item"
+												 v-for="u in usersList"
+												 :class="{'active info': u.current, 'notify': u.notify}"
+												 @click="initializeRoom(u, $event)"
+											>
+												<div class="list-left">
+													<span class="w-40 avatar w-default img-circle">АК<i class="on b-white bottom" v-if="u.online"></i></span>
+												</div>
+												<div class="list-body">
+													<span class="pull-right text-xs text-muted">09.04</span>
+													<div class="item-title">
+														<a href="#" class="_500">{{u.name}}</a>
+													</div>
+													<small class="block text-muted text-ellipsis" v-if="u.online">
+														Онлайн
+													</small>
+													<small class="block text-muted text-ellipsis" v-else>
+														был(а) в сети 1 мин. назад
+													</small>
+												</div>
+											</div>
+										</div>
+										<!-- / -->
+										
+									</div>
+								</div>
+							</div>
+							<!-- / -->
+							
+							<!-- footer -->
+							<div class="list-footer__settings p-a b-t clearfix">
+								<div class="dropdown dropup inline pull-right">
+									<a class="nav-link" data-toggle="dropdown" aria-expanded="false">
+										<span class="btn btn-sm btn-icon default-icon rounded">
+											<i class="ion-gear-b"></i>
+										</span>
+									</a>
+									<div class="dropdown-menu">
+										<a class="dropdown-item" href="#">Action</a>
+										<a class="dropdown-item" href="#">Another action</a>
+										<a class="dropdown-item" href="#">Something else here</a>
+										<div class="dropdown-divider"></div>
+										<a class="dropdown-item">Separated link</a>
+									</div>
+								</div>
+								<span class="text-sm text-muted">Настройки списка</span>
+							</div>
+							<!-- / -->
+							
+						</div>
+					</div>
+					
+					<div class="col-xs-4" id="detail">
+						<div class="row-col dark-white">
+						
+							<!-- header -->
+							<div class="dark-white b-b">
+								<div class="navbar">
+									
+									<!-- nabar right -->
+									<ul class="nav navbar-nav navbar-message-default pull-right m-l">
+                                        <li class="nav-item" @click="loadingMessage()">
+                                            <a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Подгрузить">
+												<span class="btn btn-sm btn-icon rounded info">
+													<i class="fa fa-spinner"></i>
+												</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+											<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Аудио звонок">
+												<span class="btn btn-sm btn-icon rounded info">
+													<i class="fa fa-phone"></i>
+												</span>
+											</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Видео звонок">
+												<span class="btn btn-sm btn-icon rounded info">
+													<i class="fa fa-video-camera"></i>
+												</span>
+											</a>
+										</li>
+									</ul>
+									<!-- / navbar right -->
+									
+									<!-- nabar right selected-->
+									<ul class="nav navbar-nav navbar-message-selected pull-right m-l" style="display: none">
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Удалить">
+												<span class="btn btn-sm btn-icon rounded default-icon">
+													<i class="fa fa-trash"></i>
+												</span>
+											</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="modal" data-target="#send-taskmanager" data-ui-toggle-class="zoom" data-ui-target="#animate-taskmanager"> 
+												<span class="btn btn-sm info">Создать задачу</span>
+											</a>
+										</li>
+									</ul>
+									<!-- / navbar right -->
+									
+									<a data-toggle="modal" data-target="#list" class="navbar-item pull-left hidden-md-up">
+										<span class="btn btn-sm btn-icon info">
+											<i class="ion-person"></i>
+										</span>
+									</a>								
+									<span class="navbar-item navbar-message-name text-ellipsis">
+										Алина Красильникова
+									</span>
+									<div class="navbar-item navbar-message-count text-ellipsis">
+										<span></span>
+										<button class="btn in_deselect_all btn-sm">
+										  <i class="ion-close"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+							<!-- / -->
+							
+							<!-- flex content -->
+							<div class="row-row">
+								<div class="row-body">
+									<div class="row-inner">
+										<!-- content -->
+										<div class="box-message p-a-sm" ref="messages">
+											<message-stack
+													v-for="(m, idx) in messages"
+													:item="m"
+													:user="user"
+													:index="idx"
+													:length="messages.length"
+													:key="idx"
+											></message-stack>
+
+										</div>
+										<!-- / -->
+										
+									</div>
+								</div>
+							</div>
+							
+							<!-- / -->
+							<div class="chat-footer__block p-a b-t dark-white">
+								<form>
+									<div class="input-group b-a b-transparent">
+										<span class="input-group-btn">
+											<button class="btn no-bg no-shadow default-icon" type="button">
+												<input type="file" name="uploadFiles" id="in-upload-input" value="Upload" multiple @change="initializeUploadFile($event)">
+												<i class="fa fa-paperclip"></i>
+											</button>
+										</span>
+										<textarea type="text" class="form-control no-border" placeholder="Введите сообщение" style="resize: none;" v-model.trim="message" autocomplete="false" @keydown.enter="sendMessage"></textarea>
+										<span class="input-group-btn">
+											<button class="btn no-bg no-shadow info-icon" type="button" @click="sendMessage" :disabled="message.length === 0">
+												<i class="fa fa-send"></i>
+											</button>
+										</span>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-xs-4 w-md modal fade aside aside-md aside-md-right" id="profile">
+						<div class="row-col b-l">
+							<div class="header-profile__box box-shadow-info">
+								<div class="navbar">
+									<h6 class="text-muted m-a-0">Информация о клиенте</h6>
+								</div>
+								<ul class="list-group no-border">
+									<li class="list-group-item">
+									  <span class="pull-left w-56 w-default img-circle text-md m-r">АК</span>
+									  <div class="clear">
+										<span class="_500 block">Алина Красильникова</span>
+										<span class="text-muted text-ellipsis">ООО "Технологии будущего"</span>
+									  </div>
+									</li>
+								</ul>
+							</div>
+							<div class="box-shadow-info">
+								<ul class="nav">
+									<li class="nav-item">
+										<a class="nav-link block">
+											<label class="md-switch pull-right">
+												<input type="checkbox" checked="" class="has-value">
+												<i class="blue"></i>
+											</label>
+											<i class="ion-android-notifications w-16 text-muted m-r"></i>
+											<span>Уведомления</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+							<div class="box-shadow-info">
+								<ul class="nav nav-profile-item">
+									<li class="nav-item nav-hover" data-toggle="modal" data-target="#profile-photo" data-load="profile-photo">
+										<a class="nav-link block">
+											<span class="pull-right text-sm m-t-xs">22</span>
+											<i class="ion-image w-16 text-muted m-r"></i>
+											<span>Фотографии</span>
+										</a>
+									</li>
+									<li class="nav-item nav-hover" data-toggle="modal" data-target="#profile-document" data-load="profile-document">
+										<a class="nav-link block">
+											<span class="pull-right text-sm m-t-xs">10</span>
+											<i class="ion-android-document w-16 text-muted m-r"></i>
+											<span>Документы</span>
+										</a>
+									</li>
+									
+								</ul>
+							</div>
+							<div class="box-shadow-info info-footer-shadow row-row">
+								<div class="info-header">
+									<i class="ion-ios-people w-16 text-muted m-r"></i>
+									<span class="m-a-0">Ассистенты беседы</span>
+								</div>
+								<div class="row-body scrollable hover">
+									<div class="row-inner p-b-2">
+									
+											<!-- content -->
+											<div class="list inset list-operator__dialog p-b-3">
+												<div class="list-item ">
+													<div class="list-left">
+														<span class="w-40 avatar w-default img-circle">ЕЧ<i class="on b-white bottom"></i></span>
+													</div>
+													<div class="list-body">
+														<div class="item-title">
+														  <span class="_500">Екатерина Чермошенцева</span>
+														</div>
+														<small class="block text-muted text-ellipsis">
+															Онлайн
+														</small>
+													</div>
+												</div>
+												<div class="list-item">
+													<div class="list-left">
+														<span class="w-40 avatar w-default img-circle"><img src="img/a0.jpg" alt="."></span>
+													</div>
+													<div class="list-body">
+														<div class="item-title">
+														  <a href="#" class="_500">Анна Васильева</a>
+														</div>
+														<small class="block text-muted text-ellipsis">
+															был(а) в сети 1 д. назад
+														</small>
+													</div>
+												</div>
+											</div>
+										<!-- / -->
+										
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- / -->
+						
+					</div>
+				</div>
+			</div>
+			
+			<!---- MODAL ---->
+			
+			<!-- Modal Images -->
+			<div class="modal fade inactive modal-window-xl" id="profile-photo" data-backdrop="false" aria-hidden="true">
+				<div class="modal-right w-xl white b-l">
+					<div class="row-col">
+						<a data-dismiss="modal" class="pull-right text-muted text-lg p-a-sm m-r-sm">×</a>
+						<div class="modal-header p-a b-b">
+						  <span class="h5">Фотографии</span>
+						</div>
+						<div class="row-row">
+							<div class="row-body">
+								<div class="row-inner">
+									<div class="list-group list-group-images no-radius no-borders">
+										<div class="p-x m-t p-v-xs _600">Сегодня</div>
+										<div class="item">
+											<div class="row no-gutter">
+												<div class="col-xs-4">
+													<a href="img/a0.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-sm-4 w-full">
+														<img src="img/a0.jpg" class="w-full img-fluid">
+													</a>
+												</div>
+												<div class="col-xs-4">
+													<a href="img/inbox.png" data-toggle="lightbox" data-gallery="example-gallery" class="col-sm-4 w-full">
+														<img src="img/inbox.png" class="w-full img-fluid">
+													</a>
+												</div>
+												<div class="col-xs-4">
+													<a href="img/message.png" data-toggle="lightbox" data-gallery="example-gallery" class="col-sm-4 w-full">
+														<img src="img/message.png" class="w-full img-fluid">
+													</a>
+												</div>
+											</div>
+										</div>
+										<div class="p-x m-t p-v-xs _600">15 января</div>
+										<div class="item">
+											<div class="row no-gutter">
+												<div class="col-xs-4">
+													<a href="img/map.png" data-toggle="lightbox" data-gallery="example-gallery" class="col-sm-4 w-full">
+														<img src="img/map.png" class="w-full img-fluid">
+													</a>
+												</div>
+												<div class="col-xs-4">
+													<a href="img/chart.png" data-toggle="lightbox" data-gallery="example-gallery" class="col-sm-4 w-full">
+														<img src="img/chart.png" class="w-full img-fluid">
+													</a>
+												</div>
+												<div class="col-xs-4">
+													<a href="img/dark.png" data-toggle="lightbox" data-gallery="example-gallery" class="col-sm-4 w-full">
+														<img src="img/dark.png" class="w-full img-fluid">
+													</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- / -->
+					
+			<!-- Modal documents -->
+			<div class="modal fade inactive modal-window-xl" id="profile-document" data-backdrop="false" aria-hidden="true">
+				<div class="modal-right w-xl white b-l">
+					<div class="row-col">
+						<a data-dismiss="modal" class="pull-right text-muted text-lg p-a-sm m-r-sm">×</a>
+						<div class="modal-header p-a b-b">
+						  <span class="h5">Документы</span>
+						</div>
+						<div class="row-row">
+							<div class="row-body">
+								<div class="row-inner">
+									<div class="list list-group-document inset">
+										<div class="p-x m-t p-v-xs _600">15 января</div>
+										<div class="list-item">
+											<div class="list-left">
+												<span class="w-56 avatar">
+												  <img alt="." src="img/a3.jpg">
+												</span>
+											</div>
+											<div class="list-body">
+												<a href="#" class="text-ellipsis _500">Название документа</a>
+												<span class="clear text-muted text-ellipsis text-xs">125.6 Кб</span>
+												<span class="clear text-muted text-ellipsis text-xs p-t-xs">15 января в 16:00</span>
+											</div>
+										</div>
+										<div class="list-item">
+											<div class="list-left">
+												<span class="w-56 avatar">
+												<img alt="." src="img/a4.jpg">
+												</span>
+											</div>
+											<div class="list-body">
+												<a href="#" class="text-ellipsis _500">Название документа 2</a>
+												<span class="clear text-muted text-ellipsis text-xs">190.4 Кб</span>
+												<span class="clear text-muted text-ellipsis text-xs p-t-xs">15 января в 16:01</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- / -->
+					
+			<!-- Modal Taskmanager -->
+			<div class="modal fade animate black-overlay" id="send-taskmanager" data-backdrop="true" data-ui-class="zoom" aria-hidden="true">
+				<div class="modal-dialog modal-window-lg" id="animate-taskmanager">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h6 class="modal-title">Создать задачу</h6>
+						</div>
+						<div class="modal-body modal-body-task">
+							<div class="box no-shadow">
+								<div class="box-body">
+									<p class="text-muted">Пожалуйста, заполните информацию, чтобы продолжить</p>
+									<div class="row m-b">
+										<div class="col-sm-6">
+											<label>От клиента</label>
+											<div class="p-b">
+												<div class="list-left">
+													<span class="w-40 avatar w-default img-circle">АК</span>
+												</div>
+												<div class="list-body">
+													<div class="item-title">
+													<span class="_500">Алина Красильникова</span>
+													</div>
+												<small class="block text-muted text-ellipsis">
+													ООО "Технологии будущего"
+												</small>
+											  </div>
+											</div>
+										</div>
+										<div class="col-sm-6">
+											<label>Постановщик задачи</label>
+											<div class="p-b">
+												<div class="list-left">
+													<span class="w-40 avatar w-default img-circle">ЕЧ</span>
+												</div>
+											  <div class="list-body">
+												<div class="item-title">
+												  <span class="_500">Екатерина Чермошенцева</span>
+												</div>
+												<small class="block text-muted text-ellipsis">
+													ООО "Предприятие"
+												</small>
+											  </div>
+											</div>  
+										</div>   
+									</div>
+									<div class="row m-b">
+										<div class="col-sm-6">
+											<label>Название задачи</label>
+											<div class="box collapse in m-a-0">
+												<input type="text" class="form-control no-border">
+											</div> 
+										</div>
+										<div class="col-sm-6">
+											<label>Срок задачи</label>
+											<div class="box collapse in m-a-0">
+												<input type="text" class="form-control has-value no-border" data-ui-jp="datetimepicker">
+											</div> 
+										</div>   
+									</div>
+									<div class="form-group">
+										<label>Тип задачи</label>
+										<div class="btn-flex">
+											<button class="btn btn-type-task m-b-sm selected"><i class="fa fa-plus pull-left"></i>Подготовить документы</button>
+											<button class="btn btn-type-task m-b-sm"><i class="fa fa-plus pull-left"></i>Обработать документы</button>
+											<button class="btn btn-type-task m-b-sm"><i class="fa fa-plus pull-left"></i>Клиентский запрос</button>
+										</div>
+									</div>
+									<div class="row m-b">
+										<div class="col-sm-6">
+											<label>Описание задачи</label>
+											<div class="box collapse in m-a-0">
+												<textarea class="form-control no-border" rows="6" placeholder="Введите описание задачи..."></textarea>
+											</div>
+										</div>
+										<div class="col-sm-6">
+											<label>Комментарий к задаче</label>
+											<div class="box collapse in m-a-0">
+												<textarea class="form-control no-border" rows="6" placeholder="Введите комментарий к задаче..."></textarea>
+											</div>
+										</div>   
+									</div>
+									<div class="row m-b">
+									  <div class="col-sm-6">
+											<label>Прикрепленные сообщения</label>
+											<div class="box p-a dark-light">
+												<div class="m-b">
+													<span class="pull-left w-40 w-default avatar img-circle m-r-sm">АК</span>
+													<div class="clear">
+														<div class="p-a p-y-sm info inline rounded">
+															Добрый день!
+														</div>
+														<div class="text-muted text-xs m-t-xs"><i class="fa fa-ok text-success"></i> 2 минуты назад</div>
+													</div>
+												</div>
+												<div class="m-b">
+													<span class="pull-right w-40 w-default avatar img-circle m-l-sm">ЕЧ</span>
+													<div class="clear text-right">
+														<div class="p-a p-y-sm dark-white inline text-left rounded">
+														  Добрый день! Подробную инструкцию мы отправили Вам на почту!
+														</div>
+														<div class="text-muted text-xs m-t-xs">1 минуту назад</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="col-sm-6">
+											<label>Прикрепленные файлы</label>
+										</div>   
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn danger p-x-md" data-dismiss="modal">Отменить</button>
+							<button type="button" class="btn info p-x-md" data-dismiss="modal">Создать задачу</button>
+						</div>
+					</div><!-- /.modal-content -->
+				</div>
+			</div>
+			<!-- / -->
+			
+			<!-- END MODAL -->
+					
+		</div>
+
+	<!-- ############ PAGE END-->
+	</div>
+
+  
+	<!-- ############ SWITHCHER START-->
+	<div id="switcher">
+		<div class="switcher dark-white" id="sw-theme">
+			<a href="#" data-ui-toggle-class="active" data-ui-target="#sw-theme" class="dark-white sw-btn">
+				<i class="fa fa-gear text-muted"></i>
+			</a>
+			<div class="box-header box-header-switcher">
+				<strong>Настройки приложения</strong>
+			</div>
+			<div class="box-divider"></div>
+			<div class="box-body">
+				<p id="settingLayout" class="hidden-md-down">
+					<label class="md-check m-y-xs" data-target="folded">
+						<input type="checkbox">
+						<i></i>
+						<span>Скрыть меню</span>
+					</label>
+				</p>
+			</div>
+		</div>
+	</div>
+	<!-- ############ SWITHCHER END-->
+
+  <!-- ############ LAYOUT END-->
+  </div>
+
+  <!-- build:js scripts/app.min.js -->
+
+  <!-- jQuery -->
+  <script src="js/library/Operator/jquery.js"></script>
+
+  <!-- Vue JS -->
+  <script src="js/library/vue.js"></script>
+
+  <!-- Axios -->
+  <script src="js/library/axios.min.js"></script>
+
+  <!-- Socket.io -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Bootstrap -->
+  <script src="js/library/Operator/tether.min.js"></script>
+  <script src="js/library/Operator/bootstrap.js"></script>
+  
+  <!-- core -->
+  <script src="js/library/Operator/jquery.storageapi.min.js"></script>
+  <script src="js/library/Operator/jquery.blockUI.js"></script>
+  <script src="js/library/Operator/jquery.jscroll.min.js"></script>
+  <script src="js/library/Operator/jquery.magnific-popup.min.js"></script>
+  <script src="js/library/Operator/ekko-lightbox.js"></script>
+  <script src="js/library/Operator/perfect-scrollbar.js"></script>
+  <script src="js/library/Operator/underscore.min.js"></script>
+  <script src="js/library/Operator/ui-toggle-class.js"></script>
+  <script src="js/library/Operator/ui-nav.js"></script>
+ 
+  <script src="js/library/Operator/app.js"></script>
+  <script src="js/library/Operator/app-engine.js"></script>
+
+  <script src="js/main.js"></script>
+  
+ <!-- endbuild -->
+ 
+</body>
+</html>

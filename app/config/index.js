@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * TITLE        : Config method
+ * DESCRIPTION  : Initialize config for App
+ *
+ */
 var init = function () {
 
 	if(process.env.NODE_ENV === 'production') {

@@ -1,16 +1,20 @@
 'use strict';
 
-const config 	 = require('../config');
-const passport 	 = require('passport');
-const mysql 	 = require('../database');
-const sql        = require('sqlstring');
-const crypto     = require('crypto');
-
+/**
+ * DESCRIPTION  : Declares variables
+ *
+ */
+const config 	 	= require('../config');
+const mysql 	 	= require('../database');
+const passport 	 	= require('passport');
+const sql        	= require('sqlstring');
+const crypto     	= require('crypto');
 const LocalStrategy = require('passport-local').Strategy;
 
 /**
- * Encapsulates all code for authentication 
- * Either by using username and password
+ * TITLE        : Authorize method
+ * DESCRIPTION  : Encapsulates all code for authentication
+ * 				  Either by using username and password
  *
  */
 const init = function(){

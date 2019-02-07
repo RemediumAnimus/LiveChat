@@ -1,11 +1,17 @@
 'use strict';
 
+/**
+ * DESCRIPTION  : Declares variables
+ *
+ */
 const mysql  = require('../database');
 const sql    = require('sqlstring');
 const config = require('../config');
+const fs     = require('fs');
 
 /**
- * Creates a new message
+ * TITLE        : Message method
+ * DESCRIPTION  : Creates a new message
  *
  */
 const save = function (from_id, room_id, type, body, upload_id, stack_id, done) {
@@ -32,8 +38,8 @@ const save = function (from_id, room_id, type, body, upload_id, stack_id, done) 
         if(upload_id) {
 
             let queryStringAdd = 'UPDATE uploads ' +
-            'SET    id_message = ? ' +
-            'WHERE  id = ?';
+                'SET    id_message = ? ' +
+                'WHERE  id = ?';
 
             mysql.query(sql.format(queryStringAdd, [result.insertId, upload_id]), function(err, result){
                 if (err)
@@ -50,12 +56,14 @@ const save = function (from_id, room_id, type, body, upload_id, stack_id, done) 
 }
 
 /**
- * Receives messages for a specific room.
+ * TITLE        : Message method
+ * DESCRIPTION  : Receives messages for a specific room
  *
  */
-const get = function (room_id, done) {
+const get = function (room_id, offset, done) {
 
     let queryString = 'SELECT   m.`id`,                 ' +
+        '                       m.`from_id`,            ' +
         '                       m.`body`,               ' +
         '                       m.`type`,               ' +
         '                       m.`stack_id`,           ' +
@@ -72,9 +80,10 @@ const get = function (room_id, done) {
         'FROM   messages m                              ' +
         'INNER  JOIN users u ON m.from_id = u.id        ' +
         'LEFT   JOIN uploads up ON m.id = up.id_message ' +
-        'WHERE  room_id = ? ORDER BY m.stack_id         ' ;
+        'WHERE  room_id = ? ORDER BY m.id DESC, m.stack_id   ' +
+        'LIMIT 10 OFFSET ?                              ' ;
 
-    mysql.query(sql.format(queryString, [room_id]), function(err, result){
+    mysql.query(sql.format(queryString, [room_id, offset]), function(err, result){
         if (err)
             return done(err);
         if (!result)
@@ -84,23 +93,65 @@ const get = function (room_id, done) {
 
         let object = [];
 
-        for(let i = 0; i < result.length; i++) {
+        for(let i = 0, objectPrev, objectMessagePrev, resize = false; i < result.length; i++) {
+
+            // Format date string
+            result[i].datetime = ("0" + result[i].datetime.getHours()).slice(-2) + ':' +
+                                 ("0" + result[i].datetime.getMinutes()).slice(-2);
+
+            if(i > 0) {
+                objectPrev          = object[object.length - 1],
+                objectMessagePrev   = objectPrev.collection.length - 1;
+            }
 
             // If an object with such a stack exists in the array
-            if(i > 0 && object[object.length - 1].message.stack === result[i].stack_id) {
+
+            if(i > 0 && objectPrev.collection[objectMessagePrev].stack_id === result[i].stack_id) {
+
                 if(result[i].type !== config.chat.messages.type.text) {
-                    object[object.length - 1].message.upload.push({ id              : result[i].up_id,
-                                                                    id_message      : result[i].id_message,
-                                                                    original_name   : result[i].original_name,
-                                                                    name            : result[i].name,
-                                                                    type            : result[i].up_type,
-                                                                    ext             : result[i].ext });
+
+                    objectPrev.collection[objectMessagePrev].upload.unshift({
+                        id              : result[i].up_id,
+                        id_message      : result[i].id_message,
+                        original_name   : result[i].original_name,
+                        name            : result[i].name,
+                        type            : result[i].up_type,
+                        ext             : result[i].ext,
+                        resize          : resize
+                    });
                 }
                 else {
-                    object[object.length - 1].message.body = result[i].body;
+
+                    objectPrev.collection[objectMessagePrev].id        = result[i].id;
+                    objectPrev.collection[objectMessagePrev].body      = result[i].body;
+                    objectPrev.collection[objectMessagePrev].type      = result[i].type;
+                    objectPrev.collection[objectMessagePrev].stack_id  = result[i].stack_id;
+                    objectPrev.collection[objectMessagePrev].is_read   = result[i].is_read;
                 }
 
                 continue;
+            }
+
+            if(i > 0 && objectPrev.collection[objectMessagePrev].upload.length === 0) {
+
+                if(result[i].from_id === objectPrev.collection[objectMessagePrev].from_id) {
+
+                    if(result[i].type === config.chat.messages.type.text) {
+
+                        objectPrev.collection.unshift({
+                            id          : result[i].id,
+                            from_id     : result[i].from_id,
+                            datetime    : result[i].datetime,
+                            body        : result[i].body,
+                            type        : result[i].type,
+                            stack_id    : result[i].stack_id,
+                            is_read     : result[i].is_read,
+                            upload      : []
+                        });
+
+                        continue;
+                    }
+                }
             }
 
             // Create`s an object
@@ -109,24 +160,38 @@ const get = function (room_id, done) {
             object[i].user.id               = result[i].u_id;
             object[i].user.name             = result[i].u_name;
             object[i].user.roles            = result[i].u_roles;
+            object[i].collection            = [];
 
-            object[i].message               = {};
-            object[i].message.upload        = [];
-            object[i].message.id            = result[i].id;
-            object[i].message.body          = result[i].body;
-            object[i].message.type          = result[i].type;
-            object[i].message.stack         = result[i].stack_id;
-            object[i].message.is_read       = result[i].is_read;
+            object[i].collection.unshift({
+                id              : result[i].id,
+                from_id         : result[i].from_id,
+                datetime        : result[i].datetime,
+                body            : result[i].body,
+                type            : result[i].type,
+                stack_id        : result[i].stack_id,
+                is_read         : result[i].is_read,
+                upload          : []
+            });
 
-            // Add`s downloads to the object
             if(result[i].type !== config.chat.messages.type.text) {
-                object[i].message.upload.push({ id              : result[i].up_id,
-                                                id_message      : result[i].id,
-                                                original_name   : result[i].original_name,
-                                                name            : result[i].name,
-                                                type            : result[i].up_type,
-                                                ext             : result[i].ext });
+                /*object[i].collection[0].upload.unshift({
+                    id              : result[i].up_id,
+                    id_message      : result[i].id,
+                    original_name   : result[i].original_name,
+                    name            : result[i].name,
+                    type            : result[i].up_type,
+                    ext             : result[i].ext
+                });*/
+                object[i].collection[object[i].collection.length - 1].upload.unshift({
+                    id              : result[i].up_id,
+                    id_message      : result[i].id,
+                    original_name   : result[i].original_name,
+                    name            : result[i].name,
+                    type            : result[i].up_type,
+                    ext             : result[i].ext
+                });
             }
+
         }
 
         // Remove`s null values
@@ -139,7 +204,8 @@ const get = function (room_id, done) {
 }
 
 /**
- * Gets message type
+ * TITLE        : Message method
+ * DESCRIPTION  : Get`s message type
  *
  */
 const type = function (type) {
@@ -149,8 +215,8 @@ const type = function (type) {
             type = config.chat.messages.type.text;
             break;
         default: type.match(/image.*/)
-                    ? type = "image"
-                    : type = "document";
+            ? type = "image"
+            : type = "document";
             break;
     }
 

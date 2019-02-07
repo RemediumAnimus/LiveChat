@@ -1,10 +1,15 @@
 'use strict';
 
+/**
+ * DESCRIPTION  : Declares variables
+ *
+ */
 const mysql = require('../database');
 const sql   = require('sqlstring');
 
 /**
- * Creates a new uploads
+ * TITLE        : Upload method
+ * DESCRIPTION  : Creates a new uploads
  *
  */
 const save = function (original_name, name, password, type, ext, done){
@@ -30,7 +35,8 @@ const save = function (original_name, name, password, type, ext, done){
 }
 
 /**
- * Receives not sent downloads
+ * TITLE        : Upload method
+ * DESCRIPTION  : Receives not sent downloads
  *
  */
 const get = function (password, done){

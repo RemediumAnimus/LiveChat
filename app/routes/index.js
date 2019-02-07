@@ -1,9 +1,14 @@
 'use strict';
 
+/**
+ * DESCRIPTION  : Declares variables
+ *
+ */
 const express	 = require('express');
 const passport   = require('passport');
 const path       = require('path')
 const crypto     = require('crypto');
+const fs         = require('fs');
 const router 	 = express.Router();
 
 const User       = require('../models/users');
@@ -12,9 +17,11 @@ const Images     = require('../models/images');
 const Messages   = require('../models/messages');
 const config     = require('../config');
 
+
 /**
- * Home page
- * Redirects to the chat page if the user is logged in
+ * TITLE        : Home page
+ * DESCRIPTION  : Redirects to the chat page if the user is logged in
+ *
  */
 router.get('/', function(req, res, next) {
 
@@ -28,8 +35,9 @@ router.get('/', function(req, res, next) {
 });
 
 /**
- * Chat router
- * Sends data to an authorized user in the system.
+ * TITLE        : Chat router
+ * DESCRIPTION  : Sends data to an authorized user in the system
+ *
  */
 router.get('/chat', [User.isAuthenticated, function(req, res) {
 
@@ -51,8 +59,9 @@ router.get('/chat', [User.isAuthenticated, function(req, res) {
 }]);
 
 /**
- * Login user
- * Redirects to the chat page if the user is logged in
+ * TITLE        : Login user
+ * DESCRIPTION  : Redirects to the chat page if the user is logged in
+ *
  */
 router.post('/login', function(req, res, next) {
     passport.authenticate('local-login', function (err, user, info) {
@@ -77,8 +86,9 @@ router.post('/login', function(req, res, next) {
 })
 
 /**
- * Client route
- * Gets a list of users in the operators application.
+ * TITLE        : Client router
+ * DESCRIPTION  : Gets a list of users in the operators application
+ *
  */
 router.post('/users/list', function(req, res) {
 
@@ -101,10 +111,10 @@ router.post('/users/list', function(req, res) {
 })
 
 /**
+ * TITLE        : Users router
+ * DESCRIPTION  : Update the user list of read messages by operator
  *
- * Update the user list of read messages by operator.
  */
-
 router.post('/users/update', function(req, res) {
 
     if (!req.body.id_user)
@@ -122,8 +132,9 @@ router.post('/users/update', function(req, res) {
 })
 
 /**
- * Users router
- * Redirects to the chat page if the user is logged in
+ * TITLE        : Users router
+ * DESCRIPTION  : Obtains information from an authorized user
+ *
  */
 router.post('/users/get', function(req, res) {
     if(req.user) {
@@ -138,8 +149,9 @@ router.post('/users/get', function(req, res) {
 })
 
 /**
- * Uploads router
- * Gets information about unfinished downloads
+ * TITLE        : Uploads router
+ * DESCRIPTION  : Gets information about unfinished downloads
+ *
  */
 router.post('/uploads/attachments', function(req, res) {
 
@@ -164,8 +176,9 @@ router.post('/uploads/attachments', function(req, res) {
 })
 
 /**
- * Upload router
- * Redirects to the chat page if the user is logged in
+ * TITLE        : Uploads router
+ * DESCRIPTION  : Cuts and uploads files to server
+ *
  */
 router.post('/upload/loading', function(req, res) {
 
@@ -188,7 +201,12 @@ router.post('/upload/loading', function(req, res) {
     let objectName      = crypto.randomBytes(20).toString('hex');
     let objectPassword  = crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex');
 
-    let objectUploadPath = 'upload/'+objectName+objectExt+'';
+
+    if (!fs.existsSync('upload/'+objectRoom)){
+        fs.mkdirSync('upload/'+objectRoom);
+    }
+
+    let objectUploadPath = 'upload/'+objectRoom+'/'+objectName+objectExt+'';
     let objectResize     = objectType.match(/image.*/)
         ? true
         : false;
@@ -204,8 +222,12 @@ router.post('/upload/loading', function(req, res) {
             if (result) {
 
                 if(objectResize) {
-                    Images.resizeXS(objectUploadPath, objectName, objectExt);
-                    Images.resizeSM(objectUploadPath, objectName, objectExt);
+                    Images.resizeXS(objectUploadPath, objectRoom, objectName, objectExt, function(err, result) {
+                        /*console.log(result)*/
+                    });
+                    Images.resizeSM(objectUploadPath, objectRoom, objectName, objectExt, function(err, result) {
+                        /*console.log(result)*/
+                    });
                 }
                 return res.status(200).json({status: true, attachment: { id             : result,
                                                                          original_name  : objectOrigName,
@@ -221,10 +243,11 @@ router.post('/upload/loading', function(req, res) {
 });
 
 /**
- * Uploads router
- * Receive`s the requested file
+ * TITLE        : Uploads router
+ * DESCRIPTION  : Receive`s the requested file
+ *
  */
-router.get("/upload/:name", (req, res) => {
+router.get("/upload/:room/:name", (req, res) => {
 
     if (Object.keys(req.user).length == 0) {
         return res.status(403).json({status: false, err: 'Access denied!'});
@@ -238,12 +261,13 @@ router.get("/upload/:name", (req, res) => {
         }
     };
 
-    res.sendFile(req.params.name, options);
+    res.sendFile(req.params.room+'/'+req.params.name, options);
 });
 
 /**
- * Messages router
- * Get`s messages for room
+ * TITLE        : Messages router
+ * DESCRIPTION  : Get`s messages for room
+ *
  */
 router.post('/messages/all', [User.isAuthenticated, function(req, res) {
 
@@ -253,17 +277,24 @@ router.post('/messages/all', [User.isAuthenticated, function(req, res) {
 
     // Get the data
     let room_id = req.body.room_id;
+    let offset  = req.body.offset ? req.body.offset : 0;
 
-    Messages.get(room_id, function(err, result) {
+    Messages.get(room_id, offset, function(err, result) {
         if (err)
             return res.status(500).send(err);
         if (result) {
-            return res.status(200).json({status: true, messages: result});
+            return res.status(200).json({status: true, result: result});
         } else {
-            return res.status(200).send({status: false, messages: []});
+            return res.status(200).send({status: false, result: []});
         }
     })
 }])
 
+router.get('/template', function(req, res) {
+
+
+    // Generates a pattern
+    res.render('operator');
+});
 
 module.exports = router;

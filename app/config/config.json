@@ -14,11 +14,12 @@
 		},
 		"template": {
 			"client": "chat_user",
-			"operator": "chat"
+			"operator": "operator"
 		},
 		"messages": {
 			"type": {
-				"text" : "text"
+				"text"  : "text",
+				"image" : "image"
 			}
 		}
 	}
