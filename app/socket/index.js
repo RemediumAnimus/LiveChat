@@ -72,6 +72,7 @@ const ioEvents = function(io) {
                         collectionData.user                 = user;
                         collectionData.collection           = [{
                             body     : data.messages[i].text,
+                            datetime : messages.time(new Date()),
                             from_id  : user.id,
                             is_read  : 0,
                             stack_id : stack,
@@ -81,6 +82,7 @@ const ioEvents = function(io) {
 
                         if(type !== config.chat.messages.type.text) {
 
+                            collectionData.collection[0].body             = null;
                             collectionData.collection[0].upload[0]        = data.messages[i];
                             collectionData.collection[0].upload[0].resize = false;
 
