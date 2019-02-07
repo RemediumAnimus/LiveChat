@@ -68,7 +68,8 @@ const getByList = function (done) {
     let queryString = 'SELECT   u.`id`,                                           ' +
         '                       u.`name`,                                         ' +
         '                       r.`id` AS `room`,                                 ' +
-        '                       u.`roles`                                         ' +
+        '                       u.`roles`,                                        ' +
+        '                       m.`is_read`                                       ' +
         'FROM  users u                                                            ' +
         'INNER JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +
         'LEFT  JOIN (SELECT from_id, is_read FROM messages ORDER BY id DESC) AS m ' +
@@ -100,14 +101,25 @@ const getByList = function (done) {
 }
 
 const updateUserMessage = function (collection, done) {
-    let queryString = 'update messages as m ' +
-        'set m.`is_read` = 1                ' +
-        'where m.`is_read` = 0              ' +
-        'and m.`from_id` = ?                ';
+    if (collection.update_from_client) {
+        let queryString = 'update messages as m ' +
+            'set m.`is_read` = 1                ' +
+            'where m.`is_read` = 0              ' +
+            'and m.`room_id` = ?                ';
 
-    mysql.query(sql.format(queryString, collection.id_user), function(err, result){
-        return done(null, result);
-    });
+        mysql.query(sql.format(queryString, collection.id_room), function(err, result){
+            return done(null, result);
+        });
+    } else {
+        let queryString = 'update messages as m ' +
+            'set m.`is_read` = 1                ' +
+            'where m.`is_read` = 0              ' +
+            'and m.`from_id` = ?                ';
+
+        mysql.query(sql.format(queryString, collection.id_user), function(err, result){
+            return done(null, result);
+        });
+    }
 }
 
 /**

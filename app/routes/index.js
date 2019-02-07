@@ -102,16 +102,16 @@ router.post('/users/list', function(req, res) {
 
 /**
  *
- * Update the user list of read messages by operator.
+ * Update the user list of read messages from operator/user.
  */
 
 router.post('/users/update', function(req, res) {
 
-    if (!req.body.id_user)
-        return res.status(401).json('Data not received');
-
     let collection = {
-        'id_user' : req.body.id_user
+        'id_user'              : req.body.id_user,
+        'id_room'              : req.body.id_room,
+        'update_from_client'   : req.body.update_from_client,
+        'update_from_operator' : req.body.update_from_operator
     }
 
     User.updateUserMessage(collection, function(err, rows){
@@ -263,6 +263,25 @@ router.post('/messages/all', [User.isAuthenticated, function(req, res) {
             return res.status(200).send({status: false, messages: []});
         }
     })
+}])
+
+router.post('/messages/update_read', [User.isAuthenticated, function(req, res) {
+
+    if (Object.keys(req.body).length == 0) {
+        return res.status(400).json({status: false, err: 'Body response empty!'});
+    }
+
+    let id_message = req.body.message.id;
+
+    Messages.update_read(id_message,function(err, result) {
+        if (err)
+            return res.status(500).send(err);
+        if (result) {
+            return res.status(200).json({status: true, messages: result});
+        } else {
+            return res.status(200).send({status: false, messages: []});
+        }
+    });
 }])
 
 

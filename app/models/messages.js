@@ -139,6 +139,26 @@ const get = function (room_id, done) {
 }
 
 /**
+ * Update messages is_read
+ */
+const update_read = function (id_message, done) {
+    let queryString =
+        'UPDATE messages        ' +
+        'SET    is_read = 1     ' +
+        'WHERE  id = ?          ';
+
+    mysql.query(sql.format(queryString, [id_message]), function(err, result){
+        if (err)
+            return done(err);
+        if (!result.insertId) {
+            return done(null, false);
+        }
+
+        // All is well, return successful
+        return done(null, result.insertId);
+    });
+}
+/**
  * Gets message type
  *
  */
@@ -160,5 +180,6 @@ const type = function (type) {
 module.exports = {
     save,
     get,
-    type
+    type,
+    update_read
 };

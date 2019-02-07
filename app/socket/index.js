@@ -69,6 +69,7 @@ const ioEvents = function(io) {
                         collectionData.message.stack        = stack;
                         collectionData.message.body         = data.messages[i].text;
                         collectionData.message.upload       = [];
+                        collectionData.message.is_read      = 0;
 
                         if(type !== config.chat.messages.type.text) {
                             collectionData.message.upload[0]= data.messages[i];
@@ -96,6 +97,26 @@ const ioEvents = function(io) {
             // Call the callback function
             callback()
         })
+
+        socket.on('message:user_read', (message, callback) => {
+            io.to(message.user.room).emit('message:user_read', message);
+            callback();
+        });
+
+        socket.on('message:user_read_all', (user, callback) => {
+            io.to(user.room).emit('message:user_read_all', user);
+            callback();
+        });
+
+        socket.on('message:operator_read', (message, callback) => {
+            io.to(message.user.room).emit('message:operator_read', message);
+            callback();
+        });
+
+        socket.on('message:operator_read_all', (user, callback) => {
+            io.to(user.room).emit('message:operator_read_all', user);
+            callback();
+        });
 
         // Hearing events to get users
         socket.on('users:get', () => {

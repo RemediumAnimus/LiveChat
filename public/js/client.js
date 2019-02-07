@@ -72,8 +72,53 @@ new Vue({
                     this.messages.push(message);
                 }
 
+                if (message.user.id != this.user.id) {
+                    socket.emit('message:user_read', message, data => {
+                        axios.post('messages/update_read',message)
+                            .then(response => {
+                                if(response.status == 200) {
+                                    console.log('Обновление прочитанных сообщений')
+                                }
+                                message.message.is_read = 1;
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    });
+                }
+
                 // Omit scroll to the last message
                 this.scrollToBottom(this.$refs.messages)
+            })
+
+            socket.on('message:operator_read', user => {
+                for (let i=this.messages.length - 1; i >= 0; i--) {
+                    if (!this.messages[i].message.is_read && (this.messages[i].user.id != user.id)) {
+                        this.messages[i].message.is_read = 1;
+                    } else {
+                        break;
+                    }
+                }
+            })
+
+            socket.on('message:user_read_all', user => {
+                for (let i=this.messages.length - 1; i >= 0; i--) {
+                    if (!this.messages[i].message.is_read && (this.messages[i].user.id != user.id)) {
+                        this.messages[i].message.is_read = 1;
+                    } else {
+                        break;
+                    }
+                }
+            })
+
+            socket.on('message:operator_read_all', user => {
+                for (let i=this.messages.length - 1; i >= 0; i--) {
+                    if (!this.messages[i].message.is_read) {
+                        this.messages[i].message.is_read = 1;
+                    } else {
+                        break;
+                    }
+                }
             })
 
             // Omit scroll to the last message
@@ -92,7 +137,7 @@ new Vue({
                 } else {
 
                     this.messages = [];
-                    this.user.id  = data.userId;
+
                     let $this     = this;
 
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room})
@@ -109,6 +154,25 @@ new Vue({
                             } else {
                                 console.log('ошибка')
                             }
+                             axios.post('users/update?transport=users',{id_room: $this.user.room, update_from_client: true})
+                                 .then(response => {
+                                     if(response.status == 200) {
+                                         console.log('Обновление прочитанных сообщений')
+                                     }
+                                     socket.emit('message:user_read_all', $this.user, data => {
+                                         for (let i=$this.messages.length - 1; i>=0; i--) {
+                                             if (!$this.messages[i].message.is_read && ($this.messages[i].user.id != $this.user.id)) {
+                                                 $this.messages[i].message.is_read = 1
+                                             } else {
+                                                 break;
+                                             }
+                                         }
+                                     });
+
+                                 })
+                                 .catch(error => {
+                                     console.log(error);
+                                 })
                          })
                          .catch(error => {
                             console.error(error);
@@ -171,6 +235,12 @@ Vue.component('chat-message', {
         <div class="message-content z-depth-1" v-else>
             {{item.user.name}}: {{item.message.body}}
         </div>
+        <div v-if="item.message.is_read" class="lala">
+             <span>Прочитано</span>
+         </div>
+         <div v-else class="lala">
+             <span>Доставлено</span>
+         </div>
     </div>
   `
 })
