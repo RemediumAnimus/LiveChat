@@ -1,21 +1,32 @@
 'use strict';
 
+/**
+ * TITLE        : Socket.io method
+ * DESCRIPTION  : Connect to sockets
+ *
+ */
 const socket = io();
 
+/**
+ * TITLE        : New Vue
+ * DESCRIPTION  : Create a new instance of Vue
+ *
+ */
 new Vue({
     el: '#app',
     data: {
         message     : '',
         messages    : [],
+        user        : {},
         users       : [],
         usersOnline : [],
-        attachments : [],
-        user        : {}
+        uploads : []
     },
     methods: {
+
         /**
-         * Message`s method
-         * Method of sending messages
+         * TITLE        : Message method
+         * DESCRIPTION  : Method of sending messages
          *
          */
         sendMessage() {
@@ -30,22 +41,22 @@ new Vue({
             const message = {
                 id          : this.user.id,
                 text        : this.message,
-                messages    : this.attachments,
+                messages    : this.uploads,
             }
 
             socket.emit('message:create', message, err => {
                 if (err) {
                     console.error(err)
                 } else {
-                    this.message     = '';
-                    this.attachments = []
+                    this.message    = '';
+                    this.uploads    = []
                 }
             })
         },
 
         /**
-         * Socket.io method
-         * Initialize event audition
+         * TITLE        : Initialization method
+         * DESCRIPTION  : Initialize event audition
          *
          */
         initializeConnection() {
@@ -126,8 +137,8 @@ new Vue({
         },
 
         /**
-         * Socket.io method
-         * Initialize connections of the authorized user
+         * TITLE        : Initialization socket
+         * DESCRIPTION  : Initialize connections of the authorized user
          *
          */
         initializeSocket() {
@@ -145,7 +156,7 @@ new Vue({
                             if(response.status === 200) {
                                 if(response.data.messages.length) {
                                     response.data.messages.forEach(function(element) {
-                                        $this.messages.push(element)
+                                        $this.messages.push(element);
                                     });
 
                                     // Omit scroll to the last message
@@ -178,14 +189,17 @@ new Vue({
                             console.error(error);
                          });
 
+                    // Omit scroll to the last message
+                    //this.scrollToBottom(this.$refs.messages)
+
                     this.initializeConnection();
                 }
             })
         },
 
         /**
-         * View method
-         * Scroll down
+         * TITLE        : View method
+         * DESCRIPTION  : Scroll down
          *
          */
         scrollToBottom(node) {
@@ -196,8 +210,8 @@ new Vue({
     },
 
     /**
-     * Vue method
-     * Initialize the hook before instantiating the instance
+     * TITLE        : Vue method
+     * DESCRIPTION  : Initialize the hook before instantiating the instance
      *
      */
     mounted() {
@@ -215,6 +229,11 @@ new Vue({
     }
 })
 
+/**
+ * TITLE        : Component registration
+ * DESCRIPTION  : Registers a component in a vue instance
+ *
+ */
 Vue.component('chat-message', {
     props: ['item', 'user'],
     template: `
@@ -223,7 +242,8 @@ Vue.component('chat-message', {
             <div>{{item.message.body}}</div>
             <div v-for="(value, key) in item.message.upload">
                 <div v-if="value.type.match(/image*/)">
-                    <img class="img" v-bind:src="'upload/'+value.name+'_196'+value.ext"></img>
+                    <img class="img" v-if="value.resize" v-bind:src="'upload/'+user.room+'/'+value.name+'_196'+value.ext"></img>
+                    <img class="img" v-else v-bind:src="'upload/'+user.room+'/'+value.name+value.ext"></img>
                 </div>
                 <div v-else>
                     <div class="document">

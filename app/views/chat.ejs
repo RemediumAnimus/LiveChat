@@ -33,12 +33,12 @@
             </a>
         </div>
         <div class="chat-messages" ref="messages">
-            <chat-message
+            <message-stack
                     v-for="(m, idx) in messages"
                     :item="m"
                     :user="user"
                     :key="idx"
-            ></chat-message>
+            ></message-stack>
         </div>
         <div class="chat-users collection">
             <nav>

@@ -1,13 +1,14 @@
 'use strict';
 
-var config 		= require('../config');
-var session 	= require('express-session');
+const config 	= require('../config');
+const session 	= require('express-session');
 
 /**
- * Initialize Session
+ * TITLE        : Session
+ * DESCRIPTION  : Initialize Session
  *
  */
-var init = function () {
+const init = function () {
 	return session({
 		secret: config.sessionSecret,
 		resave: false,

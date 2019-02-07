@@ -1,11 +1,17 @@
 'use strict';
 
+/**
+ * DESCRIPTION  : Declares variables
+ *
+ */
 const users       = require('../models/users');
 const messages    = require('../models/messages');
 const config      = require('../config');
+const fs          = require('fs')
 
 /**
- * Encapsulates all code for emitting and listening to socket events
+ * TITLE        : Initialize socket
+ * DESCRIPTION  : Encapsulates all code for emitting and listening to socket events
  *
  */
 const ioEvents = function(io) {
@@ -63,16 +69,29 @@ const ioEvents = function(io) {
 
                         // Create`s a collection of data
                         let collectionData                  = {};
-                        collectionData.message              = {};
                         collectionData.user                 = user;
-                        collectionData.message.type         = type;
-                        collectionData.message.stack        = stack;
-                        collectionData.message.body         = data.messages[i].text;
-                        collectionData.message.upload       = [];
-                        collectionData.message.is_read      = 0;
+
+                        collectionData.collection           = [{
+                            body     : data.messages[i].text,
+                            from_id  : user.id,
+                            is_read  : 0,
+                            stack_id : stack,
+                            type     : type,
+                            upload   : []
+                        }];
 
                         if(type !== config.chat.messages.type.text) {
-                            collectionData.message.upload[0]= data.messages[i];
+
+                            collectionData.collection[0].upload[0]        = data.messages[i];
+                            collectionData.collection[0].upload[0].resize = false;
+
+                            if(type === config.chat.messages.type.image) {
+                                try {
+                                    if (fs.existsSync('upload/'+user.room+'/'+data.messages[i].name+'_196'+data.messages[i].ext)) {
+                                        collectionData.collection[0].upload[0].resize = true;
+                                    }
+                                } catch(err) {}
+                            }
                         }
 
                         if (err) {
@@ -83,8 +102,8 @@ const ioEvents = function(io) {
                         }
 
                         if(result) {
-                            collectionData.success    = true;
-                            collectionData.message.id = result;
+                            collectionData.success          = true;
+                            collectionData.collection[0].id = result;
 
                             // Send the message to all users who are attached to sockets
                             io.to(user.room).emit('message:new', collectionData);
@@ -152,10 +171,10 @@ const ioEvents = function(io) {
 }
 
 /**
- * Initialize Socket.io
+ * TITLE  : Initialize socket
  *
  */
-var init = function(app){
+const init = function(app){
 
 	let server 	= require('http').Server(app);
 	let io 		= require('socket.io')(server);

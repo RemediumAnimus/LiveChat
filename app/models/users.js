@@ -1,14 +1,18 @@
 'use strict';
 
+/**
+ * DESCRIPTION  : Declares variables
+ *
+ */
 const mysql             = require('../database');
 const config            = require('../config');
 const sql               = require('sqlstring');
 
 let userModel = [];
 
-
 /**
- * Creates a new user
+ * TITLE        : User method
+ * DESCRIPTION  : Creates a new user
  *
  */
 const add = function (id, user_id, name, room, roles){
@@ -24,7 +28,8 @@ const add = function (id, user_id, name, room, roles){
 }
 
 /**
- * Gets user data
+ * TITLE        : User method
+ * DESCRIPTION  : Gets user data
  *
  */
 const get = function (id) {
@@ -32,7 +37,8 @@ const get = function (id) {
 }
 
 /**
- * Deletes user
+ * TITLE        : User method
+ * DESCRIPTION  : Delete`s user
  *
  */
 const remove = function (id) {
@@ -44,7 +50,8 @@ const remove = function (id) {
 }
 
 /**
- *  Getting a user's room
+ * TITLE        : User method
+ * DESCRIPTION  : Getting a user's room
  *
  */
 const getByRoom = function (room) {
@@ -52,7 +59,8 @@ const getByRoom = function (room) {
 }
 
 /**
- *  Getting all list users (client)
+ * TITLE        : User method
+ * DESCRIPTION  : Getting all list users (client)
  *
  */
 const getAllUsers = function () {
@@ -60,7 +68,8 @@ const getAllUsers = function () {
 }
 
 /**
- *  Get by lists users
+ * TITLE        : User method
+ * DESCRIPTION  : Get by lists users
  *
  */
 const getByList = function (done) {
@@ -100,6 +109,11 @@ const getByList = function (done) {
     });
 }
 
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : Update message
+ *
+ */
 const updateUserMessage = function (collection, done) {
     if (collection.update_from_client) {
         let queryString = 'update messages as m ' +
@@ -123,7 +137,8 @@ const updateUserMessage = function (collection, done) {
 }
 
 /**
- * A middleware allows user to get access to pages ONLY if the user is already logged in.
+ * TITLE        : User method
+ * DESCRIPTION  : A middleware allows user to get access to pages ONLY if the user is already logged in
  *
  */
 const isAuthenticated = function (req, res, next) {
@@ -135,7 +150,8 @@ const isAuthenticated = function (req, res, next) {
 }
 
 /**
- * A middleware allows user to get access to pages ONLY if the user is an operator.
+ * TITLE        : User method
+ * DESCRIPTION  : A middleware allows user to get access to pages ONLY if the user is an operator
  *
  */
 const isOperator = function (req, done) {

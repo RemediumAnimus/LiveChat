@@ -1,8 +1,17 @@
 'use strict';
 
+/**
+ * DESCRIPTION  : Declares variables
+ *
+ */
 var config 	= require('../config');
 var mysql 	= require('mysql');
 
+/**
+ * TITLE        : Database method
+ * DESCRIPTION  : Initialize sitting`s from database
+ *
+ */
 var init = function() {
 
     // Connect to the database
