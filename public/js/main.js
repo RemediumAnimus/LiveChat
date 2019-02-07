@@ -552,16 +552,13 @@ Vue.component('message-stack', {
                     <span class="info-message">{{value.datetime}}</span>
                 </div>
             </div>
-        </div>
-        <div class="message-content z-depth-1" v-else>
-            {{item.user.name}}: {{item.message.body}}         
-        </div>
-        <div v-if="item.message.is_read" class="lala">
+        </div>    
+        <!--<div v-if="item.message.is_read" class="lala">
              <span>Прочитано</span>
          </div>
          <div v-else class="lala">
              <span>Доставлено</span>
-         </div>
+         </div>-->
     </div>`
 })
 
