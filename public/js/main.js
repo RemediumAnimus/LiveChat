@@ -119,7 +119,6 @@ new Vue({
                     }
                 }
 
-
                 this.scrollToBottom(this.$refs.messages)
             })
 
@@ -257,7 +256,7 @@ new Vue({
                                     response.data.result.forEach(function(element) {
                                         $this.messages.unshift(element)
                                     });
-                                    console.log($this.messages)
+
                                     // Omit scroll to the last message
                                     $this.scrollToBottom($this.$refs.messages)
                                 }
@@ -472,16 +471,17 @@ new Vue({
 /**
  * TITLE        : Component registration
  * DESCRIPTION  : Registers a component in a vue instance
- * 'hide'     : item.collection.length === 1 && index === length - 1 && item.collection[item.collection.length - 1].upload.length > 1
+ * item.collection[item.collection.length - 1].upload.length > 1
  */
 Vue.component('message-stack', {
-    props: ['item', 'user', 'index', 'length'],
+    props: ['item', 'user', 'index'],
     inheritAttrs: false,
     template:
      `<div class="message-stack m-b"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
                      'mess-out' : item.user.roles === 'BOOKER',
-                     'error'    : item.success    === false
+                     'error'    : item.success    === false,
+                     'hide'     : item.collection.length === 1 && index === 0
                     }"
      >
      
