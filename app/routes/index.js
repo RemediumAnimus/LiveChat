@@ -114,14 +114,15 @@ router.post('/users/list', function(req, res) {
  * TITLE        : Users router
  * DESCRIPTION  : Update the user list of read messages by operator
  *
+ * Update the user list of read messages from operator/user.
  */
 router.post('/users/update', function(req, res) {
 
-    if (!req.body.id_user)
-        return res.status(401).json('Data not received');
-
     let collection = {
-        'id_user' : req.body.id_user
+        'id_user'              : req.body.id_user,
+        'id_room'              : req.body.id_room,
+        'update_from_client'   : req.body.update_from_client,
+        'update_from_operator' : req.body.update_from_operator
     }
 
     User.updateUserMessage(collection, function(err, rows){
@@ -290,11 +291,34 @@ router.post('/messages/all', [User.isAuthenticated, function(req, res) {
     })
 }])
 
+router.post('/messages/update_read', [User.isAuthenticated, function(req, res) {
+
+    if (Object.keys(req.body).length == 0) {
+        return res.status(400).json({status: false, err: 'Body response empty!'});
+    }
+
+    let ids_message = '';
+    for (let i=0; i<req.body.collection.length; i++) {
+        ids_message += req.body.collection[i].id + ',';
+    }
+
+    Messages.update_read(ids_message,function(err, result) {
+        if (err)
+            return res.status(500).send(err);
+        if (result) {
+            return res.status(200).json({status: true, messages: result});
+        } else {
+            return res.status(200).send({status: false, messages: []});
+        }
+    });
+}])
+
 router.get('/template', function(req, res) {
 
 
     // Generates a pattern
     res.render('operator');
 });
+
 
 module.exports = router;

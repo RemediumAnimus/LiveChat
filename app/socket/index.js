@@ -70,6 +70,7 @@ const ioEvents = function(io) {
                         // Create`s a collection of data
                         let collectionData                  = {};
                         collectionData.user                 = user;
+
                         collectionData.collection           = [{
                             body     : data.messages[i].text,
                             datetime : messages.time(new Date()),
@@ -117,6 +118,26 @@ const ioEvents = function(io) {
             // Call the callback function
             callback()
         })
+
+        socket.on('message:user_read', (message, callback) => {
+            io.to(message.user.room).emit('message:user_read', message);
+            callback();
+        });
+
+        socket.on('message:user_read_all', (user, callback) => {
+            io.to(user.room).emit('message:user_read_all', user);
+            callback();
+        });
+
+        socket.on('message:operator_read', (message, callback) => {
+            io.to(message.user.room).emit('message:operator_read', message);
+            callback();
+        });
+
+        socket.on('message:operator_read_all', (user, callback) => {
+            io.to(user.room).emit('message:operator_read_all', user);
+            callback();
+        });
 
         // Hearing events to get users
         socket.on('users:get', () => {

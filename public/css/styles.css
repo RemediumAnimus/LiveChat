@@ -41,6 +41,7 @@ html, body {
 
 .message {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .message-content {

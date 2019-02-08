@@ -115,15 +115,25 @@ const getByList = function (done) {
  *
  */
 const updateUserMessage = function (collection, done) {
+    if (collection.update_from_client) {
+        let queryString = 'update messages as m ' +
+            'set m.`is_read` = 1                ' +
+            'where m.`is_read` = 0              ' +
+            'and m.`room_id` = ?                ';
 
-    let queryString = 'UPDATE messages as m  ' +
-        'SET    m.`is_read`     = 1          ' +
-        'WHERE  m.`is_read`     = 0          ' +
-        'AND    m.`from_id`     = ?          ' ;
+        mysql.query(sql.format(queryString, collection.id_room), function(err, result){
+            return done(null, result);
+        });
+    } else {
+        let queryString = 'update messages as m ' +
+            'set m.`is_read` = 1                ' +
+            'where m.`is_read` = 0              ' +
+            'and m.`from_id` = ?                ';
 
-    mysql.query(sql.format(queryString, collection.id_user), function(err, result){
-        return done(null, result);
-    });
+        mysql.query(sql.format(queryString, collection.id_user), function(err, result){
+            return done(null, result);
+        });
+    }
 }
 
 /**

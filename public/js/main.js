@@ -100,8 +100,7 @@ new Vue({
                     lastOutMessages = outMessages.length - 1;
 
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
-                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
-
+                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
                 }
                 else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
@@ -113,6 +112,30 @@ new Vue({
                     if(inMessage.collection[0].body) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
+
+                } else {
+                    outMessages.push(inMessage);
+                }
+
+                if (inMessage.user.id !== this.user.id) {
+                    for (let i = 0; i < this.usersList.length; i++) {
+                        if (this.usersList[i].id === inMessage.user.id && this.usersList[i].current) {
+                            socket.emit('message:operator_read', inMessage, data => {
+                                axios.post('messages/update_read', inMessage)
+                                    .then(response => {
+                                        if (response.status == 200) {
+                                            console.log('Обновление прочитанных сообщений')
+                                        }
+                                        for (let i=0; i<inMessage.collection.length; i++) {
+                                            inMessage.collection[i].is_read = 1;
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    })
+                            });
+                        }
+                    }
                 }
                 else {
                     outMessages.push(inMessage)
@@ -123,10 +146,32 @@ new Vue({
 
             socket.on('hiddenMessage:new', message => {
                 this.usersList.forEach(function(elem) {
-                    if (elem.id == message.user.id && !elem.current) {
+                    if (elem.id === message.user.id && !elem.current) {
                         elem.notify = true;
                     }
                 })
+            })
+
+            socket.on('message:user_read', message => {
+                for (let i=this.messages.length - 1; i >= 0; i--) {
+                    for (let j=0; j<this.messages[i].collection.length; j++) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id === message.user.id)) {
+                            this.messages[i].collection[j].is_read = 1;
+                        }
+                    }
+                }
+            })
+
+            socket.on('message:user_read_all', user => {
+                for (let i=this.messages.length - 1; i >= 0; i--) {
+                    for (let j = this.messages[i].collection.length - 1; j >= 0; j--) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
+                            this.messages[i].collection[j].is_read = 1;
+                        } else {
+                            break;
+                        }
+                    }
+                }
             })
 
             // Omit scroll to the last message
@@ -225,8 +270,7 @@ new Vue({
                     this.usersList[i].current = true;
                 }
             }
-
-            axios.post('users/update?transport=users', {id_user: data.id})
+            axios.post('users/update?transport=users',{id_user: data.id, update_from_operator: true})
                  .then(response => {
                     if(response.status == 200) {
                         console.log('Обновление прочитанных сообщений')
@@ -254,6 +298,18 @@ new Vue({
                                 if(response.data.result.length) {
                                     response.data.result.forEach(function(element) {
                                         $this.messages.unshift(element)
+                                    });
+
+                                    socket.emit('message:operator_read_all', $this.user, data => {
+                                        for (let i=$this.messages.length - 1; i>=0; i--) {
+                                            for (let j=0; j<$this.messages[i].collection.length; j--) {
+                                                if (!$this.messages[i].collection[j].is_read  && ($this.messages[i].user.id !== $this.user.id)) {
+                                                    $this.messages[i].collection[j].is_read = 1;
+                                                } else {
+                                                    break;
+                                                }
+                                            }
+                                        }
                                     });
 
                                     // Omit scroll to the last message
@@ -506,11 +562,17 @@ Vue.component('message-stack', {
                     <span class="body-message">{{value.body}}</span>
                     <span class="info-message">{{value.datetime}}</span>
                 </div>
+                <div v-if="value.is_read" class="lala">
+                    <span>Прочитано</span>
+                </div>
+                 <div v-else class="lala">
+                     <span>Доставлено</span>
+                 </div>
             </div>
-        </div>
+        </div>    
         <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
             <span class="w-40 avatar img-circle">АК</span>
-        </div>
-     </div>`
-
+        </div>     
+    </div>`
 })
+
