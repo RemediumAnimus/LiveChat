@@ -192,7 +192,6 @@ const get = function (room_id, offset, done) {
             }
 
         }
-
         // Remove`s null values
         object = object.filter(function (el) {
             return el != null;

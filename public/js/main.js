@@ -63,7 +63,6 @@ new Vue({
          *
          */
         initializeConnection() {
-
             // Listen to the update event of users in the room
             socket.on('users:update', users => {
                 this.users = [...users]
@@ -117,9 +116,9 @@ new Vue({
                 }
 
 
-                if (inMessage.user.id != this.user.id) {
+                if (inMessage.user.id !== this.user.id) {
                     for (let i=0; i<this.usersList.length; i++) {
-                        if (this.usersList[i].id == inMessage.user.id && this.usersList[i].current) {
+                        if (this.usersList[i].id === inMessage.user.id && this.usersList[i].current) {
                             socket.emit('message:operator_read', inMessage, data => {
                                 axios.post('messages/update_read', inMessage)
                                     .then(response => {
@@ -143,7 +142,7 @@ new Vue({
 
             socket.on('hiddenMessage:new', message => {
                 this.usersList.forEach(function(elem) {
-                    if (elem.id == message.user.id && !elem.current) {
+                    if (elem.id === message.user.id && !elem.current) {
                         elem.notify = true;
                     }
                 })
@@ -152,7 +151,7 @@ new Vue({
             socket.on('message:user_read', message => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
                     for (let j=0; j<this.messages[i].collection.length; j++) {
-                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id == message.user.id)) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id === message.user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         }
                     }
@@ -162,7 +161,7 @@ new Vue({
             socket.on('message:user_read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
                     for (let j=this.messages[i].collection.length - 1; j>= 0; j--) {
-                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
@@ -296,7 +295,6 @@ new Vue({
                                     response.data.result.forEach(function(element) {
                                         $this.messages.unshift(element)
                                     });
-
                                     socket.emit('message:operator_read_all', $this.user, data => {
                                         for (let i=$this.messages.length - 1; i>=0; i--) {
                                             for (let j=0; j<$this.messages[i].collection.length; j--) {
@@ -559,11 +557,13 @@ Vue.component('message-stack', {
                     <span class="body-message">{{value.body}}</span>
                     <span class="info-message">{{value.datetime}}</span>
                 </div>
-                <div v-if="value.is_read" class="lala">
-                    <span>Прочитано</span>
-                </div>
-                 <div v-else class="lala">
-                     <span>Доставлено</span>
+                <div v-if="item.user.roles === 'BOOKER'" class="status">
+                    <div v-if="value.is_read" class="lala">
+                        <span>Прочитано</span>
+                    </div>
+                     <div v-else class="lala">
+                         <span>Доставлено</span>
+                     </div>
                  </div>
             </div>
         </div>    

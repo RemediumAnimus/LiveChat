@@ -87,7 +87,7 @@ new Vue({
                     outMessages.push(inMessage);
                 }
 
-                if (inMessage.user.id != this.user.id) {
+                if (inMessage.user.id !== this.user.id) {
                     socket.emit('message:user_read', inMessage , data => {
                         axios.post('messages/update_read',inMessage )
                             .then(response => {
@@ -112,7 +112,7 @@ new Vue({
             socket.on('message:operator_read', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
                     for (let j=this.messages[i].collection.length - 1; j>=0; j--) {
-                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
@@ -124,7 +124,7 @@ new Vue({
             socket.on('message:user_read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
                     for (let j=0; j<this.messages[i].collection.length; j++) {
-                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
@@ -136,7 +136,7 @@ new Vue({
             socket.on('message:operator_read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
                     for (let j=this.messages[i].collection.length - 1; j>=0; j--) {
-                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
@@ -187,7 +187,7 @@ new Vue({
                                      socket.emit('message:user_read_all', $this.user, data => {
                                          for (let i=$this.messages.length - 1; i >= 0; i--) {
                                              for (let j=$this.messages[i].collection.length - 1; j>=0; j--) {
-                                                 if (!$this.messages[i].collection[j].is_read && ($this.messages[i].user.id != $this.user.id)) {
+                                                 if (!$this.messages[i].collection[j].is_read && ($this.messages[i].user.id !== $this.user.id)) {
                                                      $this.messages[i].collection[j].is_read = 1;
                                                  } else {
                                                      break;
