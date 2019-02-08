@@ -16,6 +16,7 @@ new Vue({
     el: '#app',
     data: {
         message     : '',
+        search      : '',
         messages    : [],
         user        : {},
         users       : [],
@@ -97,26 +98,24 @@ new Vue({
                 let inMessage       = message,
                     outMessages     = this.messages,
                     lastOutMessages = outMessages.length - 1;
-                console.log(inMessage)
+
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
 
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
-                    inMessage.collection.splice(0, 1)
                 }
-
-                if(outMessages.length && inMessage.collection.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+                else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
 
                     if(inMessage.collection[0].upload.length) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
                     }
 
                     if(inMessage.collection[0].body) {
-
-                       // inMessage.collection[0].upload = outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload;
-
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
+                }
+                else {
+                    outMessages.push(inMessage)
                 }
 
                 this.scrollToBottom(this.$refs.messages)

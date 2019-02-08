@@ -207,295 +207,298 @@
 
 			<div class="app-body-inner">
 				<div class="row-col">
-					<div class="col-xs-4 w-lg modal fade aside aside-sm  b-r" id="list">
-						<div class="row-col dark-white">
-						
-							<!-- header -->
-							<div class="list-users__top ">
-								<div class="list-search__top">
-									<form>
-										<div class="input-group b-a b-transparent">
-											<span class="input-group-btn">
-												<button class="btn no-bg no-shadow" type="button" data-toggle="modal" data-target="#aside">
-													<i class="ion-navicon"></i>
-												</button>
-											</span>
-											<input type="text" class="form-control no-border" placeholder="Введите имя пользователя">
-											<!--<span class="input-group-btn">
-												<button class="btn no-bg no-shadow" type="button">
-													<i class="fa fa-search"></i>
-												</button>
-											</span>-->
-										</div>
-									</form>
-								</div>
-							</div>
-							<!-- / -->
-							
-							<!-- flex content -->
-							<div class="list-users__list row-row">
-								<div class="row-body scrollable hover">
-									<div class="row-inner">
-									
-										<!-- left content -->
-										<div class="list inset" data-ui-list="info">
-											<div class="list-item"
-												 v-for="u in usersList"
-												 :class="{'active info': u.current, 'notify': u.notify}"
-												 @click="initializeRoom(u, $event)"
-											>
-												<div class="list-left">
-													<span class="w-40 avatar w-default img-circle">АК<i class="on b-white bottom" v-if="u.online"></i></span>
-												</div>
-												<div class="list-body">
-													<span class="pull-right text-xs text-muted">09.04</span>
-													<div class="item-title">
-														<a href="#" class="_500">{{u.name}}</a>
-													</div>
-													<small class="block text-muted text-ellipsis" v-if="u.online">
-														Онлайн
-													</small>
-													<small class="block text-muted text-ellipsis" v-else>
-														был(а) в сети 1 мин. назад
-													</small>
-												</div>
-											</div>
-										</div>
-										<!-- / -->
-										
-									</div>
-								</div>
-							</div>
-							<!-- / -->
-							
-							<!-- footer -->
-							<div class="list-footer__settings p-a b-t clearfix">
-								<div class="dropdown dropup inline pull-right">
-									<a class="nav-link" data-toggle="dropdown" aria-expanded="false">
-										<span class="btn btn-sm btn-icon default-icon rounded">
-											<i class="ion-gear-b"></i>
-										</span>
-									</a>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="#">Action</a>
-										<a class="dropdown-item" href="#">Another action</a>
-										<a class="dropdown-item" href="#">Something else here</a>
-										<div class="dropdown-divider"></div>
-										<a class="dropdown-item">Separated link</a>
-									</div>
-								</div>
-								<span class="text-sm text-muted">Настройки списка</span>
-							</div>
-							<!-- / -->
-							
-						</div>
-					</div>
-					
-					<div class="col-xs-4" id="detail">
-						<div class="row-col dark-white">
-						
-							<!-- header -->
-							<div class="dark-white b-b">
-								<div class="navbar">
-									
-									<!-- nabar right -->
-									<ul class="nav navbar-nav navbar-message-default pull-right m-l">
-                                        <li class="nav-item" @click="loadingMessage()">
-                                            <a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Подгрузить">
-												<span class="btn btn-sm btn-icon rounded info">
-													<i class="fa fa-spinner"></i>
-												</span>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-											<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Аудио звонок">
-												<span class="btn btn-sm btn-icon rounded info">
-													<i class="fa fa-phone"></i>
-												</span>
-											</a>
-										</li>
-										<li class="nav-item">
-											<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Видео звонок">
-												<span class="btn btn-sm btn-icon rounded info">
-													<i class="fa fa-video-camera"></i>
-												</span>
-											</a>
-										</li>
-									</ul>
-									<!-- / navbar right -->
-									
-									<!-- nabar right selected-->
-									<ul class="nav navbar-nav navbar-message-selected pull-right m-l" style="display: none">
-										<li class="nav-item">
-											<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Удалить">
-												<span class="btn btn-sm btn-icon rounded default-icon">
-													<i class="fa fa-trash"></i>
-												</span>
-											</a>
-										</li>
-										<li class="nav-item">
-											<a class="nav-link" data-toggle="modal" data-target="#send-taskmanager" data-ui-toggle-class="zoom" data-ui-target="#animate-taskmanager"> 
-												<span class="btn btn-sm info">Создать задачу</span>
-											</a>
-										</li>
-									</ul>
-									<!-- / navbar right -->
-									
-									<a data-toggle="modal" data-target="#list" class="navbar-item pull-left hidden-md-up">
-										<span class="btn btn-sm btn-icon info">
-											<i class="ion-person"></i>
-										</span>
-									</a>								
-									<span class="navbar-item navbar-message-name text-ellipsis">
-										Алина Красильникова
-									</span>
-									<div class="navbar-item navbar-message-count text-ellipsis">
-										<span></span>
-										<button class="btn in_deselect_all btn-sm">
-										  <i class="ion-close"></i>
-										</button>
-									</div>
-								</div>
-							</div>
-							<!-- / -->
-							
-							<!-- flex content -->
-							<div class="row-row">
-								<div class="row-body">
-									<div class="row-inner">
-										<!-- content -->
-										<div class="box-message p-a-sm" ref="messages">
-											<message-stack
-													v-for="(m, idx) in messages"
-													:item="m"
-													:user="user"
-													:index="idx"
-													:key="idx"
-											></message-stack>
+					<div class="app-container-col">
+						<div class="left-box-col aside-md b-r" id="list">
+							<div class="row-col dark-white">
 
-										</div>
-										<!-- / -->
-										
+								<!-- header -->
+								<div class="list-users__top ">
+									<div class="list-search__top">
+										<form>
+											<div class="input-group b-a b-transparent">
+												<span class="input-group-btn">
+													<button class="btn no-bg no-shadow" type="button" data-toggle="modal" data-target="#aside">
+														<i class="ion-navicon"></i>
+													</button>
+												</span>
+												<span class="search-group-btn">
+													<input type="text" class="form-control no-border" v-model.trim="search" placeholder="Введите имя пользователя">
+													<button class="btn no-bg no-shadow" type="button" v-show="search.length > 0">
+														<i class="ion-close-circled"></i>
+													</button>
+												</span>
+											</div>
+										</form>
 									</div>
 								</div>
-							</div>
+								<!-- / -->
 							
-							<!-- / -->
-							<div class="chat-footer__block p-a b-t dark-white">
-								<form>
-									<div class="input-group b-a b-transparent">
-										<span class="input-group-btn">
-											<button class="btn no-bg no-shadow default-icon" type="button">
-												<input type="file" name="uploadFiles" id="in-upload-input" value="Upload" multiple @change="initializeUploadFile($event)">
-												<i class="fa fa-paperclip"></i>
-											</button>
-										</span>
-										<textarea type="text" class="form-control no-border" placeholder="Введите сообщение" style="resize: none;" v-model.trim="message" autocomplete="false" @keydown.enter="sendMessage"></textarea>
-										<span class="input-group-btn">
-											<button class="btn no-bg no-shadow info-icon" type="button" @click="sendMessage" :disabled="message.length === 0">
-												<i class="fa fa-send"></i>
-											</button>
-										</span>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-					
-					<div class="col-xs-4 w-md modal fade aside aside-md aside-md-right" id="profile">
-						<div class="row-col b-l">
-							<div class="header-profile__box box-shadow-info">
-								<div class="navbar">
-									<h6 class="text-muted m-a-0">Информация о клиенте</h6>
-								</div>
-								<ul class="list-group no-border">
-									<li class="list-group-item">
-									  <span class="pull-left w-56 w-default img-circle text-md m-r">АК</span>
-									  <div class="clear">
-										<span class="_500 block">Алина Красильникова</span>
-										<span class="text-muted text-ellipsis">ООО "Технологии будущего"</span>
-									  </div>
-									</li>
-								</ul>
-							</div>
-							<div class="box-shadow-info">
-								<ul class="nav">
-									<li class="nav-item">
-										<a class="nav-link block">
-											<label class="md-switch pull-right">
-												<input type="checkbox" checked="" class="has-value">
-												<i class="blue"></i>
-											</label>
-											<i class="ion-android-notifications w-16 text-muted m-r"></i>
-											<span>Уведомления</span>
-										</a>
-									</li>
-								</ul>
-							</div>
-							<div class="box-shadow-info">
-								<ul class="nav nav-profile-item">
-									<li class="nav-item nav-hover" data-toggle="modal" data-target="#profile-photo" data-load="profile-photo">
-										<a class="nav-link block">
-											<span class="pull-right text-sm m-t-xs">22</span>
-											<i class="ion-image w-16 text-muted m-r"></i>
-											<span>Фотографии</span>
-										</a>
-									</li>
-									<li class="nav-item nav-hover" data-toggle="modal" data-target="#profile-document" data-load="profile-document">
-										<a class="nav-link block">
-											<span class="pull-right text-sm m-t-xs">10</span>
-											<i class="ion-android-document w-16 text-muted m-r"></i>
-											<span>Документы</span>
-										</a>
-									</li>
-									
-								</ul>
-							</div>
-							<div class="box-shadow-info info-footer-shadow row-row">
-								<div class="info-header">
-									<i class="ion-ios-people w-16 text-muted m-r"></i>
-									<span class="m-a-0">Ассистенты беседы</span>
-								</div>
-								<div class="row-body scrollable hover">
-									<div class="row-inner p-b-2">
-									
-											<!-- content -->
-											<div class="list inset list-operator__dialog p-b-3">
-												<div class="list-item ">
+								<!-- flex content -->
+								<div class="list-users__list row-row">
+									<div class="row-body scrollable hover">
+										<div class="row-inner">
+
+											<!-- left content -->
+											<div class="list inset" data-ui-list="info">
+												<div class="list-item"
+													 v-for="u in usersList"
+													 :class="{'active info': u.current, 'notify': u.notify}"
+													 @click="initializeRoom(u, $event)"
+												>
 													<div class="list-left">
-														<span class="w-40 avatar w-default img-circle">ЕЧ<i class="on b-white bottom"></i></span>
+														<span class="w-40 avatar w-default img-circle">АК<i class="on b-white bottom" v-if="u.online"></i></span>
 													</div>
 													<div class="list-body">
+														<span class="pull-right text-xs text-muted">09.04</span>
 														<div class="item-title">
-														  <span class="_500">Екатерина Чермошенцева</span>
+															<a href="#" class="_500">{{u.name}}</a>
 														</div>
-														<small class="block text-muted text-ellipsis">
+														<small class="block text-muted text-ellipsis" v-if="u.online">
 															Онлайн
 														</small>
-													</div>
-												</div>
-												<div class="list-item">
-													<div class="list-left">
-														<span class="w-40 avatar w-default img-circle"><img src="img/a0.jpg" alt="."></span>
-													</div>
-													<div class="list-body">
-														<div class="item-title">
-														  <a href="#" class="_500">Анна Васильева</a>
-														</div>
-														<small class="block text-muted text-ellipsis">
-															был(а) в сети 1 д. назад
+														<small class="block text-muted text-ellipsis" v-else>
+															был(а) в сети 1 мин. назад
 														</small>
 													</div>
 												</div>
 											</div>
-										<!-- / -->
-										
+											<!-- / -->
+
+										</div>
+									</div>
+								</div>
+								<!-- / -->
+							
+								<!-- footer -->
+								<div class="list-footer__settings p-a b-t clearfix">
+									<div class="dropdown dropup inline pull-right">
+										<a class="nav-link" data-toggle="dropdown" aria-expanded="false">
+											<span class="btn btn-sm btn-icon default-icon rounded">
+												<i class="ion-gear-b"></i>
+											</span>
+										</a>
+										<div class="dropdown-menu">
+											<a class="dropdown-item" href="#">Action</a>
+											<a class="dropdown-item" href="#">Another action</a>
+											<a class="dropdown-item" href="#">Something else here</a>
+											<div class="dropdown-divider"></div>
+											<a class="dropdown-item">Separated link</a>
+										</div>
+									</div>
+									<span class="text-sm text-muted">Настройки списка</span>
+								</div>
+								<!-- / -->
+							
+							</div>
+						</div>
+
+						<div class="inner-box-col">
+
+							<div class="empty-box-col hide">
+								<i class="ion-chatboxes"></i>
+								<span>Пожалуйста, выберите диалог...</span>
+							</div>
+
+							<div class="box-inner-message" id="detail">
+								<div class="flex-dir-col dark-white">
+
+									<!-- header -->
+									<div class="dark-white b-b">
+										<div class="navbar">
+
+											<!-- nabar right -->
+											<ul class="nav navbar-nav navbar-message-default pull-right m-l">
+												<li class="nav-item" @click="loadingMessage()">
+													<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Подгрузить">
+														<span class="btn btn-sm btn-icon rounded info">
+															<i class="fa fa-spinner"></i>
+														</span>
+													</a>
+												</li>
+												<li class="nav-item">
+													<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Аудио звонок">
+														<span class="btn btn-sm btn-icon rounded info">
+															<i class="fa fa-phone"></i>
+														</span>
+													</a>
+												</li>
+												<li class="nav-item">
+													<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Видео звонок">
+														<span class="btn btn-sm btn-icon rounded info">
+															<i class="fa fa-video-camera"></i>
+														</span>
+													</a>
+												</li>
+											</ul>
+											<!-- / navbar right -->
+
+											<!-- nabar right selected-->
+											<ul class="nav navbar-nav navbar-message-selected pull-right m-l" style="display: none">
+												<li class="nav-item">
+													<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Удалить">
+														<span class="btn btn-sm btn-icon rounded default-icon">
+															<i class="fa fa-trash"></i>
+														</span>
+													</a>
+												</li>
+												<li class="nav-item">
+													<a class="nav-link" data-toggle="modal" data-target="#send-taskmanager" data-ui-toggle-class="zoom" data-ui-target="#animate-taskmanager">
+														<span class="btn btn-sm info">Создать задачу</span>
+													</a>
+												</li>
+											</ul>
+											<!-- / navbar right -->
+
+											<span class="navbar-item navbar-message-name text-ellipsis">
+												Алина Красильникова
+											</span>
+											<div class="navbar-item navbar-message-count text-ellipsis">
+												<span></span>
+												<button class="btn in_deselect_all btn-sm">
+												  <i class="ion-close"></i>
+												</button>
+											</div>
+										</div>
+									</div>
+									<!-- / -->
+
+									<!-- flex content -->
+									<div class="box-body-message">
+										<div class="row-body">
+											<div class="row-inner">
+												<!-- content -->
+												<div class="box-message p-a-sm" ref="messages">
+													<message-stack
+															v-for="(m, idx) in messages"
+															:item="m"
+															:user="user"
+															:index="idx"
+															:key="idx"
+													></message-stack>
+												</div>
+												<!-- / -->
+											</div>
+										</div>
+									</div>
+
+									<!-- / -->
+									<div class="chat-footer__block p-a b-t dark-white">
+										<form>
+											<div class="input-group b-a b-transparent">
+												<span class="input-group-btn">
+													<button class="btn no-bg no-shadow default-icon" type="button">
+														<input class="input-hidden-file" type="file" name="uploadFiles" id="in-upload-input" value="Upload" multiple @change="initializeUploadFile($event)">
+														<i class="fa fa-paperclip"></i>
+													</button>
+												</span>
+												<textarea type="text" class="form-control no-border" placeholder="Введите сообщение" style="resize: none;" v-model.trim="message" autocomplete="false" @keydown.enter="sendMessage"></textarea>
+												<span class="input-group-btn">
+													<button class="btn no-bg no-shadow info-icon" type="button" @click="sendMessage" :disabled="message.length === 0">
+														<i class="fa fa-send"></i>
+													</button>
+												</span>
+											</div>
+										</form>
 									</div>
 								</div>
 							</div>
+					
+							<div class="right-box-col aside-md" id="profile">
+								<div class="row-col b-l">
+									<div class="header-profile__box box-shadow-info">
+										<div class="navbar">
+											<h6 class="text-muted m-a-0">Информация о клиенте</h6>
+										</div>
+										<ul class="list-group no-border">
+											<li class="list-group-item">
+											  <span class="pull-left w-56 w-default img-circle text-md m-r">АК</span>
+											  <div class="clear">
+												<span class="_500 block">Алина Красильникова</span>
+												<span class="text-muted text-ellipsis">ООО "Технологии будущего"</span>
+											  </div>
+											</li>
+										</ul>
+									</div>
+									<div class="box-shadow-info">
+										<ul class="nav">
+											<li class="nav-item">
+												<a class="nav-link block">
+													<label class="md-switch pull-right">
+														<input type="checkbox" checked="" class="has-value">
+														<i class="blue"></i>
+													</label>
+													<i class="ion-android-notifications w-16 text-muted m-r"></i>
+													<span>Уведомления</span>
+												</a>
+											</li>
+										</ul>
+									</div>
+									<div class="box-shadow-info">
+										<ul class="nav nav-profile-item">
+											<li class="nav-item nav-hover" data-toggle="modal" data-target="#profile-photo" data-load="profile-photo">
+												<a class="nav-link block">
+													<span class="pull-right text-sm m-t-xs">22</span>
+													<i class="ion-image w-16 text-muted m-r"></i>
+													<span>Фотографии</span>
+												</a>
+											</li>
+											<li class="nav-item nav-hover" data-toggle="modal" data-target="#profile-document" data-load="profile-document">
+												<a class="nav-link block">
+													<span class="pull-right text-sm m-t-xs">10</span>
+													<i class="ion-android-document w-16 text-muted m-r"></i>
+													<span>Документы</span>
+												</a>
+											</li>
+
+										</ul>
+									</div>
+									<div class="box-shadow-info info-footer-shadow row-row">
+										<div class="info-header">
+											<i class="ion-ios-people w-16 text-muted m-r"></i>
+											<span class="m-a-0">Ассистенты беседы</span>
+										</div>
+										<div class="row-body scrollable hover">
+											<div class="row-inner p-b-2">
+
+													<!-- content -->
+													<div class="list inset list-operator__dialog p-b-3">
+														<div class="list-item ">
+															<div class="list-left">
+																<span class="w-40 avatar w-default img-circle">ЕЧ<i class="on b-white bottom"></i></span>
+															</div>
+															<div class="list-body">
+																<div class="item-title">
+																  <span class="_500">Екатерина Чермошенцева</span>
+																</div>
+																<small class="block text-muted text-ellipsis">
+																	Онлайн
+																</small>
+															</div>
+														</div>
+														<div class="list-item">
+															<div class="list-left">
+																<span class="w-40 avatar w-default img-circle"><img src="img/a0.jpg" alt="."></span>
+															</div>
+															<div class="list-body">
+																<div class="item-title">
+																  <a href="#" class="_500">Анна Васильева</a>
+																</div>
+																<small class="block text-muted text-ellipsis">
+																	был(а) в сети 1 д. назад
+																</small>
+															</div>
+														</div>
+													</div>
+												<!-- / -->
+
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- / -->
+
+							</div>
 						</div>
-						<!-- / -->
-						
 					</div>
 				</div>
 			</div>
@@ -565,7 +568,7 @@
 					
 			<!-- Modal documents -->
 			<div class="modal fade inactive modal-window-xl" id="profile-document" data-backdrop="false" aria-hidden="true">
-				<div class="modal-right w-xl white b-l">
+				<div class="modal-right white b-l">
 					<div class="row-col">
 						<a data-dismiss="modal" class="pull-right text-muted text-lg p-a-sm m-r-sm">×</a>
 						<div class="modal-header p-a b-b">
@@ -693,7 +696,7 @@
 									<div class="row m-b">
 									  <div class="col-sm-6">
 											<label>Прикрепленные сообщения</label>
-											<div class="box p-a dark-light">
+											<div class="box p-a dark-white">
 												<div class="m-b">
 													<span class="pull-left w-40 w-default avatar img-circle m-r-sm">АК</span>
 													<div class="clear">
@@ -706,7 +709,7 @@
 												<div class="m-b">
 													<span class="pull-right w-40 w-default avatar img-circle m-l-sm">ЕЧ</span>
 													<div class="clear text-right">
-														<div class="p-a p-y-sm dark-white inline text-left rounded">
+														<div class="p-a p-y-sm dark-default inline text-left rounded">
 														  Добрый день! Подробную инструкцию мы отправили Вам на почту!
 														</div>
 														<div class="text-muted text-xs m-t-xs">1 минуту назад</div>

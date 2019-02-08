@@ -73,10 +73,8 @@ new Vue({
                     outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
 
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
-                    inMessage.collection.splice(0, 1)
                 }
-
-                if(outMessages.length && inMessage.collection.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+                else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
 
                     if(inMessage.collection[0].upload.length) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
@@ -85,6 +83,9 @@ new Vue({
                     if(inMessage.collection[0].body) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
+                }
+                else {
+                    outMessages.push(inMessage)
                 }
 
                 // Omit scroll to the last message
@@ -115,7 +116,7 @@ new Vue({
                             if(response.status === 200) {
                                 if(response.data.result.length) {
                                     response.data.result.forEach(function(element) {
-                                        $this.messages.push(element);
+                                        $this.messages.unshift(element);
                                     });
 
                                     // Omit scroll to the last message

@@ -709,8 +709,7 @@ Modal
     .aside-lg ~ * {
       width: 100%; } }
 
-/*@media (max-width: 991px) {*/
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .row-col > div.aside-md {
     display: none;
     width: 100%; }
@@ -1975,7 +1974,7 @@ body {
     .app-aside.in > div {
       -webkit-transform: translate3d(0, 0, 0);
       transform: translate3d(0, 0, 0);
-	  width: 18.5rem;} }
+	  width: 20.5rem;} }
 
 @media (min-width: 768px) {
   .app-header.hidden-md-up ~ .app-body {
@@ -3756,7 +3755,7 @@ Colors
   
 .dark-default {
   color: rgba(0, 0, 0, 0.87);
-  background-color: rgba(242, 244, 245, 1); }
+  background-color: rgba(244, 247, 249, 1); }
 
 .black {
   color: rgba(225, 235, 245, 0.87);
