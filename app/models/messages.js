@@ -150,6 +150,19 @@ const get = function (room_id, offset, done) {
 
                         continue;
                     }
+                    else {
+
+                        objectPrev.collection[0].upload.unshift({
+                            id              : result[i].up_id,
+                            id_message      : result[i].id,
+                            original_name   : result[i].original_name,
+                            name            : result[i].name,
+                            type            : result[i].up_type,
+                            ext             : result[i].ext
+                        });
+
+                        continue;
+                    }
                 }
             }
 
@@ -173,14 +186,7 @@ const get = function (room_id, offset, done) {
             });
 
             if(result[i].type !== config.chat.messages.type.text) {
-                /*object[i].collection[0].upload.unshift({
-                    id              : result[i].up_id,
-                    id_message      : result[i].id,
-                    original_name   : result[i].original_name,
-                    name            : result[i].name,
-                    type            : result[i].up_type,
-                    ext             : result[i].ext
-                });*/
+
                 object[i].collection[object[i].collection.length - 1].upload.unshift({
                     id              : result[i].up_id,
                     id_message      : result[i].id,
