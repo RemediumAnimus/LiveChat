@@ -72,8 +72,8 @@ new Vue({
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
                     outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
-
-                } else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+                }
+                else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
 
                     if(inMessage.collection[0].upload.length) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
@@ -82,8 +82,8 @@ new Vue({
                     if(inMessage.collection[0].body) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
-
-                } else {
+                }
+                else {
                     outMessages.push(inMessage);
                 }
 
@@ -91,7 +91,7 @@ new Vue({
                     socket.emit('message:user_read', inMessage , data => {
                         axios.post('messages/update_read',inMessage )
                             .then(response => {
-                                if(response.status == 200) {
+                                if(response.status === 200) {
                                     console.log('Обновление прочитанных сообщений')
                                 }
 
@@ -104,14 +104,17 @@ new Vue({
                             })
                     });
                 }
+                else {
+                    outMessages.push(inMessage)
+                }
 
                 // Omit scroll to the last message
                 this.scrollToBottom(this.$refs.messages)
             })
 
             socket.on('message:operator_read', user => {
-                for (let i=this.messages.length - 1; i >= 0; i--) {
-                    for (let j=this.messages[i].collection.length - 1; j>=0; j--) {
+                for (let i = this.messages.length - 1; i >= 0; i--) {
+                    for (let j = this.messages[i].collection.length - 1; j>= 0; j--) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         } else {
@@ -123,7 +126,7 @@ new Vue({
 
             socket.on('message:user_read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
-                    for (let j=0; j<this.messages[i].collection.length; j++) {
+                    for (let j = 0; j < this.messages[i].collection.length; j++) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         } else {
@@ -134,7 +137,7 @@ new Vue({
             })
 
             socket.on('message:operator_read_all', user => {
-                for (let i=this.messages.length - 1; i >= 0; i--) {
+                for (let i = this.messages.length - 1; i >= 0; i--) {
                     for (let j=this.messages[i].collection.length - 1; j>=0; j--) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;

@@ -54,7 +54,7 @@ var message = (function($) {
 				width_modal = $(opts.profileBox).width();
 			
 			// Set the width
-			$('#'+modal+'').find('.modal-right').width(width_modal);
+			/*$('#'+modal+'').find('.modal-right').width(width_modal);*/
 		});	
 	}
 	

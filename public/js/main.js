@@ -16,6 +16,7 @@ new Vue({
     el: '#app',
     data: {
         message     : '',
+        search      : '',
         messages    : [],
         user        : {},
         users       : [],
@@ -24,7 +25,6 @@ new Vue({
         offset      : 0
     },
     methods: {
-
         /**
          * TITLE        : Message method
          * DESCRIPTION  : Method of sending messages
@@ -85,7 +85,7 @@ new Vue({
             socket.on('users:get', user => {
                 for(let i = 0; i < user.length; i++){
                     let j = this.usersList.findIndex(u => u.id === user[i].id)
-                    if(j != undefined){
+                    if(j !== undefined){
                         this.usersList[j].online = true;
                     }
                 }
@@ -98,10 +98,11 @@ new Vue({
                     lastOutMessages = outMessages.length - 1;
 
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
-                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
-                    outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
+                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
 
-                } else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+                    outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
+                }
+                else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
 
                     if(inMessage.collection[0].upload.length) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
@@ -110,22 +111,22 @@ new Vue({
                     if(inMessage.collection[0].body) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
-
-                } else {
+                }
+                else {
                     outMessages.push(inMessage);
                 }
 
-
                 if (inMessage.user.id !== this.user.id) {
-                    for (let i=0; i<this.usersList.length; i++) {
+                    for (let i = 0; i < this.usersList.length; i++) {
+
                         if (this.usersList[i].id === inMessage.user.id && this.usersList[i].current) {
                             socket.emit('message:operator_read', inMessage, data => {
                                 axios.post('messages/update_read', inMessage)
                                     .then(response => {
-                                        if (response.status == 200) {
+                                        if (response.status === 200) {
                                             console.log('Обновление прочитанных сообщений')
                                         }
-                                        for (let i=0; i<inMessage.collection.length; i++) {
+                                        for (let i = 0; i < inMessage.collection.length; i++) {
                                             inMessage.collection[i].is_read = 1;
                                         }
                                     })
@@ -149,7 +150,7 @@ new Vue({
             })
 
             socket.on('message:user_read', message => {
-                for (let i=this.messages.length - 1; i >= 0; i--) {
+                for (let i = this.messages.length - 1; i >= 0; i--) {
                     for (let j=0; j<this.messages[i].collection.length; j++) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id === message.user.id)) {
                             this.messages[i].collection[j].is_read = 1;
@@ -159,8 +160,9 @@ new Vue({
             })
 
             socket.on('message:user_read_all', user => {
-                for (let i=this.messages.length - 1; i >= 0; i--) {
-                    for (let j=this.messages[i].collection.length - 1; j>= 0; j--) {
+
+                for (let i = this.messages.length - 1; i >= 0; i--) {
+                    for (let j = this.messages[i].collection.length - 1; j >= 0; j--) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
                             this.messages[i].collection[j].is_read = 1;
                         } else {
@@ -295,10 +297,11 @@ new Vue({
                                     response.data.result.forEach(function(element) {
                                         $this.messages.unshift(element)
                                     });
+
                                     socket.emit('message:operator_read_all', $this.user, data => {
-                                        for (let i=$this.messages.length - 1; i>=0; i--) {
+                                        for (let i = $this.messages.length - 1; i >= 0; i--) {
                                             for (let j=0; j<$this.messages[i].collection.length; j--) {
-                                                if (!$this.messages[i].collection[j].is_read  && ($this.messages[i].user.id != $this.user.id)) {
+                                                if (!$this.messages[i].collection[j].is_read  && ($this.messages[i].user.id !== $this.user.id)) {
                                                     $this.messages[i].collection[j].is_read = 1;
                                                 } else {
                                                     break;
@@ -351,11 +354,12 @@ new Vue({
                 let uploads     = this.uploads;
                 let reader      = new FileReader();
                 let settings    = {
-                    headers: {'Content-Type': 'multipart/form-data'}/*,
-                    onUploadProgress: this.uploadProgress(random)*/
+                    headers: {'Content-Type': 'multipart/form-data'},
+                    onUploadProgress: this.uploadProgress(random)
                 };
 
-                //this.renderPreview(event.target.files[i], random, reader);
+                this.renderPreview(event.target.files[i], random, reader);
+                return;
                 data.append('file', event.target.files[i]);
                 data.append('room', this.user.room);
 
@@ -530,8 +534,7 @@ Vue.component('message-stack', {
      `<div class="message-stack m-b"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
                      'mess-out' : item.user.roles === 'BOOKER',
-                     'error'    : item.success    === false,
-                     'hide'     : item.collection.length === 1 && index === 0
+                     'error'    : item.success    === false
                     }"
      >
      
@@ -539,32 +542,44 @@ Vue.component('message-stack', {
             <span class="w-40 avatar img-circle">АК</span>
         </div>
         <div class="message-stack-content">
-            <div class="in-message" v-for="(value, key) in item.collection" data-msgid="">
+            <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.id">
                 <div class="select-message">
                     <span><i class="ion-checkmark-circled"></i></span>
                 </div>
                 <div class="text-message in-message_media" v-if="value.upload.length">
                     <div class="body-message">
                         <span>{{value.body}}</span>
-                        <a href="#" v-for="(file, index) in value.upload">
-                            <img class="img" v-if="file.type.match(/image*/)" v-bind:src="'upload/'+user.room+'/'+file.name+'_196'+file.ext"></img>
-                            <span v-else>{{file.original_name}}</span>
-                        </a>     
+                        <div v-for="(file, index) in value.upload" v-if="file.type.match(/image*/)">
+                            <img class="img" v-bind:src="'upload/'+user.room+'/'+file.name+'_196'+file.ext"></img>
+                        </div>
+                        <div v-for="(file, index) in value.upload" v-if="!file.type.match(/image*/)">
+                            <a v-bind:href="'upload/'+user.room+'/'+file.name+file.ext" class="item-attachment">
+                                <span class="label-icon"><i class="ion-android-document"></i></span>
+                                <span class="label-text">
+                                    <span>{{file.original_name}}</span>
+                                    <small class="text-muted">34kb</small>
+                                </span>  
+                            </a>
+                        </div>       
                     </div>
-                    <span class="info-message">{{value.datetime}}</span>
+                    <span class="info-message">
+                        <span>{{value.datetime}}</span>
+                        <span class="info-done-message" v-if="item.user.id === value.from_id">
+                            <i class="ion-android-done-all" v-if="value.is_read"></i>
+                            <i class="ion-android-done" v-else></i>
+                        </span>
+                    </span>
                 </div>
                 <div class="text-message" v-else>
                     <span class="body-message">{{value.body}}</span>
-                    <span class="info-message">{{value.datetime}}</span>
-                </div>
-                <div v-if="item.user.roles === 'BOOKER'" class="status">
-                    <div v-if="value.is_read" class="lala">
-                        <span>Прочитано</span>
+                    <div class="info-message">
+                        <span>{{value.datetime}}</span>
+                        <span class="info-done-message" v-if="item.user.id === value.from_id">
+                            <i class="ion-android-done-all" v-if="value.is_read"></i>
+                            <i class="ion-android-done" v-else></i>
+                        </span>
                     </div>
-                     <div v-else class="lala">
-                         <span>Доставлено</span>
-                     </div>
-                 </div>
+                </div>
             </div>
         </div>    
         <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
