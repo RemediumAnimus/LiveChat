@@ -205,13 +205,13 @@ const get = function (room_id, offset, done) {
 /**
  * Update messages is_read
  */
-const update_read = function (id_message, done) {
+const update_read = function (ids_message, done) {
     let queryString =
         'UPDATE messages        ' +
         'SET    is_read = 1     ' +
-        'WHERE  id = ?          ';
+        'WHERE  id in (?)       ';
 
-    mysql.query(sql.format(queryString, [id_message]), function(err, result){
+    mysql.query(sql.format(queryString, [ids_message]), function(err, result){
         if (err)
             return done(err);
         if (!result.insertId) {

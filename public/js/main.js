@@ -99,13 +99,10 @@ new Vue({
                     lastOutMessages = outMessages.length - 1;
 
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
-                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
-
+                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
-                    inMessage.collection.splice(0, 1)
-                }
 
-                if(outMessages.length && inMessage.collection.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+                } else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
 
                     if(inMessage.collection[0].upload.length) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
@@ -114,18 +111,24 @@ new Vue({
                     if(inMessage.collection[0].body) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
+
+                } else {
+                    outMessages.push(inMessage);
                 }
 
-                if (message.user.id != this.user.id) {
+
+                if (inMessage.user.id != this.user.id) {
                     for (let i=0; i<this.usersList.length; i++) {
-                        if (this.usersList[i].id == message.user.id && this.usersList[i].current) {
-                            socket.emit('message:operator_read', message, data => {
-                                axios.post('messages/update_read', message)
+                        if (this.usersList[i].id == inMessage.user.id && this.usersList[i].current) {
+                            socket.emit('message:operator_read', inMessage, data => {
+                                axios.post('messages/update_read', inMessage)
                                     .then(response => {
                                         if (response.status == 200) {
                                             console.log('Обновление прочитанных сообщений')
                                         }
-                                        message.message.is_read = 1;
+                                        for (let i=0; i<inMessage.collection.length; i++) {
+                                            inMessage.collection[i].is_read = 1;
+                                        }
                                     })
                                     .catch(error => {
                                         console.log(error);
@@ -148,18 +151,22 @@ new Vue({
 
             socket.on('message:user_read', message => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
-                    if (!this.messages[i].message.is_read && (this.messages[i].user.id == message.user.id)) {
-                        this.messages[i].message.is_read = 1;
+                    for (let j=0; j<this.messages[i].collection.length; j++) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id == message.user.id)) {
+                            this.messages[i].collection[j].is_read = 1;
+                        }
                     }
                 }
             })
 
             socket.on('message:user_read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
-                    if (!this.messages[i].message.is_read && (this.messages[i].user.id != user.id)) {
-                        this.messages[i].message.is_read = 1;
-                    } else {
-                        break;
+                    for (let j=this.messages[i].collection.length - 1; j>= 0; j--) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                            this.messages[i].collection[j].is_read = 1;
+                        } else {
+                            break;
+                        }
                     }
                 }
             })
@@ -292,10 +299,12 @@ new Vue({
 
                                     socket.emit('message:operator_read_all', $this.user, data => {
                                         for (let i=$this.messages.length - 1; i>=0; i--) {
-                                            if (!$this.messages[i].message.is_read && ($this.messages[i].user.id != $this.user.id)) {
-                                                $this.messages[i].message.is_read = 1
-                                            } else {
-                                                break;
+                                            for (let j=0; j<$this.messages[i].collection.length; j--) {
+                                                if (!$this.messages[i].collection[j].is_read  && ($this.messages[i].user.id != $this.user.id)) {
+                                                    $this.messages[i].collection[j].is_read = 1;
+                                                } else {
+                                                    break;
+                                                }
                                             }
                                         }
                                     });
@@ -550,18 +559,17 @@ Vue.component('message-stack', {
                     <span class="body-message">{{value.body}}</span>
                     <span class="info-message">{{value.datetime}}</span>
                 </div>
+                <div v-if="value.is_read" class="lala">
+                    <span>Прочитано</span>
+                </div>
+                 <div v-else class="lala">
+                     <span>Доставлено</span>
+                 </div>
             </div>
-
         </div>    
         <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
             <span class="w-40 avatar img-circle">АК</span>
-        </div>
-        <!--<div v-if="item.message.is_read" class="lala">
-             <span>Прочитано</span>
-         </div>
-         <div v-else class="lala">
-             <span>Доставлено</span>
-         </div>-->
+        </div>     
     </div>`
 })
 

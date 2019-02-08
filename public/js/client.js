@@ -71,12 +71,9 @@ new Vue({
 
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
                     outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
-
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
-                    inMessage.collection.splice(0, 1)
-                }
 
-                if(outMessages.length && inMessage.collection.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
+                } else if(outMessages.length && outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id === inMessage.collection[0].stack_id) {
 
                     if(inMessage.collection[0].upload.length) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].upload.push(inMessage.collection[0].upload[0])
@@ -85,16 +82,22 @@ new Vue({
                     if(inMessage.collection[0].body) {
                         outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].body = inMessage.collection[0].body;
                     }
+
+                } else {
+                    outMessages.push(inMessage);
                 }
 
-                if (message.user.id != this.user.id) {
-                    socket.emit('message:user_read', message, data => {
-                        axios.post('messages/update_read',message)
+                if (inMessage.user.id != this.user.id) {
+                    socket.emit('message:user_read', inMessage , data => {
+                        axios.post('messages/update_read',inMessage )
                             .then(response => {
                                 if(response.status == 200) {
                                     console.log('Обновление прочитанных сообщений')
                                 }
-                                message.message.is_read = 1;
+
+                                for (let i=0; i<inMessage.collection.length; i++) {
+                                    inMessage.collection[i].is_read = 1;
+                                }
                             })
                             .catch(error => {
                                 console.log(error);
@@ -108,30 +111,36 @@ new Vue({
 
             socket.on('message:operator_read', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
-                    if (!this.messages[i].message.is_read && (this.messages[i].user.id != user.id)) {
-                        this.messages[i].message.is_read = 1;
-                    } else {
-                        break;
+                    for (let j=this.messages[i].collection.length - 1; j>=0; j--) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                            this.messages[i].collection[j].is_read = 1;
+                        } else {
+                            break;
+                        }
                     }
                 }
             })
 
             socket.on('message:user_read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
-                    if (!this.messages[i].message.is_read && (this.messages[i].user.id != user.id)) {
-                        this.messages[i].message.is_read = 1;
-                    } else {
-                        break;
+                    for (let j=0; j<this.messages[i].collection.length; j++) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                            this.messages[i].collection[j].is_read = 1;
+                        } else {
+                            break;
+                        }
                     }
                 }
             })
 
             socket.on('message:operator_read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
-                    if (!this.messages[i].message.is_read) {
-                        this.messages[i].message.is_read = 1;
-                    } else {
-                        break;
+                    for (let j=this.messages[i].collection.length - 1; j>=0; j--) {
+                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id != user.id)) {
+                            this.messages[i].collection[j].is_read = 1;
+                        } else {
+                            break;
+                        }
                     }
                 }
             })
@@ -161,7 +170,7 @@ new Vue({
 
                                 if(response.data.result.length) {
                                     response.data.result.forEach(function(element) {
-                                        $this.messages.push(element);
+                                        $this.messages.unshift(element);
                                     });
 
                                     // Omit scroll to the last message
@@ -176,11 +185,13 @@ new Vue({
                                          console.log('Обновление прочитанных сообщений')
                                      }
                                      socket.emit('message:user_read_all', $this.user, data => {
-                                         for (let i=$this.messages.length - 1; i>=0; i--) {
-                                             if (!$this.messages[i].message.is_read && ($this.messages[i].user.id != $this.user.id)) {
-                                                 $this.messages[i].message.is_read = 1
-                                             } else {
-                                                 break;
+                                         for (let i=$this.messages.length - 1; i >= 0; i--) {
+                                             for (let j=$this.messages[i].collection.length - 1; j>=0; j--) {
+                                                 if (!$this.messages[i].collection[j].is_read && ($this.messages[i].user.id != $this.user.id)) {
+                                                     $this.messages[i].collection[j].is_read = 1;
+                                                 } else {
+                                                     break;
+                                                 }
                                              }
                                          }
                                      });
@@ -260,13 +271,13 @@ Vue.component('message-stack', {
             <div class="message-content z-depth-1" v-else>
                 {{item.user.name}}: {{value.body}}
             </div>
-        </div>
-        <div v-if="item.message.is_read" class="lala">
-             <span>Прочитано</span>
-         </div>
-         <div v-else class="lala">
-             <span>Доставлено</span>
-         </div>
+            <div v-if="value.is_read" class="lala">
+                <span>Прочитано</span>
+            </div>
+            <div v-else class="lala">
+                <span>Доставлено</span>
+            </div>
+        </div>     
     </div>
   `
 })

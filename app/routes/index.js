@@ -297,9 +297,12 @@ router.post('/messages/update_read', [User.isAuthenticated, function(req, res) {
         return res.status(400).json({status: false, err: 'Body response empty!'});
     }
 
-    let id_message = req.body.message.id;
+    let ids_message = '';
+    for (let i=0; i<req.body.collection.length; i++) {
+        ids_message += req.body.collection[i].id + ',';
+    }
 
-    Messages.update_read(id_message,function(err, result) {
+    Messages.update_read(ids_message,function(err, result) {
         if (err)
             return res.status(500).send(err);
         if (result) {
