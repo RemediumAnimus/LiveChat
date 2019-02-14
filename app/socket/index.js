@@ -7,7 +7,7 @@
 const users       = require('../models/users');
 const messages    = require('../models/messages');
 const config      = require('../config');
-const fs          = require('fs')
+const fs          = require('fs');
 
 /**
  * TITLE        : Initialize socket
@@ -22,7 +22,7 @@ const ioEvents = function(io) {
         // We will listen in on the connection of users to a specific chat.
         socket.on('join', (user, callback) => {
 
-            if (!user.name || !user.room) {
+            if (!user.room) {
                 return callback('Enter valid user data')
             }
 
@@ -30,16 +30,16 @@ const ioEvents = function(io) {
             callback({userId: socket.id})
 
             // We attach the socket
-            socket.join(user.room)
+            socket.join(user.room);
 
             // Clearing user data
-            users.remove(socket.id)
+            users.remove(socket.id);
 
             // Add user data
-            users.add(socket.id, user.id, user.name, user.room, user.roles)
+            users.add(socket.id, user.id, user.display_name, user.room, user.roles);
 
             // We update the list of users in the dialog
-            io.to(user.room).emit('users:update', users.getByRoom(user.room))
+            io.to(user.room).emit('users:update', users.getByRoom(user.room));
 
             // Sends request to add online user
             socket.broadcast.emit('users:status', users.get(socket.id));
@@ -83,17 +83,8 @@ const ioEvents = function(io) {
 
                         if(type !== config.chat.messages.type.text) {
 
-                            collectionData.collection[0].body             = null;
-                            collectionData.collection[0].upload[0]        = data.messages[i];
-                            collectionData.collection[0].upload[0].resize = false;
-
-                            if(type === config.chat.messages.type.image) {
-                                try {
-                                    if (fs.existsSync('upload/'+user.room+'/'+data.messages[i].name+'_196'+data.messages[i].ext)) {
-                                        collectionData.collection[0].upload[0].resize = true;
-                                    }
-                                } catch(err) {}
-                            }
+                            collectionData.collection[0].body       = null;
+                            collectionData.collection[0].upload[0]  = data.messages[i];
                         }
 
                         if (err) {
@@ -117,26 +108,18 @@ const ioEvents = function(io) {
 
             // Call the callback function
             callback()
-        })
-
-        socket.on('message:user_read', (message, callback) => {
-            io.to(message.user.room).emit('message:user_read', message);
-            callback();
         });
 
-        socket.on('message:user_read_all', (user, callback) => {
-            io.to(user.room).emit('message:user_read_all', user);
-            callback();
+        socket.on('message:update', (object, callback) => {
+
+            io.to(object.user.room).emit('message:read_all', object);
+            messages.updateReadAll(object.user.id, object.update_from);
         });
 
-        socket.on('message:operator_read', (message, callback) => {
-            io.to(message.user.room).emit('message:operator_read', message);
-            callback();
-        });
+        socket.on('message:read', (message, callback) => {
 
-        socket.on('message:operator_read_all', (user, callback) => {
-            io.to(user.room).emit('message:operator_read_all', user);
-            callback();
+            io.to(message.user.room).emit('message:read', message);
+            messages.update_read(message.collection[0].id);
         });
 
         // Hearing events to get users

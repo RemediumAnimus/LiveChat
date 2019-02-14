@@ -8,11 +8,22 @@
 const socket = io();
 
 /**
+ * TITLE        : Config method
+ * DESCRIPTION  : Setting App
+ *
+ */
+const settings = {
+    notice: {
+        error_upload: 'Во время загрузки файлов произошла ошибка...'
+    }
+}
+
+/**
  * TITLE        : New Vue
  * DESCRIPTION  : Create a new instance of Vue
  *
  */
-new Vue({
+let vue = new Vue({
     el: '#app',
     data: {
         message     : '',
@@ -22,7 +33,17 @@ new Vue({
         users       : [],
         usersList   : [],
         uploads     : [],
-        offset      : 0
+        previews    : [],
+        profile     : {
+            assistants  : [],
+            user        : {},
+            attachments : []
+        },
+        offset      : 0,
+        loading     : {
+            innerBox    : 0,
+            startBox    : 0
+        }
     },
     methods: {
         /**
@@ -32,12 +53,19 @@ new Vue({
          */
         sendMessage() {
 
+            if(this.message.length === 0) {
+                if(this.uploads.length === 0)
+                    return;
+            }
+
             const text = {
                 text  : this.message,
                 type  : 'text'
             };
 
-            this.uploads.push(text);
+            if(this.message.length > 0) {
+                this.uploads.push(text);
+            }
 
             // Body message
             const message = {
@@ -51,8 +79,9 @@ new Vue({
                 if (err) {
                     console.error(err)
                 } else {
-                    this.message = '';
-                    this.uploads = []
+                    this.message  = '';
+                    this.uploads  = [];
+                    this.previews = [];
                 }
             })
         },
@@ -74,9 +103,9 @@ new Vue({
                 for(let j = 0; j < this.usersList.length; j++) {
                     if(this.usersList[j].id === user.id) {
                         if(this.usersList[j].online === true){
-                            this.usersList[j].online = false;
+                           this.usersList[j].online = false;
                         } else {
-                            this.usersList[j].online = true;
+                           this.usersList[j].online = true;
                         }
                     }
                 }
@@ -120,20 +149,7 @@ new Vue({
                 if (inMessage.user.id !== this.user.id) {
                     for (let i = 0; i < this.usersList.length; i++) {
                         if (this.usersList[i].id === inMessage.user.id && this.usersList[i].current) {
-                            socket.emit('message:operator_read', inMessage, data => {
-                                axios.post('messages/update_read', inMessage)
-                                    .then(response => {
-                                        if (response.status === 200) {
-                                            console.log('Обновление прочитанных сообщений')
-                                        }
-                                        for (let i = 0; i < inMessage.collection.length; i++) {
-                                            inMessage.collection[i].is_read = 1;
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.log(error);
-                                    })
-                            });
+                            socket.emit('message:read', inMessage);
                         }
                     }
                 }
@@ -144,35 +160,32 @@ new Vue({
             socket.on('hiddenMessage:new', message => {
                 this.usersList.forEach(function(elem) {
                     if (elem.id === message.user.id && !elem.current) {
-                        elem.notify = true;
+                        elem.unread = elem.unread + 1;
                     }
                 })
-            })
+            });
 
-            socket.on('message:user_read', message => {
+            socket.on('message:read', message => {
                 for (let i = this.messages.length - 1; i >= 0; i--) {
-                    for (let j=0; j<this.messages[i].collection.length; j++) {
+                    for (let j = 0; j < this.messages[i].collection.length; j++) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id === message.user.id)) {
-                            this.messages[i].collection[j].is_read = 1;
+                             this.messages[i].collection[j].is_read = 1;
                         }
                     }
                 }
-            })
+            });
 
-            socket.on('message:user_read_all', user => {
+            socket.on('message:read_all', user => {
                 for (let i = this.messages.length - 1; i >= 0; i--) {
                     for (let j = this.messages[i].collection.length - 1; j >= 0; j--) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
-                            this.messages[i].collection[j].is_read = 1;
+                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
                         }
                     }
                 }
-            })
-
-            // Omit scroll to the last message
-            this.scrollToBottom(this.$refs.messages)
+            });
         },
 
         /**
@@ -257,60 +270,90 @@ new Vue({
          * DESCRIPTION  : Initialize a new dialogue with the client
          *
          */
-        initializeRoom(data, event) {
+        initializeRoom(data) {
+
+            let this_clone   = this;
+            this.previews    = [];
+            this.uploads     = [];
 
             for (let i = 0; i < this.usersList.length; i++) {
                 this.usersList[i].current = false;
-                if (this.usersList[i].id == data.id) {
+                if(this.usersList[i].id === data.id) {
 
                     // Set current, if current user is selected
                     this.usersList[i].current = true;
+
+                    // Reset unread, if current user is selected
+                    this.usersList[i].unread = 0;
                 }
             }
-            axios.post('users/update?transport=users',{id_user: data.id, update_from_operator: true})
+
+            socket.emit('message:update', {user: data, update_from: true});
+
+            axios.post('users/profile?transport=users', {id_user: data.id, id_room: data.room})
                  .then(response => {
-                    if(response.status == 200) {
-                        console.log('Обновление прочитанных сообщений')
+                    if(response.status === 200) {
+                        if(response.data.status !== 0) {
+                            this_clone.profile.assistants  = response.data.assistants;
+                            this_clone.profile.user        = response.data.user;
+                            this_clone.profile.attachments = response.data.attachments;
+                        }
                     }
                  })
                  .catch(error => {
                     console.log(error);
-                 })
+                 });
 
-            data.notify     = false;
             this.user.room  = data.room;
 
             socket.emit('join', this.user, data => {
+
                 if (typeof data === 'string') {
                     console.error(data)
                 }
                 else {
 
-                    this.messages = [];
-                    let $this     = this;
+                    this.messages         = [];
+                    this.loading.innerBox = 1;
 
-                    axios.post('messages/all?transport=messages', {'room_id': this.user.room})
+                    axios.post('messages/all?transport=messages', {'room_id': this.user.room, 'in_upload': true})
                          .then(function (response) {
                             if(response.status === 200) {
                                 if(response.data.result.length) {
+
                                     response.data.result.forEach(function(element) {
-                                        $this.messages.unshift(element)
-                                    });
-            console.log($this.messages)
-                                    socket.emit('message:operator_read_all', $this.user, data => {
-                                        for (let i = $this.messages.length - 1; i >= 0; i--) {
-                                            for (let j=0; j<$this.messages[i].collection.length; j--) {
-                                                if (!$this.messages[i].collection[j].is_read  && ($this.messages[i].user.id !== $this.user.id)) {
-                                                    $this.messages[i].collection[j].is_read = 1;
-                                                } else {
-                                                    break;
-                                                }
-                                            }
-                                        }
+                                        this_clone.messages.unshift(element)
                                     });
 
+                                    if(response.data.attachments.length) {
+
+                                        this_clone.uploads      = response.data.attachments;
+                                        let objectPreview = {};
+
+                                        for(let i = 0; i < response.data.attachments.length; i++) {
+                                            objectPreview           = {};
+                                            objectPreview.status    = 1;
+                                            objectPreview.progress  = 100;
+                                            objectPreview.id        = response.data.attachments[i].id;
+                                            objectPreview.name      = response.data.attachments[i].original_name;
+                                            objectPreview.size      = response.data.attachments[i].size;
+
+                                            objectPreview.image     = response.data.attachments[i].thumb_xs
+                                                                    ? response.data.attachments[i].thumb_xs
+                                                                    :(response.data.attachments[i].thumb_sm
+                                                                    ? response.data.attachments[i].thumb_sm
+                                                                    : response.data.attachments[i].thumb);
+
+                                            objectPreview.blob      = response.data.attachments[i].type.match(/image*/)
+                                                                    ? objectPreview.image
+                                                                    : null;
+
+                                            this_clone.previews.push(objectPreview);
+                                        }
+                                    }
+
                                     // Omit scroll to the last message
-                                    $this.scrollToBottom($this.$refs.messages)
+                                    this_clone.scrollToBottom(this_clone.$refs.messages)
                                 }
                             } else {
                                 console.log('ошибка')
@@ -318,22 +361,7 @@ new Vue({
                          })
                          .catch(error => {
                             console.error(error);
-                         })
-
-                    // Get attachments information
-                    axios.post('uploads/attachments?transport=uploads', {'room_id': this.user.room})
-                         .then(response => {
-                            if(response.status === 200) {
-                                if(response.data.attachments.length) {
-                                    console.log('Есть неотправленные вложения')
-                                    this.uploads = response.data.attachments;
-                                    this.reloadPreview(response.data.attachments);
-                                }
-                            }
-                         })
-                         .catch(error => {
-                            console.log(error);
-                         })
+                         });
 
                 }
             })
@@ -346,91 +374,56 @@ new Vue({
          */
         initializeUploadFile(event) {
 
-            for (let i = 0; i < event.target.files.length; i++) {
-                let data        = new FormData();
-                let this_clone  = this;
-                let random      = Math.random().toString(16).slice(2);
-                let uploads     = this.uploads;
-                let reader      = new FileReader();
-                let settings    = {
-                    headers: {'Content-Type': 'multipart/form-data'},
-                    onUploadProgress: this.uploadProgress(random)
-                };
+            let i = 0;
+            let this_clone  = this;
 
-                this.renderPreview(event.target.files[i], random, reader);
-                return;
+            const upload = function(i)  {
+
+                let objectPreview               = {};
+                let objectHeader                = {};
+                let data                        = new FormData();
+                let random                      = Math.random().toString(16).slice(2);
+
+                objectHeader.onUploadProgress   = this_clone.uploadProgress(this_clone);
+                objectHeader.headers            = {'Content-Type': 'multipart/form-data'};
+
+                objectPreview.id                = 0;
+                objectPreview.status            = 0;
+                objectPreview.progress          = 0;
+                objectPreview.name              = event.target.files[i].name;
+                objectPreview.size              = filesize(event.target.files[i].size);
+                objectPreview.blob              = event.target.files[i].type.match(/image*/)
+                                                ? URL.createObjectURL(event.target.files[i])
+                                                : null;
+
+                this_clone.previews.push(objectPreview);
+
                 data.append('file', event.target.files[i]);
-                data.append('room', this.user.room);
+                data.append('room', this_clone.user.room);
 
-                axios.post('upload/loading?transport=uploads&sid='+random+'', data, settings)
+                axios.post('upload/loading?transport=uploads&sid='+random+'', data, objectHeader)
                      .then(function (response) {
                         if(response.status === 200){
-                            //this_clone.statusProgress(random, true);
-                            uploads.push(response.data.attachment);
-                        } else {
-                            //this_clone.statusProgress(random, false);
+
+                            this_clone.previews[this_clone.previews.length - 1].status = 1;
+                            this_clone.previews[this_clone.previews.length - 1].id     = response.data.attachment.id;
+
+                            this_clone.uploads.push(response.data.attachment);
+
+                            i++;
+
+                            if (i < event.target.files.length) {
+                                upload(i);
+                            }
                         }
                      })
-                     .catch(error => {
-                         //this_clone.statusProgress(random, true);
-                     })
-            }
-        },
+                    .catch(error => {
+                        this_clone.previews.splice(this_clone.previews[this_clone.previews.length - 1], 1);
+                        alert(settings.notice.error_upload);
+                    })
+            };
 
-        /**
-         * TITLE        : View method
-         * DESCRIPTION  : Render preview for upload
-         *
-         */
-        renderPreview(file, random, reader, item, img, preload) {
-            reader.addEventListener("load", function(event) {
-                item = document.createElement("li");
-                item.className = "item";
-                item.setAttribute("data-id", random);
-
-                img = document.createElement("img");
-                img.className = "img-absolute";
-
-                img.src = file.type.match(/image.*/)
-                    ? event.target.result
-                    : event.target.result;
-
-                preload = document.createElement("span");
-                preload.className = "item-preload";
-
-                item.appendChild(img);
-                item.appendChild(preload);
-
-                document.getElementById('preview').appendChild(item);
-            });
-            reader.readAsDataURL(file);
-        },
-
-        /**
-         * TITLE        : View method
-         * DESCRIPTION  : Render preview for upload after reload window
-         *
-         */
-        reloadPreview(file, item, img, preload) {
-            for(let i = 0; i < file.length; i++) {
-                item = document.createElement("li");
-                item.className = "item";
-                item.setAttribute("data-id", file[i].id);
-
-                img = document.createElement("img");
-                img.className = "img-absolute";
-                img.src = file[i].type.match(/image.*/)
-                    ? 'upload/'+file[i].name+file[i].ext
-                    : event.target.result;
-
-                preload = document.createElement("span");
-                preload.className = "item-preload";
-
-                item.appendChild(img);
-                item.appendChild(preload);
-
-                document.getElementById('preview').appendChild(item);
-            }
+            upload(i);
         },
 
         /**
@@ -438,31 +431,37 @@ new Vue({
          * DESCRIPTION  : Render status progress for file
          *
          */
-        uploadProgress(identity) {
+        uploadProgress(this_clone) {
             return function (progress) {
-                let preview = document.getElementById('preview');
-                let item = preview.querySelectorAll('[data-id="'+identity+'"]');
-                let percentage = Math.floor((progress.loaded * 100)/progress.total);
 
-                item[0].getElementsByClassName('item-preload')[0].innerHTML = percentage;
+                let percentage = Math.floor((progress.loaded * 100)/progress.total);
+                this_clone.previews[this_clone.previews.length - 1].progress = percentage;
+                if(this_clone.bar) {
+                    this_clone.bar.set(percentage);
+                }
+
             }
         },
 
-        /**
-         * TITLE        : View method
-         * DESCRIPTION  : Upload status progress for file
-         *
-         */
-        statusProgress(identity, status) {
-            let preview = document.getElementById('preview');
-            let item = preview.querySelectorAll('[data-id="'+identity+'"]');
+        previewRemove(id) {
 
-            if(status === true) {
-                item[0].getElementsByClassName('item-preload')[0].innerHTML = 'Загружено';
-            } else {
-                item[0].getElementsByClassName('item-preload')[0].innerHTML = 'Ошибка';
-            }
+            // Get information attachment
+            let object = this.uploads.find(u => u.id === id);
 
+            // Clear information from array
+            this.previews = this.previews.filter(u => u.id !== id);
+            this.uploads  = this.uploads.filter(u => u.id !== id);
+
+            // Delete attachments from date base
+            axios.post('uploads/delete?transport=uploads', {'id': id, 'room': this.user.room, 'name': object.name, 'ext': object.ext})
+                 .then(response => {
+                    if(response.status === 200) {
+
+                    }
+                 })
+                 .catch(error => {
+                    console.log(error);
+                 })
         },
 
         /**
@@ -506,11 +505,16 @@ new Vue({
      *
      */
     mounted() {
+        let this_clone = this;
+        setTimeout(function() {
+            this_clone.loading.startBox = 1;
+            document.getElementsByClassName('app-body-inner')[0].classList.remove("hide");
+        }, 1000);
 
         // Get list users
         axios.post('users/list?transport=users')
              .then(response => {
-                if(response.status == 200) {
+                if(response.status === 200) {
                     console.log('Получен список пользователей')
                     this.usersList = response.data;
                 }
@@ -524,7 +528,7 @@ new Vue({
 /**
  * TITLE        : Component registration
  * DESCRIPTION  : Registers a component in a vue instance
- * item.collection[item.collection.length - 1].upload.length > 1
+ *
  */
 Vue.component('message-stack', {
     props: ['item', 'user', 'index'],
@@ -538,7 +542,7 @@ Vue.component('message-stack', {
      >
      
         <div class="message-stack-photo" v-if="item.user.roles === 'GUEST'">
-            <span class="w-40 avatar img-circle">АК</span>
+            <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
         </div>
         <div class="message-stack-content">
             <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.id">
@@ -547,12 +551,14 @@ Vue.component('message-stack', {
                 </div>
                 <div class="text-message in-message_media" v-if="value.upload.length">
                     <div class="body-message">
-                        <span>{{value.body}}</span>
+                        <span v-if="value.body">{{value.body}}</span>
                         <div v-for="(file, index) in value.upload" v-if="file.type.match(/image*/)">
-                            <img class="img" v-bind:src="'upload/'+user.room+'/'+file.name+'_196'+file.ext"></img>
+                            <img class="img" v-if="file.thumb_xs" v-bind:src="file.thumb_xs"></img>
+                            <img class="img" v-else-if="file.thumb_sm" v-bind:src="file.thumb_sm"></img>
+                            <img class="img" v-else v-bind:src="file.thumb"></img>
                         </div>
                         <div v-for="(file, index) in value.upload" v-if="!file.type.match(/image*/)">
-                            <a v-bind:href="'upload/'+user.room+'/'+file.name+file.ext" class="item-attachment">
+                            <a v-bind:href="file.name" class="item-attachment">
                                 <span class="label-icon"><i class="ion-android-document"></i></span>
                                 <span class="label-text">
                                     <span>{{file.original_name}}</span>
@@ -573,7 +579,7 @@ Vue.component('message-stack', {
                     <span class="body-message">{{value.body}}</span>
                     <div class="info-message">
                         <span>{{value.datetime}}</span>
-                        <span class="info-done-message" v-if="item.user.id === value.from_id">
+                        <span class="info-done-message" v-if="item.user.roles === 'BOOKER'">
                             <i class="ion-android-done-all" v-if="value.is_read"></i>
                             <i class="ion-android-done" v-else></i>
                         </span>
@@ -582,8 +588,62 @@ Vue.component('message-stack', {
             </div>
         </div>    
         <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
-            <span class="w-40 avatar img-circle">АК</span>
+            <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
         </div>     
     </div>`
 })
+
+Vue.component('attachment-view', {
+    props: ['item'],
+    inheritAttrs: false,
+    methods: {
+        previewRemove(id) {
+            vue.previewRemove(id);
+        }
+    },
+    template:
+        `<div class="in-preview-upload">
+            <div class="in-preview-item">
+                <div class="in-preview-src" v-if="item.blob">
+                    <img v-bind:src="item.blob"> 
+                </div>
+                <div class="in-preview-file" v-else>
+                       <span class="label-icon"><i class="ion-android-document"></i></span>
+                       <span class="label-name">{{item.name}}</span>
+                       <span class="label-size">{{item.size}}</span>
+                </div>
+                <div class="in-preview-close" v-if="item.status === 1" @click="previewRemove(item.id)">
+                    <i class="ion-close"></i>
+                </div>
+                <div class="in-preview-preloader" v-else>
+                    <span><i class="fa fa-circle-o-notch fa-spin fa-fw"></i></span>
+                </div>
+            </div>
+        </div>`
+});
+
+Vue.component('assistant-dialog', {
+    props: ['item'],
+    inheritAttrs: false,
+    template:
+        `<div class="list-item ">
+            <div class="list-left">
+                <span class="w-40 avatar w-orange img-circle">{{item.short_name}}</span>
+            </div>
+            <div class="list-body">
+                <div class="item-title">
+                    <span class="_500">{{item.display_name}}</span>
+                </div>
+                <small class="block text-muted text-ellipsis">
+                    {{item.email}}
+                </small>
+            </div>
+        </div>`
+})
+
+
+
+
+
+
 

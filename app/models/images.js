@@ -22,7 +22,7 @@ const resizeXS = function (tempFilePath, objectRoom, objectName, objectExt, call
             return done
                 .resize(sizeFile, Jimp.AUTO)
                 .quality(qualityFile)
-                .write(uploadPath, callback(null, uploadPath));
+                .write(uploadPath, callback(null, nameFile));
         })
         .catch(err => {
             callback(err, null)
@@ -39,12 +39,13 @@ const resizeSM = function (tempFilePath, objectRoom, objectName, objectExt, call
     const qualityFile   = 100;
     const nameFile      = objectName+'_600';
     const uploadPath    = 'upload/'+objectRoom+'/'+nameFile+objectExt;
+
     Jimp.read(tempFilePath)
         .then(done => {
             return done
                 .resize(sizeFile, Jimp.AUTO)
                 .quality(qualityFile)
-                .write(uploadPath, callback(null, uploadPath));
+                .write(uploadPath, callback(null, nameFile));
         })
         .catch(err => {
             callback(err, null)

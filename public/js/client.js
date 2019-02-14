@@ -88,21 +88,7 @@ new Vue({
                 }
 
                 if (inMessage.user.id !== this.user.id) {
-                    socket.emit('message:user_read', inMessage , data => {
-                        axios.post('messages/update_read',inMessage )
-                            .then(response => {
-                                if(response.status === 200) {
-                                    console.log('Обновление прочитанных сообщений')
-                                }
-
-                                for (let i=0; i<inMessage.collection.length; i++) {
-                                    inMessage.collection[i].is_read = 1;
-                                }
-                            })
-                            .catch(error => {
-                                console.log(error);
-                            })
-                    });
+                    socket.emit('message:read', inMessage);
                 }
                 else {
                     outMessages.push(inMessage)
@@ -112,11 +98,11 @@ new Vue({
                 this.scrollToBottom(this.$refs.messages)
             })
 
-            socket.on('message:operator_read', user => {
+            socket.on('message:read', user => {
                 for (let i = this.messages.length - 1; i >= 0; i--) {
                     for (let j = this.messages[i].collection.length - 1; j>= 0; j--) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
-                            this.messages[i].collection[j].is_read = 1;
+                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
                         }
@@ -124,23 +110,11 @@ new Vue({
                 }
             })
 
-            socket.on('message:user_read_all', user => {
+            socket.on('message:read_all', user => {
                 for (let i=this.messages.length - 1; i >= 0; i--) {
                     for (let j = 0; j < this.messages[i].collection.length; j++) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
-                            this.messages[i].collection[j].is_read = 1;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            })
-
-            socket.on('message:operator_read_all', user => {
-                for (let i = this.messages.length - 1; i >= 0; i--) {
-                    for (let j=this.messages[i].collection.length - 1; j>=0; j--) {
-                        if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
-                            this.messages[i].collection[j].is_read = 1;
+                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
                         }
@@ -182,34 +156,15 @@ new Vue({
                             } else {
                                 console.log('ошибка')
                             }
-                             axios.post('users/update?transport=users',{id_room: $this.user.room, update_from_client: true})
-                                 .then(response => {
-                                     if(response.status == 200) {
-                                         console.log('Обновление прочитанных сообщений')
-                                     }
-                                     socket.emit('message:user_read_all', $this.user, data => {
-                                         for (let i=$this.messages.length - 1; i >= 0; i--) {
-                                             for (let j=$this.messages[i].collection.length - 1; j>=0; j--) {
-                                                 if (!$this.messages[i].collection[j].is_read && ($this.messages[i].user.id != $this.user.id)) {
-                                                     $this.messages[i].collection[j].is_read = 1;
-                                                 } else {
-                                                     break;
-                                                 }
-                                             }
-                                         }
-                                     });
 
-                                 })
-                                 .catch(error => {
-                                     console.log(error);
-                                 })
+                            socket.emit('message:update', {user: $this.user, update_from: false});
                          })
                          .catch(error => {
                             console.error(error);
                          });
 
                     // Omit scroll to the last message
-                    //this.scrollToBottom(this.$refs.messages)
+                    this.scrollToBottom(this.$refs.messages)
 
                     this.initializeConnection();
                 }

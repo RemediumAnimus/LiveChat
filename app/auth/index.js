@@ -26,7 +26,17 @@ const init = function(){
 
     // used to deserialize the user
     passport.deserializeUser(function(id, done) {
-        mysql.query(sql.format('SELECT u.`id`, u.`name`, u.`roles`, r.`id` AS `room` FROM `users` u LEFT JOIN `rooms` r ON u.id = r.id_user WHERE u.`id` = ?', [id]), function(err, rows){
+
+        let queryString = 'SELECT   u.`id`,                 ' +
+            '                       u.`first_name`,         ' +
+            '                       u.`last_name`,          ' +
+            '                       u.`roles`,  			' +
+            '                       r.`id` AS room          ' +
+            'FROM  users u                                  ' +
+            'LEFT  JOIN `rooms` r ON u.`id` = r.`id_user`   ' +
+            'WHERE u.`id` = ?                               ' ;
+
+        mysql.query(sql.format(queryString, [id]), function(err, rows){
             done(err, rows[0]);
         });
     });
@@ -41,12 +51,13 @@ const init = function(){
 	function(req, email, password, done) {
 
         let queryString = 'SELECT   u.`id`,                 ' +
-            '                       u.`name`,               ' +
+            '                       u.`first_name`,         ' +
+            '                       u.`last_name`,          ' +
             '                       u.`roles`,  			' +
             '                       r.`id` AS room,         ' +
             '                       u.`password`            ' +
             'FROM  users u                                  ' +
-            'LEFT JOIN `rooms` r ON u.`id` = r.`id_user`   	' +
+            'LEFT  JOIN `rooms` r ON u.`id` = r.`id_user`   ' +
             'WHERE u.`email` = ?                            ' ;
 
 		mysql.query(sql.format(queryString, [email]), function(err, rows){

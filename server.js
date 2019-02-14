@@ -40,7 +40,8 @@ app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.use(fileUpload());
+app.use(fileUpload({useTempFiles : true,
+                    tempFileDir  : '/tmp/'}));
 
 /**
  * Routes

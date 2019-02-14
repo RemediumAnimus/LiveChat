@@ -22,7 +22,7 @@ const add = function (id, user_id, name, room, roles){
         'name'      : name,
         'room'      : room,
         'roles'     : roles,
-        'notify'    : false,
+        'unread'    : 0,
         'current'   : false
     })
 }
@@ -75,17 +75,20 @@ const getAllUsers = function () {
 const getByList = function (done) {
 
     let queryString = 'SELECT   u.`id`,                                           ' +
-        '                       u.`name`,                                         ' +
+        '                       u.`first_name`,                                   ' +
+        '                       u.`last_name`,                                    ' +
+        '                       u.`company`,                                      ' +
         '                       r.`id` AS `room`,                                 ' +
         '                       u.`roles`,                                        ' +
-        '                       m.`is_read`                                       ' +
+        '                       m.`unread`                                        ' +
         'FROM  users u                                                            ' +
-        'INNER JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +
-        'LEFT  JOIN (SELECT from_id, is_read FROM messages ORDER BY id DESC) AS m ' +
+        'LEFT  JOIN `rooms` r ON u.`id` = r.`id_user`                             ' +
+        'LEFT  JOIN (SELECT count(*) as unread, from_id                           ' +
+        '               FROM messages WHERE is_read = 0                           ' +
+        '               GROUP BY from_id) AS m                                    ' +
         'ON m.`from_id` = u.`id`                                                  ' +
         'WHERE u.`roles` = ?                                                      ' +
-        'GROUP BY u.id'
-    ;
+        'GROUP BY u.id                                                            ' ;
 
     mysql.query(sql.format(queryString, ['GUEST']), function(err, result){
         if (err)
@@ -95,12 +98,11 @@ const getByList = function (done) {
         }
 
         result.forEach(function(index, elem) {
-            if (!index.is_read && index.is_read !== null) {
-                index.notify = true;
-            } else
-                index.notify = false;
 
-            index.online = false;
+            index.display_name  = getReadbleName(index.first_name, index.last_name);
+            index.short_name    = getShortName(index.first_name, index.last_name);
+
+            index.online  = false;
             index.current = false;
         });
 
@@ -109,31 +111,85 @@ const getByList = function (done) {
     });
 }
 
+
 /**
  * TITLE        : User method
- * DESCRIPTION  : Update message
+ * DESCRIPTION  : Get information on conversation assists
  *
  */
-const updateUserMessage = function (collection, done) {
-    if (collection.update_from_client) {
-        let queryString = 'update messages as m ' +
-            'set m.`is_read` = 1                ' +
-            'where m.`is_read` = 0              ' +
-            'and m.`room_id` = ?                ';
+const getAssistant = function (id_room, done) {
 
-        mysql.query(sql.format(queryString, collection.id_room), function(err, result){
-            return done(null, result);
-        });
-    } else {
-        let queryString = 'update messages as m ' +
-            'set m.`is_read` = 1                ' +
-            'where m.`is_read` = 0              ' +
-            'and m.`from_id` = ?                ';
+    let queryString = 'SELECT u.* FROM messages m ' +
+        'INNER  JOIN users u ON u.id = m.from_id  ' +
+        'WHERE  m.room_id = ?                     ' +
+        'AND    u.roles = ?                       ' +
+        'GROUP  BY m.`from_id`                    ';
 
-        mysql.query(sql.format(queryString, collection.id_user), function(err, result){
-            return done(null, result);
-        });
-    }
+    mysql.query(sql.format(queryString, [id_room, 'BOOKER']), function(err, result){
+        if(err)
+            return done(err, null);
+        if(!result)
+            return done(null, null);
+
+        for(let i = 0; i < result.length; i++) {
+            result[i].display_name  = getReadbleName(result[i].first_name, result[i].last_name);
+            result[i].short_name    = getShortName(result[i].first_name, result[i].last_name);
+        }
+        return done(null, result);
+    });
+}
+
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : Get information on conversation assists
+ *
+ */
+const getInfoProfile = function (id_room, done) {
+
+    let queryString = 'SELECT u.* FROM users u    ' +
+        'INNER  JOIN rooms r ON u.id = r.id_user  ' +
+        'WHERE  r.id = ?                          ' ;
+
+    mysql.query(sql.format(queryString, [id_room]), function(err, result){
+        if(err)
+            return done(err, null);
+        if(!result)
+            return done(null, null);
+
+        for(let i = 0; i < result.length; i++) {
+            result[i].display_name  = getReadbleName(result[i].first_name, result[i].last_name);
+            result[i].short_name    = getShortName(result[i].first_name, result[i].last_name);
+        }
+        return done(null, result);
+    });
+}
+
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : Receive`s information on the number of investments in the dialog
+ *
+ */
+const getCntUpload = function (id_room, done) {
+
+    let queryString = 'SELECT count(*) sum, m.type FROM messages m  ' +
+        'INNER  JOIN uploads u ON m.id = u.id_message               ' +
+        'WHERE  m.room_id = ?                                       ' +
+        'GROUP  by m.type                                           ' ;
+
+    mysql.query(sql.format(queryString, [id_room]), function(err, result){
+        if(err)
+            return done(err, null);
+        if(!result)
+            return done(null, null);
+
+        let array = {};
+
+        for(let i = 0; i < result.length; i++) {
+            array[result[i].type] = result[i].sum;
+        }
+
+        return done(null, array);
+    });
 }
 
 /**
@@ -162,6 +218,24 @@ const isOperator = function (req, done) {
     }
 }
 
+/**
+ * TITLE        : User method
+ * DESCRIPTION  :
+ *
+ */
+const getReadbleName = function (firstName, lastName) {
+    return firstName+ ' ' + lastName;
+}
+
+/**
+ * TITLE        : User method
+ * DESCRIPTION  :
+ *
+ */
+const getShortName = function (firstName, lastName) {
+    return firstName.substr(0, 1).toUpperCase() + lastName.substr(0, 1).toUpperCase();
+}
+
 module.exports = {
     add,
     get,
@@ -171,5 +245,9 @@ module.exports = {
     isAuthenticated,
     isOperator,
     getAllUsers,
-    updateUserMessage
+    getAssistant,
+    getInfoProfile,
+    getReadbleName,
+    getShortName,
+    getCntUpload
 };

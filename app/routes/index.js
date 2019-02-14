@@ -125,11 +125,52 @@ router.post('/users/update', function(req, res) {
         'update_from_operator' : req.body.update_from_operator
     }
 
-    User.updateUserMessage(collection, function(err, rows){
-        if(rows) {
-            res.status(200).json(rows);
+    Messages.updateReadAll(collection);
+})
+
+/**
+ * TITLE        : Users router
+ * DESCRIPTION  : Get info user for profile block
+ *
+ */
+router.post('/users/profile', function(req, res) {
+
+    let object       = {};
+        object.user  = req.body.id_user,
+        object.room  = req.body.id_room;
+
+    let objectUser          = {},
+        objectOperators     = [],
+        objectUploads       = [];
+
+    User.getInfoProfile(object.room, function(err, rows) {
+        if (rows) {
+            objectUser = rows[0];
         }
-    })
+
+        User.getAssistant(object.room, function(err, result) {
+            if (result) {
+                objectOperators = result;
+            }
+
+            User.getCntUpload(object.room, function(err, rows) {
+                if (rows) {
+                    objectUploads = rows;
+                }
+
+                returnOut(objectUser, objectOperators, objectUploads);
+            })
+        })
+    });
+
+    const returnOut = function(objectUser, objectOperators, objectUploads) {
+        return res.status(200).json({
+            status      : true,
+            assistants  : objectOperators,
+            user        : objectUser,
+            attachments : objectUploads
+        });
+    }
 })
 
 /**
@@ -142,6 +183,10 @@ router.post('/users/get', function(req, res) {
         if(req.user.room === null){
             delete(req.user.room);
         }
+
+        req.user.display_name = User.getReadbleName(req.user.first_name, req.user.last_name);
+        req.user.short_name   = User.getShortName(req.user.first_name, req.user.last_name);
+
         return res.status(200).json(req.user);
     }
     else {
@@ -151,43 +196,16 @@ router.post('/users/get', function(req, res) {
 
 /**
  * TITLE        : Uploads router
- * DESCRIPTION  : Gets information about unfinished downloads
- *
- */
-router.post('/uploads/attachments', function(req, res) {
-
-    if (Object.keys(req.user).length == 0) {
-        return res.status(400).json({status: false, err: 'No authorized.'});
-    }
-
-    let objectUser      = req.user;
-    let objectRoom      = req.body.room_id;
-
-    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex');
-
-    Uploads.get(objectPassword, function(err, result) {
-        if (err)
-            return res.status(500).send(err);
-        if (result) {
-            return res.status(200).json({status: true, attachments: result});
-        } else {
-            return res.status(500).send(err);
-        }
-    })
-})
-
-/**
- * TITLE        : Uploads router
  * DESCRIPTION  : Cuts and uploads files to server
  *
  */
 router.post('/upload/loading', function(req, res) {
 
-    if (Object.keys(req.files).length == 0) {
+    if (Object.keys(req.files).length === 0) {
         return res.status(400).json({status: false, err: 'No files were uploaded.'});
     }
 
-    if (Object.keys(req.user).length == 0) {
+    if (Object.keys(req.user).length === 0) {
         return res.status(400).json({status: false, err: 'No authorized.'});
     }
 
@@ -200,8 +218,11 @@ router.post('/upload/loading', function(req, res) {
     let objectType      = objectFile.mimetype;
     let objectExt       = path.extname(objectOrigName);
     let objectName      = crypto.randomBytes(20).toString('hex');
+    let objectSize      = 0;
     let objectPassword  = crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex');
 
+    let objectNameXS    = null;
+    let objectNameSM    = null;
 
     if (!fs.existsSync('upload/'+objectRoom)){
         fs.mkdirSync('upload/'+objectRoom);
@@ -217,31 +238,102 @@ router.post('/upload/loading', function(req, res) {
         if (err)
             return res.status(500).send(err);
 
-        Uploads.save(objectOrigName, objectName, objectPassword, objectType, objectExt, function(err, result) {
+        // Transform image into different size
+        if(objectResize) {
+            Images.resizeXS(objectUploadPath, objectRoom, objectName, objectExt, function(err, result) {
+
+                if(result){
+
+                    // Save the new file size XS (196x196)
+                    objectNameXS = result;
+
+                    Images.resizeSM(objectUploadPath, objectRoom, objectName, objectExt, function(err, result) {
+                        if(result){
+
+                            // Save the new file size XS 600x600)
+                            objectNameSM = result;
+                        }
+
+                        // Save result to DB
+                        uploadFunction(objectOrigName, objectName, objectNameXS, objectNameSM, objectPassword, objectType, objectExt);
+                    });
+                }
+            });
+        } else {
+            uploadFunction(objectOrigName, objectName, objectNameXS, objectNameSM, objectPassword, objectType, objectExt);
+        }
+    });
+
+    const uploadFunction = function(objectOrigName, objectName, objectNameXS, objectNameSM, objectPassword, objectType, objectExt) {
+
+        let fileInfo = fs.statSync(objectUploadPath);
+
+        if(fileInfo) {
+            objectSize = fileInfo.size;
+        }
+
+        Uploads.save(objectOrigName, objectName, objectNameXS, objectNameSM, objectPassword, objectType, objectSize, objectExt, function(err, result) {
             if (err)
                 return res.status(500).send(err);
             if (result) {
 
-                if(objectResize) {
-                    Images.resizeXS(objectUploadPath, objectRoom, objectName, objectExt, function(err, result) {
-                        /*console.log(result)*/
-                    });
-                    Images.resizeSM(objectUploadPath, objectRoom, objectName, objectExt, function(err, result) {
-                        /*console.log(result)*/
-                    });
-                }
-                return res.status(200).json({status: true, attachment: { id             : result,
-                                                                         original_name  : objectOrigName,
-                                                                         name           : objectName,
-                                                                         type           : objectType,
-                                                                         ext            : objectExt }
+                return res.status(200).json({status: true, attachment: {
+                        id             : result,
+                        original_name  : objectOrigName,
+                        type           : objectType,
+                        thumb          : Messages.getPath(objectRoom, objectName, objectExt),
+                        thumb_xs       : objectNameXS
+                                       ? Messages.getPath(objectRoom, objectNameXS, objectExt)
+                                       : objectNameXS,
+                        thumb_sm       : objectNameSM
+                                       ? Messages.getPath(objectRoom, objectNameSM, objectExt)
+                                       : objectNameSM,
+                        size           : objectSize}
                 });
             } else {
                 return res.status(500).send(err);
             }
         })
-    });
+    }
 });
+
+/**
+ * TITLE        : Uploads router
+ * DESCRIPTION  : Gets information about unfinished downloads
+ *
+ */
+router.post('/uploads/delete', function(req, res) {
+
+    if (Object.keys(req.user).length === 0) {
+        return res.status(400).json({status: false, err: 'No authorized.'});
+    }
+
+    Uploads.remove(req.body.id, function(err, result) {
+        if (err)
+            return res.status(500).send(err);
+        if (result) {
+            let objectURL        = [];
+                objectURL[0]     = Messages.getPathRemove(req.body.room, result[0].name, result[0].ext);
+
+                if(result[0].name_xs)
+                    objectURL[1] = Messages.getPathRemove(req.body.room, result[0].name_xs, result[0].ext);
+
+                if(result[0].name_sm)
+                    objectURL[2] = Messages.getPathRemove(req.body.room, result[0].name_sm, result[0].ext);
+
+            for(let i = 0; i < objectURL.length; i++) {
+
+                fs.unlink(objectURL[i], function(err) {
+                    if(err) console.log(err)
+                })
+            }
+
+            return res.status(200).json({status: true});
+        } else {
+            return res.status(500).send(err);
+        }
+    })
+})
 
 /**
  * TITLE        : Uploads router
@@ -250,7 +342,7 @@ router.post('/upload/loading', function(req, res) {
  */
 router.get("/upload/:room/:name", (req, res) => {
 
-    if (Object.keys(req.user).length == 0) {
+    if (Object.keys(req.user).length === 0) {
         return res.status(403).json({status: false, err: 'Access denied!'});
     }
 
@@ -272,53 +364,41 @@ router.get("/upload/:room/:name", (req, res) => {
  */
 router.post('/messages/all', [User.isAuthenticated, function(req, res) {
 
-    if (Object.keys(req.body).length == 0) {
+    if (Object.keys(req.body).length === 0) {
         return res.status(400).json({status: false, err: 'Body response empty!'});
     }
 
     // Get the data
-    let room_id = req.body.room_id;
-    let offset  = req.body.offset ? req.body.offset : 0;
+    let objectUser      = req.user;
+    let objectRoom      = req.body.room_id;
+    let objectOffset    = req.body.offset
+                        ? req.body.offset
+                        : 0;
+    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex');
+    let objectUploads   = req.body.in_upload
+                        ? true
+                        : false;
 
-    Messages.get(room_id, offset, function(err, result) {
+    Messages.get(objectRoom, objectOffset, function(err, result) {
         if (err)
             return res.status(500).send(err);
         if (result) {
-            return res.status(200).json({status: true, result: result});
+            if(objectUploads) {
+                Uploads.get(objectPassword, objectRoom, function(err, out) {
+                    if (out) {
+                        return res.status(200).json({status: true, result: result, attachments: out});
+                    }
+                    else {
+                        return res.status(200).json({status: true, result: result, attachments: []});
+                    }
+                })
+            }
+            else return res.status(200).json({status: true, result: result, attachments: []});
+
         } else {
             return res.status(200).send({status: false, result: []});
         }
     })
 }])
-
-router.post('/messages/update_read', [User.isAuthenticated, function(req, res) {
-
-    if (Object.keys(req.body).length == 0) {
-        return res.status(400).json({status: false, err: 'Body response empty!'});
-    }
-
-    let ids_message = '';
-    for (let i=0; i<req.body.collection.length; i++) {
-        ids_message += req.body.collection[i].id + ',';
-    }
-
-    Messages.update_read(ids_message,function(err, result) {
-        if (err)
-            return res.status(500).send(err);
-        if (result) {
-            return res.status(200).json({status: true, messages: result});
-        } else {
-            return res.status(200).send({status: false, messages: []});
-        }
-    });
-}])
-
-router.get('/template', function(req, res) {
-
-
-    // Generates a pattern
-    res.render('operator');
-});
-
 
 module.exports = router;
