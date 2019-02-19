@@ -29,5 +29,16 @@
       storage.set(setting, app.setting);
       setTheme(app.setting);
     });
+	
+	/*$(document).mouseup(function (e){ 
+		var div = $("#profile-photo"); 
+		if (!div.is(e.target) 
+			&& div.has(e.target).length === 0) {
+	
+			if(div.hasClass('in')) {
+				div.modal('toggle');
+			}
+		}
+	});*/
 
 })(jQuery);

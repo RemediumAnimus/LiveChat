@@ -100,7 +100,7 @@ const get = function (room_id, offset, done) {
 
         let object = [];
 
-        for(let i = 0, objectPrev, objectMessagePrev, resize = false; i < result.length; i++) {
+        for(let i = 0, objectPrev, objectMessagePrev; i < result.length; i++) {
 
             // Format date string
             result[i].datetime = time(result[i].datetime);

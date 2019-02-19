@@ -26,6 +26,18 @@ new Vue({
             }).catch(error => {
                 console.error(error);
             })
+        },
+        showForm() {
+            $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
+        }
+    }
+})
+
+new Vue({
+    el: '.register-form',
+    methods: {
+        showForm() {
+            $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
         }
     }
 })
@@ -47,7 +59,7 @@ new Vue({
             axios.post('login', {'username': this.username,
                 'password': this.password
             }).then(response => {
-                if(response.status == 200)
+                if(response.status === 200)
                 {
                     window.location = "/chat"
                 } else {

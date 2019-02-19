@@ -18,8 +18,9 @@
 		},
 		"messages": {
 			"type": {
-				"text"  : "text",
-				"image" : "image"
+				"text"  	: "text",
+				"image" 	: "image",
+				"document"  : "document"
 			}
 		}
 	},

@@ -15,15 +15,23 @@ let userModel = [];
  * DESCRIPTION  : Creates a new user
  *
  */
-const add = function (id, user_id, name, room, roles){
+const add = function (socket_id, data){
+
     userModel.push({
-        'socket_id' : id,
-        'id'        : user_id,
-        'name'      : name,
-        'room'      : room,
-        'roles'     : roles,
-        'unread'    : 0,
-        'current'   : false
+        'socket_id'         : socket_id,
+        'id'                : data.id,
+        'email'             : data.email,
+        'first_name'        : data.first_name,
+        'last_name'         : data.last_name,
+        'company'           : data.company,
+        'display_name'      : data.display_name,
+        'short_name'        : data.short_name,
+        'room'              : data.room,
+        'roles'             : data.roles,
+        'attributes'        : {
+            'unread'            : 0,
+            'current'           : false
+        }
     })
 }
 
@@ -75,6 +83,7 @@ const getAllUsers = function () {
 const getByList = function (done) {
 
     let queryString = 'SELECT   u.`id`,                                           ' +
+        '                       u.`email`,                                        ' +
         '                       u.`first_name`,                                   ' +
         '                       u.`last_name`,                                    ' +
         '                       u.`company`,                                      ' +
@@ -99,11 +108,15 @@ const getByList = function (done) {
 
         result.forEach(function(index, elem) {
 
-            index.display_name  = getReadbleName(index.first_name, index.last_name);
-            index.short_name    = getShortName(index.first_name, index.last_name);
+            index.display_name       = getReadbleName(index.first_name, index.last_name);
+            index.short_name         = getShortName(index.first_name, index.last_name);
 
-            index.online  = false;
-            index.current = false;
+            index.attributes         = {};
+            index.attributes.online  = false;
+            index.attributes.current = false;
+            index.attributes.unread  = index.unread;
+
+            delete(index.unread);
         });
 
         // All is well, return successful user
@@ -119,11 +132,16 @@ const getByList = function (done) {
  */
 const getAssistant = function (id_room, done) {
 
-    let queryString = 'SELECT u.* FROM messages m ' +
-        'INNER  JOIN users u ON u.id = m.from_id  ' +
-        'WHERE  m.room_id = ?                     ' +
-        'AND    u.roles = ?                       ' +
-        'GROUP  BY m.`from_id`                    ';
+    let queryString = 'SELECT   u.`id`,                                           ' +
+        '                       u.`email`,                                        ' +
+        '                       u.`first_name`,                                   ' +
+        '                       u.`last_name`,                                    ' +
+        '                       u.`roles`                                         ' +
+        'FROM messages m                                                          ' +
+        'INNER  JOIN users u ON u.id = m.from_id                                  ' +
+        'WHERE  m.room_id = ?                                                     ' +
+        'AND    u.roles = ?                                                       ' +
+        'GROUP  BY m.`from_id`                                                    ' ;
 
     mysql.query(sql.format(queryString, [id_room, 'BOOKER']), function(err, result){
         if(err)
@@ -134,6 +152,8 @@ const getAssistant = function (id_room, done) {
         for(let i = 0; i < result.length; i++) {
             result[i].display_name  = getReadbleName(result[i].first_name, result[i].last_name);
             result[i].short_name    = getShortName(result[i].first_name, result[i].last_name);
+
+            delete(result[i].password)
         }
         return done(null, result);
     });
@@ -159,6 +179,8 @@ const getInfoProfile = function (id_room, done) {
         for(let i = 0; i < result.length; i++) {
             result[i].display_name  = getReadbleName(result[i].first_name, result[i].last_name);
             result[i].short_name    = getShortName(result[i].first_name, result[i].last_name);
+
+            delete result[i].password;
         }
         return done(null, result);
     });

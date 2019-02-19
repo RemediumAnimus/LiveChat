@@ -28,8 +28,10 @@ const init = function(){
     passport.deserializeUser(function(id, done) {
 
         let queryString = 'SELECT   u.`id`,                 ' +
+            '                       u.`email`,              ' +
             '                       u.`first_name`,         ' +
             '                       u.`last_name`,          ' +
+            '                       u.`company`,            ' +
             '                       u.`roles`,  			' +
             '                       r.`id` AS room          ' +
             'FROM  users u                                  ' +
@@ -51,8 +53,10 @@ const init = function(){
 	function(req, email, password, done) {
 
         let queryString = 'SELECT   u.`id`,                 ' +
+            '                       u.`email`,         		' +
             '                       u.`first_name`,         ' +
             '                       u.`last_name`,          ' +
+            '                       u.`company`,            ' +
             '                       u.`roles`,  			' +
             '                       r.`id` AS room,         ' +
             '                       u.`password`            ' +

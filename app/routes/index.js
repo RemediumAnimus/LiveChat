@@ -69,6 +69,7 @@ router.post('/login', function(req, res, next) {
             return res.status(401).json(err);
         }
         if (user) {
+
             req.logIn(user, function(err) {
                  if (err) {
                     return res.status(500).json({
@@ -140,8 +141,7 @@ router.post('/users/profile', function(req, res) {
         object.room  = req.body.id_room;
 
     let objectUser          = {},
-        objectOperators     = [],
-        objectUploads       = [];
+        objectOperators     = [];
 
     User.getInfoProfile(object.room, function(err, rows) {
         if (rows) {
@@ -153,22 +153,15 @@ router.post('/users/profile', function(req, res) {
                 objectOperators = result;
             }
 
-            User.getCntUpload(object.room, function(err, rows) {
-                if (rows) {
-                    objectUploads = rows;
-                }
-
-                returnOut(objectUser, objectOperators, objectUploads);
-            })
+            returnOut(objectUser, objectOperators);
         })
     });
 
-    const returnOut = function(objectUser, objectOperators, objectUploads) {
+    const returnOut = function(objectUser, objectOperators) {
         return res.status(200).json({
             status      : true,
             assistants  : objectOperators,
-            user        : objectUser,
-            attachments : objectUploads
+            user        : objectUser
         });
     }
 })
@@ -329,6 +322,32 @@ router.post('/uploads/delete', function(req, res) {
             }
 
             return res.status(200).json({status: true});
+        } else {
+            return res.status(500).send(err);
+        }
+    })
+})
+
+/**
+ * TITLE        : Uploads router
+ * DESCRIPTION  : Gets file for profile user box
+ *
+ */
+router.post('/uploads/get/', function(req, res) {
+
+    if (Object.keys(req.user).length === 0) {
+        return res.status(400).json({status: false, err: 'No authorized'});
+    }
+
+    if (!req.query.type) {
+        return res.status(200).json({status: false, err: 'No file type specified'});
+    }
+
+    Uploads.profile(req.body.room, req.query.type, req.body.offset, function(err, result) {
+        if (err)
+            return res.status(500).send(err);
+        if (result) {
+            return res.status(200).json({status: true, attachments: result});
         } else {
             return res.status(500).send(err);
         }

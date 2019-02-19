@@ -37,12 +37,23 @@ let vue = new Vue({
         profile     : {
             assistants  : [],
             user        : {},
-            attachments : []
+            images      : {
+                offset      : 0,
+                loading     : 0,
+                collection  : []
+            },
+            documents   : {
+                offset      : 0,
+                loading     : 0,
+                collection  : []
+            }
         },
-        offset      : 0,
-        loading     : {
-            innerBox    : 0,
-            startBox    : 0
+        profileShow  : false,
+        offsetMessage: 0,
+        loading      : {
+            innerBox     : 0,
+            startBox     : 0,
+            messageBox   : 0
         }
     },
     methods: {
@@ -102,10 +113,10 @@ let vue = new Vue({
             socket.on('users:status', user => {
                 for(let j = 0; j < this.usersList.length; j++) {
                     if(this.usersList[j].id === user.id) {
-                        if(this.usersList[j].online === true){
-                           this.usersList[j].online = false;
+                        if(this.usersList[j].attributes.online === true){
+                           this.usersList[j].attributes.online = false;
                         } else {
-                           this.usersList[j].online = true;
+                           this.usersList[j].attributes.online = true;
                         }
                     }
                 }
@@ -116,16 +127,37 @@ let vue = new Vue({
                 for(let i = 0; i < user.length; i++){
                     let j = this.usersList.findIndex(u => u.id === user[i].id)
                     if(j !== undefined){
-                        this.usersList[j].online = true;
+                        this.usersList[j].attributes.online = true;
                     }
                 }
             })
 
-            // Listen to the message receiving event
             socket.on('message:new', message => {
+
+                // Listen to the message receiving event
                 let inMessage       = message,
-                    outMessages     = this.messages,
+                    this_clone      = this,
+                    outMessages     = this_clone.messages,
                     lastOutMessages = outMessages.length - 1;
+
+                if(message.user.roles === 'BOOKER') {
+
+                   let assistant = this.profile.assistants.find(u => u.id === message.user.id);
+
+                   if(!assistant) {
+                       let newAssistant = {};
+                       newAssistant.id             = message.user.id;
+                       newAssistant.email          = message.user.email;
+                       newAssistant.first_name     = message.user.first_name ;
+                       newAssistant.last_name      = message.user.last_name;
+                       newAssistant.roles          = message.user.roles;
+                       newAssistant.display_name   = message.user.display_name;
+                       newAssistant.short_name     = message.user.short_name;
+
+                       this.profile.assistants.push(newAssistant);
+                     //  this.getProfileAssistant(this.user.room, this.user.id);
+                   }
+                }
 
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
@@ -148,19 +180,20 @@ let vue = new Vue({
 
                 if (inMessage.user.id !== this.user.id) {
                     for (let i = 0; i < this.usersList.length; i++) {
-                        if (this.usersList[i].id === inMessage.user.id && this.usersList[i].current) {
+                        if (this.usersList[i].id === inMessage.user.id && this.usersList[i].attributes.current) {
                             socket.emit('message:read', inMessage);
                         }
                     }
                 }
 
+                this.loading.messageBox = 1;
                 this.scrollToBottom(this.$refs.messages)
             })
 
             socket.on('hiddenMessage:new', message => {
                 this.usersList.forEach(function(elem) {
-                    if (elem.id === message.user.id && !elem.current) {
-                        elem.unread = elem.unread + 1;
+                    if (elem.id === message.user.id && !elem.attributes.current) {
+                        elem.attributes.unread = elem.attributes.unread + 1;
                     }
                 })
             });
@@ -204,11 +237,11 @@ let vue = new Vue({
 
         loadingMessage() {
 
-            let $this = this;
-            this.offset = this.offset + 10;
+            let $this           = this;
+            this.offsetMessage  = this.offsetMessage + 10;
 
-            axios.post('messages/all?transport=messages', {'room_id': this.user.room, 'offset': this.offset})
-                .then(function (response) {
+            axios.post('messages/all?transport=messages', {'room_id': this.user.room, 'offset': this.offsetMessage})
+                 .then(function (response) {
                     if(response.status === 200) {
 
                         if(response.data.result.length === 0) {
@@ -259,10 +292,43 @@ let vue = new Vue({
                     } else {
                         console.log('Error getting message list...')
                     }
-                })
-                .catch(error => {
+                 })
+                 .catch(error => {
                     console.error(error);
-                })
+                 })
+        },
+
+        /**
+         * TITLE        : User`s method
+         * DESCRIPTION  : Reset room setting`s
+         *
+         */
+        resetRoom() {
+
+            this.previews             = [];
+            this.uploads              = [];
+            this.offsetMessage        = 0;
+
+            // Reset settings profile
+            this.profile = {
+                assistants  : [],
+                user        : {},
+                images      : {
+                    offset      : 0,
+                    step        : 20,
+                    loading     : 0,
+                    collection  : []
+                },
+                documents   : {
+                    offset      : 0,
+                    step        : 20,
+                    loading     : 0,
+                    collection  : []
+                }
+            };
+            this.loading.messageBox = 0;
+            $('.modal-window-xl').modal('hide');
+
         },
 
         /**
@@ -272,39 +338,25 @@ let vue = new Vue({
          */
         initializeRoom(data) {
 
-            let this_clone   = this;
-            this.previews    = [];
-            this.uploads     = [];
+            this.resetRoom();
+            let this_clone  = this;
+            this.user.room  = data.room;
 
             for (let i = 0; i < this.usersList.length; i++) {
-                this.usersList[i].current = false;
+                this.usersList[i].attributes.current = false;
                 if(this.usersList[i].id === data.id) {
 
                     // Set current, if current user is selected
-                    this.usersList[i].current = true;
+                    this.usersList[i].attributes.current = true;
 
                     // Reset unread, if current user is selected
-                    this.usersList[i].unread = 0;
+                    this.usersList[i].attributes.unread = 0;
                 }
             }
 
             socket.emit('message:update', {user: data, update_from: true});
 
-            axios.post('users/profile?transport=users', {id_user: data.id, id_room: data.room})
-                 .then(response => {
-                    if(response.status === 200) {
-                        if(response.data.status !== 0) {
-                            this_clone.profile.assistants  = response.data.assistants;
-                            this_clone.profile.user        = response.data.user;
-                            this_clone.profile.attachments = response.data.attachments;
-                        }
-                    }
-                 })
-                 .catch(error => {
-                    console.log(error);
-                 });
-
-            this.user.room  = data.room;
+            this.getProfileAssistant(data.room, data.id);
 
             socket.emit('join', this.user, data => {
 
@@ -352,8 +404,16 @@ let vue = new Vue({
                                         }
                                     }
 
+                                    // View box message
+                                    this_clone.loading.messageBox = 1;
+
                                     // Omit scroll to the last message
                                     this_clone.scrollToBottom(this_clone.$refs.messages)
+                                }
+                                else {
+
+                                    // View empty box message
+                                    this_clone.loading.messageBox = 2;
                                 }
                             } else {
                                 console.log('ошибка')
@@ -365,6 +425,26 @@ let vue = new Vue({
 
                 }
             })
+        },
+
+        /**
+         * TITLE        : User`s method
+         * DESCRIPTION  : Get list assistant for dialog
+         *
+         */
+        getProfileAssistant(room_id, user_id) {
+            axios.post('users/profile?transport=users', {id_user: user_id, id_room: room_id})
+                .then(response => {
+                    if(response.status === 200) {
+                        if(response.data.status !== 0) {
+                            this.profile.assistants  = response.data.assistants;
+                            this.profile.user        = response.data.user;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                });
         },
 
         /**
@@ -466,10 +546,91 @@ let vue = new Vue({
 
         /**
          * TITLE        : View method
+         * DESCRIPTION  : Upload images for profile
+         *
+         */
+        loadingPhoto(trigger) {
+
+            if(this.profile.images.collection.length && !trigger) {
+                return;
+            }
+
+            this.profile.images.offset = trigger ? this.profile.images.offset + 10 : 0;
+
+            // Load photos for profile
+            axios.post('uploads/get?transport=uploads&type=image', {'room': this.user.room, offset: this.profile.images.offset})
+                .then(response => {
+                    if(response.status === 200) {
+                        if(response.data.attachments.length){
+                            this.profile.images.collection = response.data.attachments;
+
+                            // Success load
+                            this.profile.images.loading = 1;
+                        }
+                        else {
+
+                            // Un success load (empty result)
+                            this.profile.images.loading = 2;
+                        }
+                    }
+                    else {
+
+                        // Error result
+                        this.profile.images.loading = 3;
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+        },
+
+        /**
+         * TITLE        : View method
+         * DESCRIPTION  : Upload images for profile
+         *
+         */
+        loadingFiles(trigger) {
+
+            if(this.profile.documents.collection.length && !trigger) {
+                return;
+            }
+
+            this.profile.documents.offset = trigger ? this.profile.documents.offset + 10 : 0;
+
+            // Load photos for profile
+            axios.post('uploads/get?transport=uploads&type=document', {'room': this.user.room, offset: this.profile.documents.offset})
+                .then(response => {
+                    if(response.status === 200) {
+                        if(response.data.attachments.length){
+                            this.profile.documents.collection = response.data.attachments;
+
+                            // Success load
+                            this.profile.documents.loading = 1;
+                        }
+                        else {
+
+                            // Un success load (empty result)
+                            this.profile.documents.loading = 2;
+                        }
+                    }
+                    else {
+
+                        // Error result
+                        this.profile.documents.loading = 3;
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+        },
+
+        /**
+         * TITLE        : View method
          * DESCRIPTION  : Scroll down
          *
          */
         scrollToBottom(node) {
+            if(!node) return;
             setTimeout(() => {
                 node.scrollTop = node.scrollHeight
             })
@@ -488,6 +649,7 @@ let vue = new Vue({
              .then(response => {
                 if(response.status === 200){
                     console.log('Пользовательские даные получены')
+
                     this.user = response.data;
                     this.initializeSocket();
                 } else {
@@ -534,18 +696,17 @@ Vue.component('message-stack', {
     props: ['item', 'user', 'index'],
     inheritAttrs: false,
     template:
-     `<div class="message-stack m-b"
+     `<div class="message-stack"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
                      'mess-out' : item.user.roles === 'BOOKER',
                      'error'    : item.success    === false
                     }"
      >
-     
         <div class="message-stack-photo" v-if="item.user.roles === 'GUEST'">
             <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
         </div>
         <div class="message-stack-content">
-            <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.id">
+            <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id">
                 <div class="select-message">
                     <span><i class="ion-checkmark-circled"></i></span>
                 </div>
@@ -637,6 +798,45 @@ Vue.component('assistant-dialog', {
                 <small class="block text-muted text-ellipsis">
                     {{item.email}}
                 </small>
+            </div>
+        </div>`
+})
+
+Vue.component('profile-image', {
+    props: ['item'],
+    inheritAttrs: false,
+    template:
+        `<div>
+            <div class="p-x m-t p-v-xs _600">{{item.datetime}}</div>
+            <div class="item">
+                <div class="row no-gutter">
+                    <div class="col-xs-4" v-for="(image, index) in item.uploads">
+                        <a v-bind:href="image.thumb_xs ? image.thumb_xs : image.thumb_sm ? image.thumb_sm : image.thumb" data-toggle="lightbox" data-gallery="example-gallery" class="col-sm-4 w-full">
+                            <img v-bind:src="image.thumb_xs ? image.thumb_xs : image.thumb_sm ? image.thumb_sm : image.thumb" class="w-full img-fluid">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>`
+})
+
+Vue.component('profile-file', {
+    props: ['item'],
+    inheritAttrs: false,
+    template:
+        `<div>
+            <div class="p-x m-t p-v-xs _600">{{item.datetime}}</div>    
+            <div class="list-item" v-for="(file, index) in item.uploads">
+                <div class="list-left">
+                    <span class="w-56 avatar">
+                        <img alt="." src="img/a3.jpg">
+                    </span>
+                </div>
+                <div class="list-body">
+                    <a href="#" class="text-ellipsis _500">{{file.original_name}}</a>
+                    <span class="clear text-muted text-ellipsis text-xs">{{file.size}}</span>
+                    <span class="clear text-muted text-ellipsis text-xs p-t-xs">{{file.fulltime}}</span>
+                </div>
             </div>
         </div>`
 })

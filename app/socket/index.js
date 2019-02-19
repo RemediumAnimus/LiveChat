@@ -36,7 +36,7 @@ const ioEvents = function(io) {
             users.remove(socket.id);
 
             // Add user data
-            users.add(socket.id, user.id, user.display_name, user.room, user.roles);
+            users.add(socket.id, user);
 
             // We update the list of users in the dialog
             io.to(user.room).emit('users:update', users.getByRoom(user.room));

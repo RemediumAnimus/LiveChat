@@ -1974,7 +1974,7 @@ body {
     .app-aside.in > div {
       -webkit-transform: translate3d(0, 0, 0);
       transform: translate3d(0, 0, 0);
-	  width: 20.5rem;} }
+	  width: 22rem;} }
 
 @media (min-width: 768px) {
   .app-header.hidden-md-up ~ .app-body {
