@@ -28,6 +28,7 @@ var message = (function($) {
 			elNavbarMessageCount: 		'.navbar-message-count',
 			elButtonDeselectAll: 		'.in_deselect_all',
 			elBoxMessage: 				'.box-message',
+			elBoxMessageSelected: 		'mode-selected',
 			attrLoad:					'data-load',
 			attrMessageId:				'data-msgid',
 		}
@@ -37,7 +38,6 @@ var message = (function($) {
 	
 	// Навешивам события
 	function _bindHandlers() {
-		_navItemBind();
 		_selectedMessageBind();
 		_deSelectedMessageBind();
 		$(document).on('click', '[data-toggle="lightbox"]', function(event) {
@@ -46,24 +46,12 @@ var message = (function($) {
             });
 	}
 	
-	// Set an event handler on profile buttons
-	function _navItemBind() {
-		
-		$(opts.elButtonProfile).on('click', opts.elProfileItem, function() {
-			var modal 	 	= $(this).attr(opts.attrLoad);
-				width_modal = $(opts.profileBox).width();
-			
-			// Set the width
-			/*$('#'+modal+'').find('.modal-right').width(width_modal);*/
-		});	
-	}
-	
 	// Set event handler to highlight messages
 	function _selectedMessageBind() {
 		
 		$(opts.body).on('click', opts.elMessageClick, function() {
 			var $this = $(this);
-				
+			$(opts.elBoxMessage).addClass(opts.elBoxMessageSelected);
 			if($this.parent().hasClass(opts.elMessageSelected)) {
 				return _selectedMessageInit($this, false);
 			}
@@ -133,6 +121,7 @@ var message = (function($) {
 		$(opts.elNavbarMessageSelected).hide();
 		$(opts.elNavbarMessageCount).hide(); 
 		$(opts.elNavbarMessageName).show();
+        $(opts.elBoxMessage).removeClass(opts.elBoxMessageSelected);
 	}
 	
 	// Declination of words by number

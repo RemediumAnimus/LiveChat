@@ -4,10 +4,12 @@
  * DESCRIPTION  : Declares variables
  *
  */
-const mysql  = require('../database');
-const sql    = require('sqlstring');
-const config = require('../config');
-const fs     = require('fs');
+const mysql     = require('../database');
+const sql       = require('sqlstring');
+const config    = require('../config');
+const users     = require('../models/users');
+const fs        = require('fs');
+const filesize  = require('filesize');
 
 /**
  * TITLE        : Message method
@@ -62,26 +64,31 @@ const save = function (from_id, room_id, type, body, upload_id, stack_id, done) 
  */
 const get = function (room_id, offset, done) {
 
-    let queryString = 'SELECT   m.`id`,                 ' +
-        '                       m.`from_id`,            ' +
-        '                       m.`body`,               ' +
-        '                       m.`type`,               ' +
-        '                       m.`stack_id`,           ' +
-        '                       m.`datetime`,           ' +
-        '                       m.`is_read`,            ' +
-        '                       u.`id`      u_id,       ' +
-        '                       u.`name`    u_name,     ' +
-        '                       u.`roles`   u_roles,    ' +
-        '                       up.`id`     up_id ,     ' +
-        '                       up.`original_name`,     ' +
-        '                       up.`name`,              ' +
-        '                       up.`type`   up_type,    ' +
-        '                       up.`ext`                ' +
-        'FROM   messages m                              ' +
-        'INNER  JOIN users u ON m.from_id = u.id        ' +
-        'LEFT   JOIN uploads up ON m.id = up.id_message ' +
-        'WHERE  room_id = ? ORDER BY m.id DESC, m.stack_id   ' +
-        'LIMIT 10 OFFSET ?                              ' ;
+    let queryString = 'SELECT   m.`id`,                         ' +
+        '                       m.`from_id`,                    ' +
+        '                       m.`body`,                       ' +
+        '                       m.`type`,                       ' +
+        '                       m.`stack_id`,                   ' +
+        '                       m.`datetime`,                   ' +
+        '                       m.`is_read`,                    ' +
+        '                       u.`id`      u_id,               ' +
+        '                       u.`first_name` u_first_name,    ' +
+        '                       u.`last_name`  u_last_name,     ' +
+        '                       u.`company`  u_company,         ' +
+        '                       u.`roles`   u_roles,            ' +
+        '                       up.`id`     up_id ,             ' +
+        '                       up.`original_name`,             ' +
+        '                       up.`name`,                      ' +
+        '                       up.`name_xs`,                   ' +
+        '                       up.`name_sm`,                   ' +
+        '                       up.`type`   up_type,            ' +
+        '                       up.`size`   up_size,            ' +
+        '                       up.`ext`                        ' +
+        'FROM   messages m                                      ' +
+        'INNER  JOIN users u ON m.from_id = u.id                ' +
+        'LEFT   JOIN uploads up ON m.id = up.id_message         ' +
+        'WHERE  room_id = ? ORDER BY m.id DESC, m.stack_id      ' +
+        'LIMIT 10 OFFSET ?                                      ' ;
 
     mysql.query(sql.format(queryString, [room_id, offset]), function(err, result){
         if (err)
@@ -93,7 +100,7 @@ const get = function (room_id, offset, done) {
 
         let object = [];
 
-        for(let i = 0, objectPrev, objectMessagePrev, resize = false; i < result.length; i++) {
+        for(let i = 0, objectPrev, objectMessagePrev; i < result.length; i++) {
 
             // Format date string
             result[i].datetime = time(result[i].datetime);
@@ -111,12 +118,16 @@ const get = function (room_id, offset, done) {
 
                     objectPrev.collection[objectMessagePrev].upload.unshift({
                         id              : result[i].up_id,
-                        id_message      : result[i].id_message,
-                        original_name   : result[i].original_name,
-                        name            : result[i].name,
                         type            : result[i].up_type,
-                        ext             : result[i].ext,
-                        resize          : resize
+                        size            : filesize(result[i].up_size),
+                        original_name   : result[i].original_name,
+                        thumb           : getPath(room_id, result[i].name, result[i].ext),
+                        thumb_xs        : result[i].name_xs
+                                        ? getPath(room_id, result[i].name_xs, result[i].ext)
+                                        : result[i].name_xs,
+                        thumb_sm        : result[i].name_sm
+                                        ? getPath(room_id, result[i].name_sm, result[i].ext)
+                                        : result[i].name_sm
                     });
                 }
                 else {
@@ -154,11 +165,16 @@ const get = function (room_id, offset, done) {
 
                         objectPrev.collection[0].upload.unshift({
                             id              : result[i].up_id,
-                            id_message      : result[i].id,
-                            original_name   : result[i].original_name,
-                            name            : result[i].name,
                             type            : result[i].up_type,
-                            ext             : result[i].ext
+                            size            : filesize(result[i].up_size),
+                            original_name   : result[i].original_name,
+                            thumb           : getPath(room_id, result[i].name, result[i].ext),
+                            thumb_xs        : result[i].name_xs
+                                            ? getPath(room_id, result[i].name_xs, result[i].ext)
+                                            : result[i].name_xs,
+                            thumb_sm        : result[i].name_sm
+                                            ? getPath(room_id, result[i].name_sm, result[i].ext)
+                                            : result[i].name_sm
                         });
 
                         continue;
@@ -170,7 +186,10 @@ const get = function (room_id, offset, done) {
             object[i]                       = {};
             object[i].user                  = {};
             object[i].user.id               = result[i].u_id;
-            object[i].user.name             = result[i].u_name;
+            object[i].user.first_name       = result[i].u_first_name;
+            object[i].user.last_name        = result[i].u_last_name;
+            object[i].user.display_name     = users.getReadbleName(result[i].u_first_name, result[i].u_last_name);
+            object[i].user.short_name       = users.getShortName(result[i].u_first_name, result[i].u_last_name);
             object[i].user.roles            = result[i].u_roles;
             object[i].collection            = [];
 
@@ -189,14 +208,18 @@ const get = function (room_id, offset, done) {
 
                 object[i].collection[object[i].collection.length - 1].upload.unshift({
                     id              : result[i].up_id,
-                    id_message      : result[i].id,
-                    original_name   : result[i].original_name,
-                    name            : result[i].name,
                     type            : result[i].up_type,
-                    ext             : result[i].ext
+                    size            : filesize(result[i].up_size),
+                    original_name   : result[i].original_name,
+                    thumb           : getPath(room_id, result[i].name, result[i].ext),
+                    thumb_xs        : result[i].name_xs
+                                    ? getPath(room_id, result[i].name_xs, result[i].ext)
+                                    : result[i].name_xs,
+                    thumb_sm        : result[i].name_sm
+                                    ? getPath(room_id, result[i].name_sm, result[i].ext)
+                                    : result[i].name_sm
                 });
             }
-
         }
         // Remove`s null values
         object = object.filter(function (el) {
@@ -208,24 +231,38 @@ const get = function (room_id, offset, done) {
 }
 
 /**
+ * TITLE        : User method
+ * DESCRIPTION  : Update message
+ *
+ */
+const updateReadAll = function (from_id, update_from) {
+    if (!update_from) {
+        let queryString = 'UPDATE messages AS m  ' +
+            'SET    m.`is_read` = 1              ' +
+            'WHERE  m.`is_read` = 0              ' +
+            'AND    m.`from_id` <> ?             ' ;
+
+        mysql.query(sql.format(queryString, from_id));
+    } else {
+        let queryString = 'UPDATE messages AS m  ' +
+            'SET    m.`is_read` = 1              ' +
+            'WHERE  m.`is_read` = 0              ' +
+            'AND    m.`from_id` = ?              ' ;
+
+        mysql.query(sql.format(queryString, from_id));
+    }
+}
+
+/**
  * Update messages is_read
  */
 const update_read = function (ids_message, done) {
     let queryString =
         'UPDATE messages        ' +
         'SET    is_read = 1     ' +
-        'WHERE  id in (?)       ';
+        'WHERE  id in (?)       ' ;
 
-    mysql.query(sql.format(queryString, [ids_message]), function(err, result){
-        if (err)
-            return done(err);
-        if (!result.insertId) {
-            return done(null, false);
-        }
-
-        // All is well, return successful
-        return done(null, result.insertId);
-    });
+    mysql.query(sql.format(queryString, [ids_message]));
 }
 /**
  * Gets message type
@@ -259,10 +296,35 @@ const time = function (datetime) {
     return ("0" + datetime.getHours()).slice(-2) + ':' + ("0" + datetime.getMinutes()).slice(-2);
 }
 
+/**
+ * TITLE        : Message method
+ * DESCRIPTION  : Get`s path
+ *
+ */
+const getPath = function (room_id, name, ext) {
+
+    return config.path.uploadView+room_id+'/'+name+ext
+}
+
+/**
+ * TITLE        : Message method
+ * DESCRIPTION  : Get`s path for remove file
+ *
+ */
+const getPathRemove = function (room_id, name, ext) {
+
+    return 'upload/'+room_id+'/'+name+ext;
+}
+
+
+
 module.exports = {
     save,
     get,
     type,
     update_read,
-    time
+    time,
+    getPath,
+    getPathRemove,
+    updateReadAll
 };

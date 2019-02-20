@@ -5,50 +5,87 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
+
+    <link rel="stylesheet" href="/css/Client/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/css/Client/new.css" type="text/css" />
     <title>Клиентский чат</title>
 </head>
 <body>
 
-<div id="app">
+    <div class="row-main" id="app">
+        <div class="row-header">
+            <div class="row-icon" data-page="settings">
+                <a class="icon-link"></a>
+                <span class="icon-text">
+                    <i class="fa fa-bars"></i>
+                    <label>Меню</label>
+                </span>
+            </div>
+            <div class="row-text">
+                <span>Ассистент</span>
+            </div>
+            <div class="row-icon" data-page="tasks">
+                <a class="icon-link"></a>
+                <span class="icon-text">
+                    <label>Задачи</label>
+                    <span class="span-count-task"></span>
+                </span>
+            </div>
+        </div>
+        <div class="row-content">
+            <div class="row-body">
+                <div class="row-inner" ref="messages">
+                    <div class="box-message">
+                        <message-stack
+                            v-for="(m, idx) in messages"
+                            :item="m"
+                            :user="user"
+                            :index="idx"
+                            :key="idx"
+                        ></message-stack>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="chat">
-
-        <div class="chat-messages" ref="messages">
-            <message-stack
-                    v-for="(m, idx) in messages"
-                    :item="m"
-                    :user="user"
-                    :index="idx"
-                    :key="idx"
-            ></message-stack>
+        <div class="row-footer" ref="footer">
+            <div class="row-button">
+                <div class="row-icon">
+                    <input type="file" multiple @change="initializeUploadFile($event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="22" height="24" viewBox="0 0 22 24"><defs><path id="6r4ua" d="M24.2 643l9.66-9.88a3.05 3.05 0 0 0 0-4.24 2.88 2.88 0 0 0-4.14 0l-10.34 10.6a5.08 5.08 0 0 0 0 7.06 4.8 4.8 0 0 0 6.9 0l10.34-10.6 1.38 1.41-10.34 10.6a6.71 6.71 0 0 1-9.66 0 7.12 7.12 0 0 1 0-9.89l10.34-10.6a4.8 4.8 0 0 1 6.9 0 5.08 5.08 0 0 1 0 7.07l-9.65 9.89a2.88 2.88 0 0 1-4.14 0 3.05 3.05 0 0 1 0-4.24L30.4 631l1.38 1.4-8.96 9.2a1.02 1.02 0 0 0 0 1.4c.38.4 1 .4 1.38 0z"/></defs><g><g transform="translate(-16 -626)"><use fill="#a8abb9" xlink:href="#6r4ua"/></g></g></svg>
+                    <span class="icon-count" v-if="previews.length">{{previews.length}}</span>
+                </div>
+                <div class="row-text">
+                    <div class="row-inline" :class="{active: previews.length}" v-show="previews.length">
+                        <div class="row-wrapper">
+                            <div class="row-scroll" ref="attachments">
+                                <attachment-view
+                                    v-for="(p, idx) in previews"
+                                    :item="p"
+                                    :key="idx"
+                                ></attachment-view>
+                            </div>
+                        </div>
+                    </div>
+                    <textarea type="text" class="send-message" placeholder="Написать сообщение" v-model.trim="message" @keydown.enter="sendMessage" ref="textarea"></textarea>
+                </div>
+                <div class="row-icon" @click="sendMessage">
+                    <svg v-if="message.length || previews.length" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 30 30"><defs><path id="povfa" d="M323 638a15 15 0 1 1 30 0 15 15 0 0 1-30 0z"/><path id="povfb" d="M338.95 645a1 1 0 0 1-2 0v-11.6l-3.25 3.25a1 1 0 0 1-1.41-1.41l4.95-4.95a1 1 0 0 1 1.41 0l4.95 4.95a1 1 0 0 1-1.41 1.41l-3.24-3.24z"/></defs><g><g transform="translate(-323 -623)"><use fill="#2dc970" xlink:href="#povfa"/></g><g transform="translate(-323 -623)"><use fill="#fafafa" xlink:href="#povfb"/></g></g></svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 30 30"><defs><path id="povfa" d="M323 638a15 15 0 1 1 30 0 15 15 0 0 1-30 0z"/><path id="povfb" d="M338.95 645a1 1 0 0 1-2 0v-11.6l-3.25 3.25a1 1 0 0 1-1.41-1.41l4.95-4.95a1 1 0 0 1 1.41 0l4.95 4.95a1 1 0 0 1-1.41 1.41l-3.24-3.24z"/></defs><g><g transform="translate(-323 -623)"><use fill="#9799a2a3" xlink:href="#povfa"/></g><g transform="translate(-323 -623)"><use fill="#fafafa" xlink:href="#povfb"/></g></g></svg>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="actions">
-        <div class="input-field">
-            <input
-                    type="text"
-                    placeholder="Type your message..."
-                    v-model.trim="message"
-                    autofocus
-                    autocomplete="false"
-                    @keydown.enter="sendMessage"
-            >
-        </div>
-        <button
-                class="btn"
-                @click="sendMessage"
-                :disabled="message.length === 0"
-        >Send</button>
-    </div>
 
-</div>
+<!-- jQuery -->
+<script src="js/library/Operator/jquery.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script src="/js/client.js"></script>
+<script src="js/library/Client/file.size.js"></script>
+<script src="js/library/Client/autosize.js"></script>
+<script src="socket.io/socket.io.js"></script>
+<script src="js/client.js"></script>
+
 </body>
 </html>

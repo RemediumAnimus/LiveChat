@@ -20,29 +20,6 @@
     }else{
         app.setting = storage.get(setting);
     }
-    var v = window.location.search.substring(1).split('&');
-    for (var i = 0; i < v.length; i++)
-    {
-        var n = v[i].split('=');
-        app.setting[n[0]] = (n[1] == "true" || n[1]== "false") ? (n[1] == "true") : n[1];
-        storage.set(setting, app.setting);
-    }
-
-    setTheme();
-
-    // init
-    function setTheme(){
-
-      $('body').removeClass($('body').attr('ui-class')).addClass(app.setting.bg).attr('ui-class', app.setting.bg);
-      $('#aside').length == 0 && (app.setting.container ? $('.app-header .navbar, .app-content').addClass('container') : $('.app-header .navbar, .app-content').removeClass('container'));
-
-      $('.switcher input[value="'+app.setting.color+'"]').prop('checked', true);
-      $('.switcher input[value="'+app.setting.bg+'"]').prop('checked', true);
-
-      $('[data-target="folded"] input').prop('checked', app.setting.folded);
-      $('[data-target="container"] input').prop('checked', app.setting.container);
-      
-    }
 
     // click to switch
     $(document).on('click.setting', '.switcher input', function(e){
@@ -52,5 +29,16 @@
       storage.set(setting, app.setting);
       setTheme(app.setting);
     });
+	
+	/*$(document).mouseup(function (e){ 
+		var div = $("#profile-photo"); 
+		if (!div.is(e.target) 
+			&& div.has(e.target).length === 0) {
+	
+			if(div.hasClass('in')) {
+				div.modal('toggle');
+			}
+		}
+	});*/
 
 })(jQuery);
