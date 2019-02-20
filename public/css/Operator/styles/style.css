@@ -581,7 +581,7 @@
 	width: 100%;
 }
 .app-body .box-body-message {
-	height: 100%
+	height: -webkit-fill-available;
 }
 .app-body .box-body-message .row-inner::-webkit-scrollbar {
 	width: 0.33rem;
@@ -759,6 +759,16 @@
 	border-top-left-radius: 20px;
 	border-top-right-radius: 20px;
 }
+.box-message .mess-in .message-stack-content > div:nth-last-child(1) .text-message {
+	border-bottom-left-radius: 0px;
+}
+.box-message .mess-in .message-stack-content > div:nth-last-child(1) .text-message > .body-message > div:nth-last-child(1) > img {
+	border-bottom-left-radius: 0px;
+}
+.box-message .mess-in .message-stack-content .text-message > .body-message > div:first-child > img {
+	border-top-right-radius: 20px;
+	border-top-left-radius: 20px;
+}
 .box-message .mess-out .message-stack-content > div:nth-last-child(1) .text-message::after {
 	content: ' ';
     position: absolute;
@@ -781,9 +791,6 @@
 }
 .box-message .message-stack-content .text-message.in-message_media div:last-child {
 	padding-bottom: 0;
-}
-.box-message .mess-in .message-stack-content .text-message.in-message_media div {
-	background: #2196f3;
 }
 .box-message .message-stack-content .text-message.in-message_media div:last-child {
 	padding-bottom: 0;

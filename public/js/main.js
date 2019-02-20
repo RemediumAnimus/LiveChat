@@ -33,6 +33,7 @@ let vue = new Vue({
         users       : [],
         usersList   : [],
         uploads     : [],
+        triggerUpload: false,
         previews    : [],
         profile     : {
             assistants  : [],
@@ -456,6 +457,7 @@ let vue = new Vue({
 
             let i = 0;
             let this_clone  = this;
+                this_clone.triggerUpload = true;
 
             const upload = function(i)  {
 
@@ -494,6 +496,8 @@ let vue = new Vue({
 
                             if (i < event.target.files.length) {
                                 upload(i);
+                            }else {
+                                this_clone.triggerUpload = false;
                             }
                         }
                      })
