@@ -202,9 +202,24 @@ const vue = new Vue({
                                 console.log('ошибка')
                             }
 
-
                             socket.emit('message:update', {user: this_clone.user, update_from: false});
 
+                             $('.row-inner').mCustomScrollbar({
+                                 callbacks:{
+                                     onInit: function(){
+                                         $(this).mCustomScrollbar("scrollTo",'bottom',{
+                                             scrollInertia:0
+                                         });
+                                     },
+                                     whileScrolling: function(){
+                                         this_clone.heightBox = $(this).find('.mCSB_container').eq(0).height();
+                                         if(this.mcs.top >= -200 && this_clone.triggerLoad) {
+                                             this_clone.triggerLoad = false;
+                                             this_clone.loadingMessage();
+                                         }
+                                     }
+                                 }
+                             });
                          })
                          .catch(error => {
                             console.error(error);
@@ -326,38 +341,8 @@ const vue = new Vue({
                 if(!scrollEnd) {
                     //boxInner.scrollTop =  boxInner.scrollHeight;
                 }
-
-                boxAttachment.scrollLeft = boxAttachment.scrollHeight;
+                boxAttachment.scrollLeft = boxAttachment.scrollWidth;
             })
-        },
-
-        /**
-         * TITLE        : View method
-         * DESCRIPTION  : Scroll
-         *
-         */
-        handleScroll(evt) {
-
-            let scrollTop    = parseInt(evt.target.scrollTop),
-                heightScroll = scrollTop + parseInt(window.getComputedStyle(evt.target, null).height) - 6,
-                boxInner     = this.$refs.messages,
-                heightPage   = boxInner.scrollHeight;
-
-
-            if (heightPage - heightScroll > 30) {
-               this.triggerScroll = true;
-            }
-            else {
-               this.triggerScroll = false;
-            }
-
-            if(scrollTop <= 0 && this.triggerLoad) {
-
-                this.triggerLoad = false;
-                this.heightBox   = heightPage;
-
-                this.loadingMessage();
-            }
         },
 
         loadingMessage() {
@@ -419,15 +404,11 @@ const vue = new Vue({
 
                             // entire view has been re-rendered
                             if(!this_clone.triggerLoad) {
-                                let box         = document.querySelectorAll('.row-inner')[0],
-                                    boxHeight   = box.scrollHeight,
-                                    scrollStart = box.scrollTop <= 0
-                                                ? (this_clone.heightBox + box.scrollTop)
-                                                : (this_clone.heightBox - box.scrollTop);
-
-                                box.scrollTop = boxHeight - scrollStart;
-
                                 this_clone.triggerLoad = true;
+
+                                $('.row-inner').mCustomScrollbar("stop");
+                                $('.mCSB_container').css({'top':$('.mCSB_container').eq(0).height() - this_clone.heightBox - $('.row-inner').mCustomScrollbar()[0].mcs.top})
+                                $('.row-inner').mCustomScrollbar("update");
                             }
                         })
 
@@ -471,7 +452,6 @@ const vue = new Vue({
             alert('Указаны не валидные данные!')
         })
         window.autosize(this.$refs.textarea);
-        this.$refs.messages.addEventListener('scroll', this.handleScroll);
     }
 })
 
