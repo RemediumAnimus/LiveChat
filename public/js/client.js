@@ -15,13 +15,13 @@ const socket = io();
 const vue = new Vue({
     el: '#app',
     data: {
-        message     : '',
-        messages    : [],
-        user        : {},
-        users       : [],
-        usersOnline : [],
-        previews    : [],
-        uploads     : [],
+        message       : '',
+        messages      : [],
+        user          : {},
+        users         : [],
+        usersOnline   : [],
+        previews      : [],
+        uploads       : [],
         offsetMessage : 0,
         triggerUpload : false,
         triggerScroll : false,
@@ -322,10 +322,10 @@ const vue = new Vue({
                 window.autosize.update(document.querySelectorAll('textarea'))
 
                 if(!scrollEnd) {
-                    //boxInner.scrollTop =  boxInner.scrollHeight;
+                    boxInner.scrollTop =  boxInner.scrollHeight;
                 }
 
-                boxAttachment.scrollLeft = boxAttachment.scrollHeight;
+                boxAttachment.scrollLeft = boxAttachment.scrollWidth;
             })
         },
 
@@ -349,7 +349,7 @@ const vue = new Vue({
                this.triggerScroll = false;
             }
 
-            if(scrollTop <= 0 && this.triggerLoad) {
+            if(scrollTop < 200 && this.triggerLoad) {
 
                 this.triggerLoad = false;
                 this.heightBox   = heightPage;
@@ -419,15 +419,16 @@ const vue = new Vue({
                             if(!this_clone.triggerLoad) {
                                 let box         = document.querySelectorAll('.row-inner')[0],
                                     boxHeight   = box.scrollHeight,
-                                    scrollStart = box.scrollTop <= 0
+                                    scrollStart = box.scrollTop < 200
                                                 ? (this_clone.heightBox + box.scrollTop)
                                                 : (this_clone.heightBox - box.scrollTop);
 
                                 box.scrollTop = boxHeight - scrollStart;
 
-                                this_clone.triggerLoad = true;
+                                //this_clone.triggerLoad = true;
                             }
                         })
+
 
                     } else {
                         console.log('Error getting message list...')
