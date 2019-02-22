@@ -506,12 +506,15 @@
 													<span class="w-40 avatar w-default img-circle">{{user.short_name}}</span>
 												</div>
 											  <div class="list-body">
-												<div class="item-title">
-												  <span class="_500">{{user.display_name}}</span>
-												</div>
-												<small class="block text-muted text-ellipsis">
+													<div class="item-title">
+												  		<span class="_500">{{user.display_name}}</span>
+													</div>
+													<small class="block text-muted text-ellipsis" v-if="user.company">
 													{{user.company}}
-												</small>
+													</small>
+												  	<small class="block text-muted text-ellipsis" v-else>
+													  	Компания не задана
+												  	</small>
 											  </div>
 											</div>  
 										</div>   
@@ -555,24 +558,23 @@
 									<div class="row m-b">
 									  	<div class="col-sm-6">
 											<label>Прикрепленные сообщения</label>
-											<div class="box-message">
-												<div class="message-stack mess-in">
-													<div class="message-stack-photo">
-														<span class="w-40 avatar img-circle">ИН</span>
-													</div>
-													<div class="in-message in-message_selected">
-														<div class="text-message">
-															<span class="body-message">Новое сообщение от клиента с расширенным textarea!</span>
-															<div class="info-message">
-																<span>15:01</span>
-															</div>
-														</div>
-													</div>
-												</div>
+											<div class="box-message" v-if="plannerMessages.length">
+												<planner-message
+														v-for="(item, idx) in plannerMessages"
+														:item="item"
+														:key="idx"
+												></planner-message>
 											</div>
 										</div>
 										<div class="col-sm-6">
 											<label>Прикрепленные файлы</label>
+											<div class="box-attachment" v-if="plannerMessages.length">
+												<planner-attachment
+														v-for="(item, idx) in plannerMessages"
+														:item="item"
+														:key="idx"
+												></planner-attachment>
+											</div>
 										</div>
 									</div>
 								</div>

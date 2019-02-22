@@ -640,57 +640,26 @@ let vue = new Vue({
 
             this.plannerMessages = [];
 
-            console.log(this.selected)
             for(let i = 0; i < this.messages.length; i++) {
-                /*for(let j = 0; j < this.selected.length; j++) {
 
-                    let objectFind = this.messages[i].collection.find(e => e.stack_id === this.selected[j].id);
+                for(let j = 0; j < this.messages[i].collection.length; j++) {
 
-                    if (objectFind) {
+                    if(!this.selected.find(e => e.id === this.messages[i].collection[j].stack_id))
+                        continue;
 
-                        if(this.plannerMessages.length) {
-                            console.log(this.plannerMessages)
-                            if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].from_id === objectFind.from_id) {
-
-                                if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].stack_id !== objectFind.stack_id) {
-
-                                    if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].upload.length === 0) {
-                                        this.plannerMessages[this.plannerMessages.length - 1].collection.push(objectFind);
-                                        continue;
-                                    }
-
-                                }
-
+                    if(this.plannerMessages.length) {
+                        if(this.plannerMessages[this.plannerMessages.length - 1].user.id === this.messages[i].user.id) {
+                            if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].from_id === this.messages[i].collection[j].from_id) {
+                                this.plannerMessages[this.plannerMessages.length - 1].collection.push(this.messages[i].collection[j])
+                                continue;
                             }
                         }
-
-                        this.plannerMessages[j] = {};
-                        this.plannerMessages[j].collection = [];
-                        this.plannerMessages[j].user = this.messages[i].user;
-                        this.plannerMessages[j].collection.push(objectFind);
-                    }
-                }*/
-
-                for(let j = 0, k = 0; j < this.messages[i].collection.length; j++) {
-
-                    for(let k = 0, item = 0; k < this.selected.length; k++) {
-
-
-                        if(this.selected[k].id === this.messages[i].collection[j].stack_id) {
-
-
-                            this.plannerMessages[item]             = {};
-                            this.plannerMessages[item].user        = this.messages[i].user;
-                            this.plannerMessages[item].collection  = [];
-                            this.plannerMessages[item].collection.push(this.messages[i].collection[j]);
-
-                            item = item + 1;
-                        }
                     }
 
-                    // let objectFind = this.selected.find(e => e.id === this.messages[i].collection[j].stack_id);
-
-
+                    this.plannerMessages.push({});
+                    this.plannerMessages[this.plannerMessages.length - 1].user       = this.messages[i].user;
+                    this.plannerMessages[this.plannerMessages.length - 1].collection = [];
+                    this.plannerMessages[this.plannerMessages.length - 1].collection.push(this.messages[i].collection[j]);
                 }
             }
 
@@ -827,7 +796,7 @@ Vue.component('message-stack', {
                                 <span class="label-icon"><i class="ion-android-document"></i></span>
                                 <span class="label-text">
                                     <span>{{file.original_name}}</span>
-                                    <small class="text-muted">34kb</small>
+                                    <small class="text-muted">{{file.size}}</small>
                                 </span>  
                             </a>
                         </div>       
@@ -856,6 +825,51 @@ Vue.component('message-stack', {
             <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
         </div>     
     </div>`
+})
+
+Vue.component('planner-message', {
+    props: ['item', 'user'],
+    template:
+        `<div class="message-stack" 
+              :class="{'mess-in'  : item.user.roles === 'GUEST', 
+                       'mess-out' : item.user.roles === 'BOOKER'}"
+         >
+            <div class="message-stack-photo" v-if="item.user.roles === 'GUEST'">
+                <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
+            </div>
+            <div class="message-stack-content">
+                <div class="in-message" v-for="(value, key) in item.collection">
+                    <div class="text-message">
+                        <span class="body-message">{{value.body}}</span>
+                        <div class="info-message">
+                            <span>{{value.datetime}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
+                <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
+            </div> 
+        </div>`
+})
+
+Vue.component('planner-attachment', {
+    props: ['item', 'user'],
+    template:
+        `<div>
+            <div class="box-item" v-for="(value, key) in item.collection" v-if="value.upload.length">
+                <a class="item-attachment" v-for="(file, index) in value.upload" v-bind:href="file.thumb">
+                    <span class="label-icon" v-bind:data-msgid="file.name">
+                        <i class="ion-image" v-if="file.type.match(/image*/)"></i>
+                        <i class="ion-android-document" v-else></i>
+                    </span> 
+                    <span class="label-text">
+                        <span>{{file.original_name}}</span> 
+                        <small class="text-muted">{{file.size}}</small>
+                    </span>
+                </a>
+            </div>   
+        </div>`
 })
 
 Vue.component('attachment-view', {
@@ -944,6 +958,7 @@ Vue.component('profile-file', {
             </div>
         </div>`
 })
+
 
 
 
