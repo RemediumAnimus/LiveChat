@@ -420,4 +420,23 @@ router.post('/messages/all', [User.isAuthenticated, function(req, res) {
     })
 }])
 
+/**
+ * TITLE        : Planner router
+ * DESCRIPTION  : Creating a task for the planner
+ *
+ */
+router.post("/task/create", (req, res) => {
+
+    if (Object.keys(req.user).length === 0) {
+        return res.status(403).json({status: false, err: 'Access denied!'});
+    }
+
+    let objectUser      = req.user,
+        objectBody      = req.body;
+
+    return res.status(200).json({status: true, result: objectBody});
+    /*return res.status(500).json({status: false, result: []});*/
+
+});
+
 module.exports = router;

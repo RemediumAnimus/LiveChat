@@ -14,7 +14,8 @@ const socket = io();
  */
 const settings = {
     notice: {
-        error_upload: 'Во время загрузки файлов произошла ошибка...'
+        error_upload:       'Во время загрузки файлов произошла ошибка...',
+        error_task_create:  'Не удалось создать задачу...'
     }
 }
 
@@ -57,7 +58,9 @@ let vue = new Vue({
             startBox     : 0,
             messageBox   : 0
         },
-        plannerMessages  : []
+        plannerMessages  : [],
+        plannerInType    : [],
+        plannerOneType   : ''
     },
     methods: {
         /**
@@ -663,7 +666,49 @@ let vue = new Vue({
                 }
             }
 
-           console.log(this.plannerMessages)
+            this.plannerInType = [];
+
+            this.plannerInType.push({id: 1, type: 'Клиентский запрос'});
+            this.plannerInType.push({id: 2, type: 'Клиентский запрос 2'});
+            this.plannerInType.push({id: 3, type: 'Клиентский запрос 3'});
+        },
+
+        createPlanner() {
+
+            let formData = new FormData(),
+                form     = $("#form-planner"),
+                data     = form.serializeArray(),
+                trigger  = true;
+
+            for(let i = 0; i < data.length; i++) {
+                if(!data[i].value || data[i].value.length < 3) {
+                    form.find('[name='+data[i].name+']').addClass('form-control-error');
+                    trigger = false;
+                } else {
+                    form.find('[name='+data[i].name+']').removeClass('form-control-error');
+                    formData.append(data[i].name, data[i].value);
+                }
+            }
+
+            if(!this.plannerOneType) {
+                trigger = false;
+            } else {
+                formData.append('type', this.plannerOneType);
+            }
+
+            if(!trigger)
+                return;
+
+            axios.post('task/create?transport=task', formData)
+                 .then(function (response) {
+                    if(response.status === 200){
+
+                        console.log('Успешно!')
+                    }
+                 })
+                 .catch(error => {
+                    alert(settings.notice.error_task_create);
+                 })
         },
 
         clearSelected() {
@@ -756,10 +801,7 @@ Vue.component('message-stack', {
     inheritAttrs: false,
     methods: {
         selectedMessage(id) {
-
-            let objectItem = vue.selected.find(e => e.id === id);
-
-            if(objectItem) {
+            if(vue.selected.find(e => e.id === id)) {
                 $(event.target).closest('.in-message').removeClass('in-message_selected');
                 vue.selected = vue.selected.filter(e => e.id !== id);
             } else {
@@ -947,7 +989,7 @@ Vue.component('profile-file', {
             <div class="list-item" v-for="(file, index) in item.uploads">
                 <div class="list-left">
                     <span class="w-56 avatar">
-                        <img alt="." src="img/a3.jpg">
+                        <img alt="." src="img/ic_document.png">
                     </span>
                 </div>
                 <div class="list-body">
@@ -958,6 +1000,28 @@ Vue.component('profile-file', {
             </div>
         </div>`
 })
+
+Vue.component('planner-type', {
+    props: ['item'],
+    methods: {
+        click(evt) {
+
+            let button    = $(evt.target).closest('button'),
+                attribute = button.data('type');
+
+            $('.btn-type-task').removeClass('selected');
+
+            vue.plannerOneType = attribute;
+            button.addClass('selected');
+        }
+    },
+    template:
+        `<button type="button" class="btn btn-type-task m-b-sm" v-bind:data-type="item.id" @click="click($event)">
+            <i class="fa fa-plus pull-left"></i>
+            {{item.type}}
+        </button>`
+})
+
 
 
 

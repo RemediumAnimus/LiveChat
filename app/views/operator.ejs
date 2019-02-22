@@ -519,42 +519,50 @@
 											</div>  
 										</div>   
 									</div>
-									<div class="row m-b">
-										<div class="col-sm-6">
-											<label>Название задачи</label>
-											<div class="box collapse in m-a-0">
-												<input type="text" class="form-control no-border">
-											</div> 
-										</div>
-										<div class="col-sm-6">
-											<label>Срок задачи</label>
-											<div class="box collapse in m-a-0">
-												<input type="text" class="form-control has-value no-border" data-ui-jp="datetimepicker">
-											</div> 
-										</div>   
-									</div>
-									<div class="form-group">
-										<label>Тип задачи</label>
-										<div class="btn-flex">
-											<button class="btn btn-type-task m-b-sm selected"><i class="fa fa-plus pull-left"></i>Подготовить документы</button>
-											<button class="btn btn-type-task m-b-sm"><i class="fa fa-plus pull-left"></i>Обработать документы</button>
-											<button class="btn btn-type-task m-b-sm"><i class="fa fa-plus pull-left"></i>Клиентский запрос</button>
-										</div>
-									</div>
-									<div class="row m-b">
-										<div class="col-sm-6">
-											<label>Описание задачи</label>
-											<div class="box collapse in m-a-0">
-												<textarea class="form-control no-border" rows="6" placeholder="Введите описание задачи..."></textarea>
+									<form class="form" id="form-planner">
+										<div class="row m-b">
+											<div class="col-sm-6">
+												<label>Название задачи</label>
+												<div class="box collapse in m-a-0">
+													<input name="name" type="text" class="form-control no-border">
+													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<label>Срок задачи</label>
+												<div class="box collapse in m-a-0">
+													<input name="datetime" type="text" class="form-control no-border">
+													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
+												</div>
 											</div>
 										</div>
-										<div class="col-sm-6">
-											<label>Комментарий к задаче</label>
-											<div class="box collapse in m-a-0">
-												<textarea class="form-control no-border" rows="6" placeholder="Введите комментарий к задаче..."></textarea>
+										<div class="form-group">
+											<label>Тип задачи</label>
+											<div class="btn-flex">
+												<planner-type
+														v-for="(item, idx) in plannerInType"
+														:item="item"
+														:key="idx"
+												></planner-type>
 											</div>
-										</div>   
-									</div>
+										</div>
+										<div class="row m-b">
+											<div class="col-sm-6">
+												<label>Описание задачи</label>
+												<div class="box collapse in m-a-0">
+													<textarea name="description" class="form-control no-border" rows="6" placeholder="Введите описание задачи..."></textarea>
+													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<label>Комментарий к задаче</label>
+												<div class="box collapse in m-a-0">
+													<textarea name="comment" class="form-control no-border" rows="6" placeholder="Введите комментарий к задаче..."></textarea>
+													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
+												</div>
+											</div>
+										</div>
+									</form>
 									<div class="row m-b">
 									  	<div class="col-sm-6">
 											<label>Прикрепленные сообщения</label>
@@ -581,8 +589,8 @@
 							</div>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn danger p-x-md" data-dismiss="modal">Отменить</button>
-							<button type="button" class="btn info p-x-md" data-dismiss="modal">Создать задачу</button>
+							<button type="button" class="btn default p-x-md" data-dismiss="modal" @click="clearSelected()">Отменить</button>
+							<button type="button" class="btn info p-x-md" @click="createPlanner()">Создать задачу</button>
 						</div>
 					</div><!-- /.modal-content -->
 				</div>
@@ -655,7 +663,6 @@
   <script src="js/library/Operator/file.size.js"></script>
 
   <script src="js/library/Operator/app.js"></script>
-  <script src="js/library/Operator/app-engine.js"></script>
 
   <script src="js/main.js"></script>
   
