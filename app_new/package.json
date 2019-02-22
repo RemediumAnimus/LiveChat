@@ -1,0 +1,62 @@
+{
+  "name": "vue-casl-demo",
+  "description": "A Vue.js project",
+  "version": "1.0.0",
+  "author": "Anthony Gore <agor8684@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon -e js --ignore src/ server.js",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "connect-flash": "^0.1.1",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "express-crypto": "1.0.5",
+    "express-fileupload": "^1.1.1-alpha.1",
+    "express-session": "^1.15.6",
+    "filesize": "^4.0.0",
+    "gm": "^1.23.1",
+    "html": "^1.0.0",
+    "jimp": "^0.6.0",
+    "mysql": "^2.16.0",
+    "passport": "^0.4.0",
+    "passport-cookie": "^1.0.6",
+    "passport-local": "^1.0.0",
+    "socket.io": "^2.2.0",
+    "sqlstring": "^2.3.1",
+    "vue": "^2.5.11",
+    "vue-router": "^3.0.2",
+    "vue-socket.io": "^3.0.5",
+    "vue-socket.io-extended": "^3.2.1"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "cross-env": "^5.0.5",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.4",
+    "node-sass": "^4.5.3",
+    "nodemon": "^1.14.7",
+    "sass-loader": "^6.0.6",
+    "vue-loader": "^13.0.5",
+    "vue-template-compiler": "^2.4.4",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^3.6.0",
+    "webpack-dev-middleware": "^2.0.3",
+    "webpack-dev-server": "^2.9.1",
+    "webpack-merge": "^4.1.1",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

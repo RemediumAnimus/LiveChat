@@ -1,0 +1,30 @@
+{
+	"db": {
+		"username": "admin",
+		"password": "admin1",
+		"host": "192.168.123.210",
+		"port": "3306",
+		"name": "node_db"
+	},
+	"sessionSecret": "0540656Haqwrsf404Awr066w0",
+	"chat": {
+		"roles": {
+			"client": "GUEST",
+			"operator": "BOOKER"
+		},
+		"template": {
+			"client": "chat_user",
+			"operator": "operator"
+		},
+		"messages": {
+			"type": {
+				"text"  	: "text",
+				"image" 	: "image",
+				"document"  : "document"
+			}
+		}
+	},
+	"path": {
+		"uploadView": "http://localhost:3001/upload/"
+	}
+}
