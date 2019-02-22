@@ -31,7 +31,8 @@
   <!-- build:css css/styles/app.min.css -->
   <link rel="stylesheet" href="/css/Operator/styles/app.css" type="text/css" />
   <link rel="stylesheet" href="/css/Operator/styles/animate.css" type="text/css" />
-  <link rel="stylesheet" href="/css/Operator/styles/style.css" type="text/css" />
+	<link rel="stylesheet" href="/css/Operator/styles/style.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/styles/jquery.mCustomScrollbar.min.css" type="text/css" />
   
   <!-- endbuild -->
   <link rel="stylesheet" href="/css/Operator/styles/font.css" type="text/css" />
@@ -196,50 +197,53 @@
 										<div class="dark-white b-b">
 											<div class="navbar">
 
-												<!-- nabar right -->
-												<ul class="nav navbar-nav navbar-message-default pull-right m-l">
-													<li class="nav-item" @click="loadingMessage()">
-														<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Подгрузить">
-														<span class="btn btn-sm btn-icon rounded info">
-															<i class="fa fa-spinner"></i>
-														</span>
-														</a>
-													</li>
-													<li class="nav-item aside-lg" @click="profileShow = !profileShow">
-														<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Профиль">
-															<span class="btn btn-sm btn-icon rounded default-icon">
-																<i class="fa fa-ellipsis-v"></i>
-															</span>
-														</a>
-													</li>
-												</ul>
-												<!-- / navbar right -->
-
 												<!-- nabar right selected-->
-												<ul class="nav navbar-nav navbar-message-selected pull-right m-l" style="display: none">
-													<li class="nav-item">
-														<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Удалить">
+												<div class="navbar-selected" v-if="selected.length">
+													<ul class="nav navbar-nav navbar-message-selected pull-right m-l">
+														<li class="nav-item">
+															<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Удалить">
 														<span class="btn btn-sm btn-icon rounded default-icon">
 															<i class="fa fa-trash"></i>
 														</span>
-														</a>
-													</li>
-													<li class="nav-item">
-														<a class="nav-link" data-toggle="modal" data-target="#send-taskmanager" data-ui-toggle-class="zoom" data-ui-target="#animate-taskmanager">
-															<span class="btn btn-sm info">Создать задачу</span>
-														</a>
-													</li>
-												</ul>
-												<!-- / navbar right -->
+															</a>
+														</li>
+														<li class="nav-item">
+															<a class="nav-link" data-toggle="modal" data-target="#send-taskmanager" data-ui-toggle-class="zoom" data-ui-target="#animate-taskmanager" @click="openPlanner()">
+																<span class="btn btn-sm info">Создать задачу</span>
+															</a>
+														</li>
+													</ul>
+													<div class="navbar-item navbar-message-count text-ellipsis">
+														<span>{{selected.length}}</span>
+														<span>{{declOfNum(selected.length)}}</span>
+														<button class="btn in_deselect_all btn-sm" @click="clearSelected()">
+															<i class="ion-close"></i>
+														</button>
+													</div>
+												</div>
+												<!-- / navbar right selected-->
 
-												<span class="navbar-item navbar-message-name text-ellipsis">
-													{{profile.user.display_name}}
-												</span>
-												<div class="navbar-item navbar-message-count text-ellipsis">
-													<span></span>
-													<button class="btn in_deselect_all btn-sm">
-														<i class="ion-close"></i>
-													</button>
+												<!-- navbar right -->
+												<div class="navbar-usualy" v-else>
+													<ul class="nav navbar-nav navbar-message-default pull-right m-l">
+														<li class="nav-item" @click="loadingMessage()">
+															<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Подгрузить">
+														<span class="btn btn-sm btn-icon rounded info">
+															<i class="fa fa-spinner"></i>
+														</span>
+															</a>
+														</li>
+														<li class="nav-item aside-lg" @click="profileShow = !profileShow">
+															<a class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Профиль">
+															<span class="btn btn-sm btn-icon rounded default-icon">
+																<i class="fa fa-ellipsis-v"></i>
+															</span>
+															</a>
+														</li>
+													</ul>
+													<span class="navbar-item navbar-message-name text-ellipsis">
+														{{profile.user.display_name}}
+													</span>
 												</div>
 											</div>
 										</div>
@@ -254,7 +258,7 @@
 											<div class="row-body">
 												<div class="row-inner">
 													<!-- content -->
-													<div class="box-message p-a-sm" ref="messages">
+													<div class="box-message p-a-sm" ref="messages" :class="{'mode-selected': selected.length}">
 														<message-stack
 																v-for="(m, idx) in messages"
 																:item="m"
@@ -483,14 +487,14 @@
 											<label>От клиента</label>
 											<div class="p-b">
 												<div class="list-left">
-													<span class="w-40 avatar w-default img-circle">АК</span>
+													<span class="w-40 avatar w-default img-circle">{{profile.user.short_name}}</span>
 												</div>
 												<div class="list-body">
 													<div class="item-title">
-													<span class="_500">Алина Красильникова</span>
+													<span class="_500">{{profile.user.display_name}}</span>
 													</div>
 												<small class="block text-muted text-ellipsis">
-													ООО "Технологии будущего"
+													{{profile.user.company}}
 												</small>
 											  </div>
 											</div>
@@ -499,14 +503,14 @@
 											<label>Постановщик задачи</label>
 											<div class="p-b">
 												<div class="list-left">
-													<span class="w-40 avatar w-default img-circle">ЕЧ</span>
+													<span class="w-40 avatar w-default img-circle">{{user.short_name}}</span>
 												</div>
 											  <div class="list-body">
 												<div class="item-title">
-												  <span class="_500">Екатерина Чермошенцева</span>
+												  <span class="_500">{{user.display_name}}</span>
 												</div>
 												<small class="block text-muted text-ellipsis">
-													ООО "Предприятие"
+													{{user.company}}
 												</small>
 											  </div>
 											</div>  
@@ -549,32 +553,27 @@
 										</div>   
 									</div>
 									<div class="row m-b">
-									  <div class="col-sm-6">
+									  	<div class="col-sm-6">
 											<label>Прикрепленные сообщения</label>
-											<div class="box p-a dark-white">
-												<div class="m-b">
-													<span class="pull-left w-40 w-default avatar img-circle m-r-sm">АК</span>
-													<div class="clear">
-														<div class="p-a p-y-sm info inline rounded">
-															Добрый день!
-														</div>
-														<div class="text-muted text-xs m-t-xs"><i class="fa fa-ok text-success"></i> 2 минуты назад</div>
+											<div class="box-message">
+												<div class="message-stack mess-in">
+													<div class="message-stack-photo">
+														<span class="w-40 avatar img-circle">ИН</span>
 													</div>
-												</div>
-												<div class="m-b">
-													<span class="pull-right w-40 w-default avatar img-circle m-l-sm">ЕЧ</span>
-													<div class="clear text-right">
-														<div class="p-a p-y-sm dark-default inline text-left rounded">
-														  Добрый день! Подробную инструкцию мы отправили Вам на почту!
+													<div class="in-message in-message_selected">
+														<div class="text-message">
+															<span class="body-message">Новое сообщение от клиента с расширенным textarea!</span>
+															<div class="info-message">
+																<span>15:01</span>
+															</div>
 														</div>
-														<div class="text-muted text-xs m-t-xs">1 минуту назад</div>
 													</div>
 												</div>
 											</div>
 										</div>
 										<div class="col-sm-6">
 											<label>Прикрепленные файлы</label>
-										</div>   
+										</div>
 									</div>
 								</div>
 							</div>
@@ -641,6 +640,7 @@
   <script src="js/library/Operator/bootstrap.js"></script>
   
   <!-- core -->
+  <script src="js/library/Operator/jquery.mCustomScrollbar.concat.min.js"></script>
   <script src="js/library/Operator/jquery.storageapi.min.js"></script>
   <script src="js/library/Operator/jquery.blockUI.js"></script>
   <script src="js/library/Operator/jquery.jscroll.min.js"></script>

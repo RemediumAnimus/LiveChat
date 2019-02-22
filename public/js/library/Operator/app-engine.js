@@ -11,7 +11,7 @@ var message = (function($) {
 		_initOptions(options);
 		
 		// Навешивам события
-       _bindHandlers();
+       //_bindHandlers();
     }
 
 	// Инициализируем настройки

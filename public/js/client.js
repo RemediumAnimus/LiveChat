@@ -203,6 +203,7 @@ const vue = new Vue({
                             }
 
                             socket.emit('message:update', {user: this_clone.user, update_from: false});
+
                          })
                          .catch(error => {
                             console.error(error);
@@ -324,7 +325,6 @@ const vue = new Vue({
                 if(!scrollEnd) {
                     boxInner.scrollTop =  boxInner.scrollHeight;
                 }
-
                 boxAttachment.scrollLeft = boxAttachment.scrollWidth;
             })
         },
@@ -417,6 +417,7 @@ const vue = new Vue({
 
                             // entire view has been re-rendered
                             if(!this_clone.triggerLoad) {
+
                                 let box         = document.querySelectorAll('.row-inner')[0],
                                     boxHeight   = box.scrollHeight,
                                     scrollStart = box.scrollTop < 200
@@ -470,7 +471,6 @@ const vue = new Vue({
             alert('Указаны не валидные данные!')
         })
         window.autosize(this.$refs.textarea);
-        this.$refs.messages.addEventListener('scroll', this.handleScroll);
     }
 })
 

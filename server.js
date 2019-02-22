@@ -10,6 +10,9 @@ const path          = require('path')
 const bodyParser    = require('body-parser');
 const flash 		= require('connect-flash');
 const fileUpload    = require('express-fileupload');
+const addRequestId  = require('express-request-id')();
+const morgan        = require('morgan');
+const logger        = require('./app/logger');
 
 /**
  * Chat application components
@@ -40,8 +43,10 @@ app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
+
 app.use(fileUpload({useTempFiles : true,
                     tempFileDir  : '/tmp/'}));
+
 
 /**
  * Routes

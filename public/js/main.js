@@ -29,6 +29,7 @@ let vue = new Vue({
         message     : '',
         search      : '',
         messages    : [],
+        selected    : [],
         user        : {},
         users       : [],
         usersList   : [],
@@ -55,7 +56,8 @@ let vue = new Vue({
             innerBox     : 0,
             startBox     : 0,
             messageBox   : 0
-        }
+        },
+        plannerMessages  : []
     },
     methods: {
         /**
@@ -104,7 +106,6 @@ let vue = new Vue({
          *
          */
         initializeConnection() {
-
             // Listen to the update event of users in the room
             socket.on('users:update', users => {
                 this.users = [...users]
@@ -181,8 +182,10 @@ let vue = new Vue({
 
                 if (inMessage.user.id !== this.user.id) {
                     for (let i = 0; i < this.usersList.length; i++) {
+
                         if (this.usersList[i].id === inMessage.user.id && this.usersList[i].attributes.current) {
                             socket.emit('message:read', inMessage);
+
                         }
                     }
                 }
@@ -209,7 +212,9 @@ let vue = new Vue({
                 }
             });
 
+
             socket.on('message:read_all', user => {
+
                 for (let i = this.messages.length - 1; i >= 0; i--) {
                     for (let j = this.messages[i].collection.length - 1; j >= 0; j--) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
@@ -328,6 +333,7 @@ let vue = new Vue({
                 }
             };
             this.loading.messageBox = 0;
+            this.clearSelected();
             $('.modal-window-xl').modal('hide');
 
         },
@@ -378,6 +384,7 @@ let vue = new Vue({
                                         this_clone.messages.unshift(element)
                                     });
 
+
                                     if(response.data.attachments.length) {
 
                                         this_clone.uploads      = response.data.attachments;
@@ -402,6 +409,7 @@ let vue = new Vue({
                                                                     : null;
 
                                             this_clone.previews.push(objectPreview);
+
                                         }
                                     }
 
@@ -628,6 +636,84 @@ let vue = new Vue({
                 })
         },
 
+        openPlanner() {
+
+            this.plannerMessages = [];
+
+            console.log(this.selected)
+            for(let i = 0; i < this.messages.length; i++) {
+                /*for(let j = 0; j < this.selected.length; j++) {
+
+                    let objectFind = this.messages[i].collection.find(e => e.stack_id === this.selected[j].id);
+
+                    if (objectFind) {
+
+                        if(this.plannerMessages.length) {
+                            console.log(this.plannerMessages)
+                            if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].from_id === objectFind.from_id) {
+
+                                if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].stack_id !== objectFind.stack_id) {
+
+                                    if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].upload.length === 0) {
+                                        this.plannerMessages[this.plannerMessages.length - 1].collection.push(objectFind);
+                                        continue;
+                                    }
+
+                                }
+
+                            }
+                        }
+
+                        this.plannerMessages[j] = {};
+                        this.plannerMessages[j].collection = [];
+                        this.plannerMessages[j].user = this.messages[i].user;
+                        this.plannerMessages[j].collection.push(objectFind);
+                    }
+                }*/
+
+                for(let j = 0, k = 0; j < this.messages[i].collection.length; j++) {
+
+                    for(let k = 0, item = 0; k < this.selected.length; k++) {
+
+
+                        if(this.selected[k].id === this.messages[i].collection[j].stack_id) {
+
+
+                            this.plannerMessages[item]             = {};
+                            this.plannerMessages[item].user        = this.messages[i].user;
+                            this.plannerMessages[item].collection  = [];
+                            this.plannerMessages[item].collection.push(this.messages[i].collection[j]);
+
+                            item = item + 1;
+                        }
+                    }
+
+                    // let objectFind = this.selected.find(e => e.id === this.messages[i].collection[j].stack_id);
+
+
+                }
+            }
+
+           console.log(this.plannerMessages)
+        },
+
+        clearSelected() {
+            this.plannerMessages = [];
+            this.selected = [];
+            $('.in-message').removeClass('in-message_selected');
+        },
+
+        /**
+         * TITLE        : View method
+         * DESCRIPTION  : declension
+         *
+         */
+        declOfNum(number) {
+            let titles = ['сообщение', 'сообщения', 'сообщений'];
+            let cases = [2, 0, 1, 1, 1, 2];
+            return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
+        },
+
         /**
          * TITLE        : View method
          * DESCRIPTION  : Scroll down
@@ -699,6 +785,20 @@ let vue = new Vue({
 Vue.component('message-stack', {
     props: ['item', 'user', 'index'],
     inheritAttrs: false,
+    methods: {
+        selectedMessage(id) {
+
+            let objectItem = vue.selected.find(e => e.id === id);
+
+            if(objectItem) {
+                $(event.target).closest('.in-message').removeClass('in-message_selected');
+                vue.selected = vue.selected.filter(e => e.id !== id);
+            } else {
+                $(event.target).closest('.in-message').addClass('in-message_selected');
+                vue.selected.push({id: id});
+            }
+        }
+    },
     template:
      `<div class="message-stack"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
@@ -711,7 +811,7 @@ Vue.component('message-stack', {
         </div>
         <div class="message-stack-content">
             <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id">
-                <div class="select-message">
+                <div class="select-message" @click="selectedMessage(value.stack_id)">
                     <span><i class="ion-checkmark-circled"></i></span>
                 </div>
                 <div class="text-message in-message_media" v-if="value.upload.length">

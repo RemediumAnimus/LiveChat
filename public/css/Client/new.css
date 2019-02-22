@@ -204,7 +204,7 @@ body #app {
     right: 0;
     animation: row-main-show .5s;
     animation-fill-mode: forwards;
-    box-shadow: -1px 0px 1px 0px #d8d8d8;
+    box-shadow: -1px 0px 20px 0px #d8d8d8;;
 }
 .row-main.visible {
     display: block;
