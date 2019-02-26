@@ -29,7 +29,15 @@
 
     const settings = {
         notice: {
-            error_upload: 'Во время загрузки файлов произошла ошибка...'
+            error_upload:       'Во время загрузки файлов произошла ошибка...',
+            error_task_create:  'Не удалось создать задачу...',
+            error_select_type:  'Вы не указали тип задачи...',
+            success_planner:    'Задача успешно создана'
+        },
+        color: {
+            info:   '#7a7a7acc',
+            danger: '#f44336',
+            white:  '#FFFFFF'
         }
     }
 

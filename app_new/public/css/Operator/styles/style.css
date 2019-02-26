@@ -576,10 +576,21 @@
 	width: 100%
 }
 .app-body .flex-dir-col {
-	display: flex;
-	flex-direction: column;
-	width: 100%;
+	 display: flex;
+	 flex-direction: column;
+	 width: 100%;
 }
+.app-body .flex-dir-col .navbar {
+	padding: 0;
+}
+.app-body .flex-dir-col .navbar-usualy, .app-body .flex-dir-col  .navbar-selected {
+	position: absolute;
+	width: 100%;
+	right: 0;
+	padding: 0 1rem;
+	top: 0px;
+}
+
 .app-body .box-body-message {
 	height: -webkit-fill-available;
 }
@@ -1013,24 +1024,46 @@
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), 0 -1px 0px rgba(0, 0, 0, 0.02);
 	padding: 1rem;
 }
-.modal-body-task .box-message .text-message {
-	padding: 1rem;
-	border-radius: 20px;
-	padding-top: 0.5rem;
-	padding-bottom: 0.5rem;
-	display: inline-block;
-	text-align: left;
+.modal-body-task .box-attachment .box-item {
+	display: flex;
+	flex-direction: column;
+}
+.modal-body-task .box-attachment .box-item > .item-attachment {
+	display: flex;
+	align-items: center;
+	padding: 0.3rem;
+}
+.modal-body-task .box-attachment .box-item .label-icon {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 35px;
+	height: 35px;
 	background-color: #2196f3;
 	color: #fff;
-	-webkit-user-select: none;
+	border-radius: 500px;
 }
-.modal-body-task .box-message .text-message .info-message {
-	font-size: 0.6rem;
-	color: #e2f1fd;
-	display: block;
-	text-align: right;
-	margin-right: -7px;
+.modal-body-task .box-attachment .box-item .label-icon > i {
+	font-size: 1.33rem;
 }
+.modal-body-task .box-attachment .box-item .label-text {
+	 display: flex;
+	 flex-direction: column;
+	 margin-left: 0.5rem;
+	 white-space: nowrap;
+	 overflow: hidden;
+	 text-overflow: ellipsis;
+}
+.modal-window-lg .label-required{
+    font-size: 1rem;
+    color: #f44336d9;
+}
+.modal-window-lg .label-error {
+    color: #f44336d9;
+    text-align: center;
+}
+
+
 
 /** END MODAL WINDOW TASK **/
 

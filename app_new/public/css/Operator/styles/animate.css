@@ -27,3 +27,29 @@
     transform: scale(0.5, 0.5);
   }
 }
+
+@keyframes row-main-show {
+    0% {
+        display: none;
+        top: -60px;
+    }
+    1% {
+        display: block;
+    }
+    100% {
+        top: 0;
+    }
+}
+
+@keyframes row-main-hide {
+    0% {
+        display: block;
+        top: 0;
+    }
+    99% {
+        top: -60px;
+    }
+    100% {
+        display: none;
+    }
+}
