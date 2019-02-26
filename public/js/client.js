@@ -440,6 +440,30 @@ const vue = new Vue({
                 })
         },
 
+        openNewTab(event) {
+            let this_clone = this;
+            let opening_page = $(event.target).closest('.icon-link').data('page');
+            let current_page = $(event.target).closest('.row-main').attr('id');
+
+            if($('#'+opening_page).hasClass('hidden')) {
+                $('#'+current_page).removeClass('visible');
+            } else {
+                $('#'+current_page).addClass('hidden');
+            }
+
+            $('#'+opening_page).addClass('visible').removeClass('hidden');
+
+            $('#'+current_page).on("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", function() {
+                this_clone.removeAnimate(current_page)
+            });
+
+            $('#'+opening_page).unbind("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend");
+        },
+
+        removeAnimate(page) {
+            $('#'+page).removeClass('visible');
+        },
+
 
         /**
          * TITLE        : View method

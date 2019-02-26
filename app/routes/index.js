@@ -15,6 +15,7 @@ const User       = require('../models/users');
 const Uploads    = require('../models/uploads');
 const Images     = require('../models/images');
 const Messages   = require('../models/messages');
+const Planners   = require('../models/planners');
 const config     = require('../config');
 
 
@@ -431,11 +432,28 @@ router.post("/task/create", (req, res) => {
         return res.status(403).json({status: false, err: 'Access denied!'});
     }
 
-    let objectUser      = req.user,
-        objectBody      = req.body;
+    let objectUser          = req.user,
+        objectBody          = req.body,
+        objectClient        = objectBody.user,
+        objectOperator      = objectUser.id,
+        objectHeader        = objectBody.header,
+        objectDescription   = objectBody.description,
+        objectComment       = objectBody.comment,
+        objectDateEnd       = objectBody.datetime,
+        objectType          = objectBody.type,
+        objectSelected      = JSON.parse(objectBody.selected);
 
-    return res.status(200).json({status: true, result: objectBody});
-    /*return res.status(500).json({status: false, result: []});*/
+    Planners.save(objectClient, objectOperator, objectHeader, objectDescription, objectComment, objectDateEnd, objectType, objectSelected, function(err, result) {
+        if(err) {
+            return res.status(500).json({status: false, result: []});
+        }
+        if (result) {
+            return res.status(200).json({status: true, result: result});
+        }
+        else {
+            return res.status(200).json({status: false, result: []});
+        }
+    })
 
 });
 

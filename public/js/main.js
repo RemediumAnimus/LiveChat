@@ -15,7 +15,14 @@ const socket = io();
 const settings = {
     notice: {
         error_upload:       'Во время загрузки файлов произошла ошибка...',
-        error_task_create:  'Не удалось создать задачу...'
+        error_task_create:  'Не удалось создать задачу...',
+        error_select_type:  'Вы не указали тип задачи...',
+        success_planner:    'Задача успешно создана'
+    },
+    color: {
+        info:   '#7a7a7acc',
+        danger: '#f44336',
+        white:  '#FFFFFF'
     }
 }
 
@@ -60,7 +67,8 @@ let vue = new Vue({
         },
         plannerMessages  : [],
         plannerInType    : [],
-        plannerOneType   : ''
+        plannerOneType   : '',
+        plannerError     : false
     },
     methods: {
         /**
@@ -675,46 +683,88 @@ let vue = new Vue({
 
         createPlanner() {
 
-            let formData = new FormData(),
-                form     = $("#form-planner"),
-                data     = form.serializeArray(),
-                trigger  = true;
+            let formData    = new FormData(),
+                this_clone  = this,
+                form        = $("#form-planner"),
+                header      = form.find('[name="header"]').val(),
+                data        = form.serializeArray();
 
+            // Reset error message
+            this.plannerError = false;
+
+            // Check the field
             for(let i = 0; i < data.length; i++) {
                 if(!data[i].value || data[i].value.length < 3) {
-                    form.find('[name='+data[i].name+']').addClass('form-control-error');
-                    trigger = false;
-                } else {
-                    form.find('[name='+data[i].name+']').removeClass('form-control-error');
+                    this.plannerError = true;
+                } else
                     formData.append(data[i].name, data[i].value);
+
+            }
+
+            // Check the type
+            if(!this.plannerOneType)
+                this.plannerError = true;
+
+            // Refund if the error
+            if(this.plannerError === true)
+                return;
+
+            // Sort the selected messages
+            for(let i = 0, m = []; i < this.selected.length; i ++) {
+                m[i] = this.selected[i].id;
+
+                if(i === this.selected.length - 1) {
+                    formData.append('selected', JSON.stringify(m));
                 }
             }
 
-            if(!this.plannerOneType) {
-                trigger = false;
-            } else {
-                formData.append('type', this.plannerOneType);
-            }
+            // Add data to send
+            formData.append('type', this.plannerOneType);
+            formData.append('user', this.profile.user.id);
 
-            if(!trigger)
-                return;
-
+            // Send to server
             axios.post('task/create?transport=task', formData)
                  .then(function (response) {
                     if(response.status === 200){
-
-                        console.log('Успешно!')
+                        if(response.data.status) {
+                            this_clone.createAmaran(settings.notice.success_planner, header);
+                            this_clone.clearSelected();
+                        }
                     }
                  })
                  .catch(error => {
-                    alert(settings.notice.error_task_create);
+                     this_clone.createAmaran(settings.notice.error_task_create, header);
                  })
         },
 
         clearSelected() {
             this.plannerMessages = [];
             this.selected = [];
+            this.plannerError = false;
+            this.plannerOneType = '';
             $('.in-message').removeClass('in-message_selected');
+            $('#form-planner').find("input[type=text], textarea").val('');
+            $('#form-planner').find("button").removeClass('selected');
+            $('#send-taskmanager').modal('hide');
+        },
+
+        createAmaran(notice, title) {
+
+            $.amaran({
+                content:{
+                    title   : notice,
+                    message : title
+                },
+                theme:'tumblr'
+            });
+
+        },
+
+        createDatePicker() {
+            $('[name="datetime"]').datetimepicker({
+                locale: 'ru',
+                format: 'YYYY-MM-DD HH:mm:ss'
+            });
         },
 
         /**

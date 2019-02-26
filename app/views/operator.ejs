@@ -26,7 +26,10 @@
   <link rel="stylesheet" href="/css/Operator/ionicons/css/ionicons.min.css" type="text/css" />
   <link rel="stylesheet" href="/css/Operator/simple-line-icons/css/simple-line-icons.css" type="text/css" />
   <link rel="stylesheet" href="/css/Operator/bootstrap/dist/css/bootstrap.min.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/datetimepicker/datetimepicker.min.css" type="text/css" />
   <link rel="stylesheet" href="/css/Operator/ekko-lightbox/ekko-lightbox.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/amaran/amaran.min.css" type="text/css" />
+  <link rel="stylesheet" href="/css/Operator/amaran/animate.min.css" type="text/css" />
 
   <!-- build:css css/styles/app.min.css -->
   <link rel="stylesheet" href="/css/Operator/styles/app.css" type="text/css" />
@@ -481,7 +484,7 @@
 						<div class="modal-body modal-body-task">
 							<div class="box no-shadow">
 								<div class="box-body">
-									<p class="text-muted">Пожалуйста, заполните информацию, чтобы продолжить</p>
+									<p class="text-muted">Пожалуйста, заполните информацию, чтобы продолжить. Поля обязательные для заполнения отмечены знаком «<label class="label-required">*</label>»</p>
 									<div class="row m-b">
 										<div class="col-sm-6">
 											<label>От клиента</label>
@@ -523,21 +526,24 @@
 										<div class="row m-b">
 											<div class="col-sm-6">
 												<label>Название задачи</label>
+                                                <label class="label-required">*</label>
 												<div class="box collapse in m-a-0">
-													<input name="name" type="text" class="form-control no-border">
+													<input name="header" type="text" class="form-control no-border">
 													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
 												</div>
 											</div>
 											<div class="col-sm-6">
 												<label>Срок задачи</label>
+                                                <label class="label-required">*</label>
 												<div class="box collapse in m-a-0">
-													<input name="datetime" type="text" class="form-control no-border">
+													<input name="datetime" type="text" class="form-control no-border" v-bind="createDatePicker()">
 													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
 												</div>
 											</div>
 										</div>
 										<div class="form-group">
 											<label>Тип задачи</label>
+                                            <label class="label-required">*</label>
 											<div class="btn-flex">
 												<planner-type
 														v-for="(item, idx) in plannerInType"
@@ -549,6 +555,7 @@
 										<div class="row m-b">
 											<div class="col-sm-6">
 												<label>Описание задачи</label>
+                                                <label class="label-required">*</label>
 												<div class="box collapse in m-a-0">
 													<textarea name="description" class="form-control no-border" rows="6" placeholder="Введите описание задачи..."></textarea>
 													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
@@ -556,6 +563,7 @@
 											</div>
 											<div class="col-sm-6">
 												<label>Комментарий к задаче</label>
+                                                <label class="label-required">*</label>
 												<div class="box collapse in m-a-0">
 													<textarea name="comment" class="form-control no-border" rows="6" placeholder="Введите комментарий к задаче..."></textarea>
 													<span class="info-danger" title="Поле обязательно для заполнения."><i class="ion-android-warning"></i></span>
@@ -589,8 +597,13 @@
 							</div>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn default p-x-md" data-dismiss="modal" @click="clearSelected()">Отменить</button>
-							<button type="button" class="btn info p-x-md" @click="createPlanner()">Создать задачу</button>
+                            <p class="label-error" v-show="plannerError">Выделенные поля для заполнения пропущены или заполнены неверно! Минимальная длина поля ввода составляет 3 символа.</p>
+                            <div class="col-md-6 text-left p-l-0">
+                                <button type="button" class="btn default p-x-md" data-dismiss="modal" @click="clearSelected()">Отменить</button>
+                            </div>
+                            <div class="col-md-6 p-r-0">
+							    <button type="button" class="btn info p-x-md" @click="createPlanner()">Создать задачу</button>
+                            </div>
 						</div>
 					</div><!-- /.modal-content -->
 				</div>
@@ -648,7 +661,9 @@
   <!-- Bootstrap -->
   <script src="js/library/Operator/tether.min.js"></script>
   <script src="js/library/Operator/bootstrap.js"></script>
-  
+  <script src="js/library/Operator/moment-with-locales.min.js"></script>
+  <script src="js/library/Operator/bootstrap-datetimepicker.min.js"></script>
+
   <!-- core -->
   <script src="js/library/Operator/jquery.mCustomScrollbar.concat.min.js"></script>
   <script src="js/library/Operator/jquery.storageapi.min.js"></script>
@@ -661,6 +676,7 @@
   <script src="js/library/Operator/ui-toggle-class.js"></script>
   <script src="js/library/Operator/ui-nav.js"></script>
   <script src="js/library/Operator/file.size.js"></script>
+  <script src="js/library/Operator/jquery.amaran.js"></script>
 
   <script src="js/library/Operator/app.js"></script>
 

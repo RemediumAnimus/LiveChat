@@ -1054,6 +1054,14 @@
 	 overflow: hidden;
 	 text-overflow: ellipsis;
 }
+.modal-window-lg .label-required{
+    font-size: 1rem;
+    color: #f44336d9;
+}
+.modal-window-lg .label-error {
+    color: #f44336d9;
+    text-align: center;
+}
 
 
 
