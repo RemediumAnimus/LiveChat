@@ -27,18 +27,6 @@
       $target = $this.closest('[data-target]').attr('data-target');
       app.setting[$target] = $this.is(':checkbox') ? $this.prop('checked') : $(this).val();
       storage.set(setting, app.setting);
-      setTheme(app.setting);
     });
-	
-	/*$(document).mouseup(function (e){ 
-		var div = $("#profile-photo"); 
-		if (!div.is(e.target) 
-			&& div.has(e.target).length === 0) {
-	
-			if(div.hasClass('in')) {
-				div.modal('toggle');
-			}
-		}
-	});*/
 
 })(jQuery);

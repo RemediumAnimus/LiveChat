@@ -26,27 +26,30 @@ var app = (function($) {
 	}
 	
 	// Удалим анимацию
-	function removeActive(selected_page) {
-		$('#'+selected_page).removeClass('visible');
-	};
-	
+	function removeActive(page) {
+        $('#'+page).removeClass('visible');
+    };
+
 	function _onClickIconBtn() {
 		
 		$('.icon-link').on('click', function() {
-			
-			var page = $(this).data('page');
-			var selected_page = $(this).closest('.row-main').attr('id');
-			
-			$('#'+selected_page).removeClass('transition');
-			$('#'+page).addClass('visible');
-			
-			$('#'+page).on("webkitAnimationEnd oanimationend oAnimationEnd msAnimationEnd animationend", function() {
-				removeActive(selected_page)
-			});
-			
-			$('#'+page).addClass('transition');
-			
-			$('#'+selected_page).unbind("webkitAnimationEnd oanimationend oAnimationEnd msAnimationEnd animationend");
+
+            /*var opening_page = $(this).data('page');
+            var current_page = $(this).closest('.row-main').attr('id');
+
+			if($('#'+opening_page).hasClass('hidden')) {
+                $('#'+current_page).removeClass('visible');
+			} else {
+                $('#'+current_page).addClass('hidden');
+			}
+
+            $('#'+opening_page).addClass('visible').removeClass('hidden');
+
+            $('#'+current_page).on("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", function() {
+                removeActive(current_page)
+            });
+
+            $('#'+opening_page).unbind("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend");*/
 		});
 		
 		$('.row-tap').on('click', function() {

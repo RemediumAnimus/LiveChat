@@ -88,7 +88,7 @@ const get = function (room_id, offset, done) {
         'INNER  JOIN users u ON m.from_id = u.id                ' +
         'LEFT   JOIN uploads up ON m.id = up.id_message         ' +
         'WHERE  room_id = ? ORDER BY m.id DESC, m.stack_id      ' +
-        'LIMIT 10 OFFSET ?                                      ' ;
+        'LIMIT  10 OFFSET ?                                     ' ;
 
     mysql.query(sql.format(queryString, [room_id, offset]), function(err, result){
         if (err)
@@ -221,7 +221,6 @@ const get = function (room_id, offset, done) {
                 });
             }
         }
-
         // Remove`s null values
         object = object.filter(function (el) {
             return el != null;

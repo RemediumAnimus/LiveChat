@@ -14,7 +14,15 @@ const socket = io();
  */
 const settings = {
     notice: {
-        error_upload: 'Во время загрузки файлов произошла ошибка...'
+        error_upload:       'Во время загрузки файлов произошла ошибка...',
+        error_task_create:  'Не удалось создать задачу...',
+        error_select_type:  'Вы не указали тип задачи...',
+        success_planner:    'Задача успешно создана'
+    },
+    color: {
+        info:   '#7a7a7acc',
+        danger: '#f44336',
+        white:  '#FFFFFF'
     }
 }
 
@@ -29,10 +37,12 @@ let vue = new Vue({
         message     : '',
         search      : '',
         messages    : [],
+        selected    : [],
         user        : {},
         users       : [],
         usersList   : [],
         uploads     : [],
+        triggerUpload: false,
         previews    : [],
         profile     : {
             assistants  : [],
@@ -54,7 +64,11 @@ let vue = new Vue({
             innerBox     : 0,
             startBox     : 0,
             messageBox   : 0
-        }
+        },
+        plannerMessages  : [],
+        plannerInType    : [],
+        plannerOneType   : '',
+        plannerError     : false
     },
     methods: {
         /**
@@ -103,7 +117,6 @@ let vue = new Vue({
          *
          */
         initializeConnection() {
-
             // Listen to the update event of users in the room
             socket.on('users:update', users => {
                 this.users = [...users]
@@ -114,9 +127,9 @@ let vue = new Vue({
                 for(let j = 0; j < this.usersList.length; j++) {
                     if(this.usersList[j].id === user.id) {
                         if(this.usersList[j].attributes.online === true){
-                            this.usersList[j].attributes.online = false;
+                           this.usersList[j].attributes.online = false;
                         } else {
-                            this.usersList[j].attributes.online = true;
+                           this.usersList[j].attributes.online = true;
                         }
                     }
                 }
@@ -142,25 +155,25 @@ let vue = new Vue({
 
                 if(message.user.roles === 'BOOKER') {
 
-                    let assistant = this.profile.assistants.find(u => u.id === message.user.id);
+                   let assistant = this.profile.assistants.find(u => u.id === message.user.id);
 
-                    if(!assistant) {
-                        let newAssistant = {};
-                        newAssistant.id             = message.user.id;
-                        newAssistant.email          = message.user.email;
-                        newAssistant.first_name     = message.user.first_name ;
-                        newAssistant.last_name      = message.user.last_name;
-                        newAssistant.roles          = message.user.roles;
-                        newAssistant.display_name   = message.user.display_name;
-                        newAssistant.short_name     = message.user.short_name;
+                   if(!assistant) {
+                       let newAssistant = {};
+                       newAssistant.id             = message.user.id;
+                       newAssistant.email          = message.user.email;
+                       newAssistant.first_name     = message.user.first_name ;
+                       newAssistant.last_name      = message.user.last_name;
+                       newAssistant.roles          = message.user.roles;
+                       newAssistant.display_name   = message.user.display_name;
+                       newAssistant.short_name     = message.user.short_name;
 
-                        this.profile.assistants.push(newAssistant);
-                        //  this.getProfileAssistant(this.user.room, this.user.id);
-                    }
+                       this.profile.assistants.push(newAssistant);
+                     //  this.getProfileAssistant(this.user.room, this.user.id);
+                   }
                 }
 
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
-                    outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
+                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
 
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
                 }
@@ -180,8 +193,10 @@ let vue = new Vue({
 
                 if (inMessage.user.id !== this.user.id) {
                     for (let i = 0; i < this.usersList.length; i++) {
+
                         if (this.usersList[i].id === inMessage.user.id && this.usersList[i].attributes.current) {
                             socket.emit('message:read', inMessage);
+
                         }
                     }
                 }
@@ -202,17 +217,19 @@ let vue = new Vue({
                 for (let i = this.messages.length - 1; i >= 0; i--) {
                     for (let j = 0; j < this.messages[i].collection.length; j++) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id === message.user.id)) {
-                            this.messages[i].collection[j].is_read = 1;
+                             this.messages[i].collection[j].is_read = 1;
                         }
                     }
                 }
             });
 
+
             socket.on('message:read_all', user => {
+
                 for (let i = this.messages.length - 1; i >= 0; i--) {
                     for (let j = this.messages[i].collection.length - 1; j >= 0; j--) {
                         if (!this.messages[i].collection[j].is_read && (this.messages[i].user.id !== user.id)) {
-                            this.messages[i].collection[j].is_read = 1;
+                             this.messages[i].collection[j].is_read = 1;
                         } else {
                             break;
                         }
@@ -241,7 +258,7 @@ let vue = new Vue({
             this.offsetMessage  = this.offsetMessage + 10;
 
             axios.post('messages/all?transport=messages', {'room_id': this.user.room, 'offset': this.offsetMessage})
-                .then(function (response) {
+                 .then(function (response) {
                     if(response.status === 200) {
 
                         if(response.data.result.length === 0) {
@@ -253,7 +270,7 @@ let vue = new Vue({
                             outMessage = $this.messages;
 
                         if(inMessage[0].collection[inMessage[0].collection.length - 1].from_id  === outMessage[0].collection[0].from_id &&
-                            inMessage[0].collection[inMessage[0].collection.length - 1].stack_id !== outMessage[0].collection[0].stack_id){
+                           inMessage[0].collection[inMessage[0].collection.length - 1].stack_id !== outMessage[0].collection[0].stack_id){
 
                             for(let i = inMessage[0].collection.length - 1; i >= 0; i--){
                                 outMessage[0].collection.unshift(inMessage[0].collection[i])
@@ -292,10 +309,10 @@ let vue = new Vue({
                     } else {
                         console.log('Error getting message list...')
                     }
-                })
-                .catch(error => {
+                 })
+                 .catch(error => {
                     console.error(error);
-                })
+                 })
         },
 
         /**
@@ -327,6 +344,7 @@ let vue = new Vue({
                 }
             };
             this.loading.messageBox = 0;
+            this.clearSelected();
             $('.modal-window-xl').modal('hide');
 
         },
@@ -369,13 +387,14 @@ let vue = new Vue({
                     this.loading.innerBox = 1;
 
                     axios.post('messages/all?transport=messages', {'room_id': this.user.room, 'in_upload': true})
-                        .then(function (response) {
+                         .then(function (response) {
                             if(response.status === 200) {
                                 if(response.data.result.length) {
 
                                     response.data.result.forEach(function(element) {
                                         this_clone.messages.unshift(element)
                                     });
+
 
                                     if(response.data.attachments.length) {
 
@@ -391,16 +410,17 @@ let vue = new Vue({
                                             objectPreview.size      = response.data.attachments[i].size;
 
                                             objectPreview.image     = response.data.attachments[i].thumb_xs
-                                                ? response.data.attachments[i].thumb_xs
-                                                :(response.data.attachments[i].thumb_sm
-                                                    ? response.data.attachments[i].thumb_sm
-                                                    : response.data.attachments[i].thumb);
+                                                                    ? response.data.attachments[i].thumb_xs
+                                                                    :(response.data.attachments[i].thumb_sm
+                                                                    ? response.data.attachments[i].thumb_sm
+                                                                    : response.data.attachments[i].thumb);
 
                                             objectPreview.blob      = response.data.attachments[i].type.match(/image*/)
-                                                ? objectPreview.image
-                                                : null;
+                                                                    ? objectPreview.image
+                                                                    : null;
 
                                             this_clone.previews.push(objectPreview);
+
                                         }
                                     }
 
@@ -418,10 +438,10 @@ let vue = new Vue({
                             } else {
                                 console.log('ошибка')
                             }
-                        })
-                        .catch(error => {
+                         })
+                         .catch(error => {
                             console.error(error);
-                        });
+                         });
 
                 }
             })
@@ -456,6 +476,7 @@ let vue = new Vue({
 
             let i = 0;
             let this_clone  = this;
+                this_clone.triggerUpload = true;
 
             const upload = function(i)  {
 
@@ -473,8 +494,8 @@ let vue = new Vue({
                 objectPreview.name              = event.target.files[i].name;
                 objectPreview.size              = filesize(event.target.files[i].size);
                 objectPreview.blob              = event.target.files[i].type.match(/image*/)
-                    ? URL.createObjectURL(event.target.files[i])
-                    : null;
+                                                ? URL.createObjectURL(event.target.files[i])
+                                                : null;
 
                 this_clone.previews.push(objectPreview);
 
@@ -482,7 +503,7 @@ let vue = new Vue({
                 data.append('room', this_clone.user.room);
 
                 axios.post('upload/loading?transport=uploads&sid='+random+'', data, objectHeader)
-                    .then(function (response) {
+                     .then(function (response) {
                         if(response.status === 200){
 
                             this_clone.previews[this_clone.previews.length - 1].status = 1;
@@ -494,9 +515,11 @@ let vue = new Vue({
 
                             if (i < event.target.files.length) {
                                 upload(i);
+                            }else {
+                                this_clone.triggerUpload = false;
                             }
                         }
-                    })
+                     })
                     .catch(error => {
                         this_clone.previews.splice(this_clone.previews[this_clone.previews.length - 1], 1);
                         alert(settings.notice.error_upload);
@@ -534,14 +557,14 @@ let vue = new Vue({
 
             // Delete attachments from date base
             axios.post('uploads/delete?transport=uploads', {'id': id, 'room': this.user.room, 'name': object.name, 'ext': object.ext})
-                .then(response => {
+                 .then(response => {
                     if(response.status === 200) {
 
                     }
-                })
-                .catch(error => {
+                 })
+                 .catch(error => {
                     console.log(error);
-                })
+                 })
         },
 
         /**
@@ -624,6 +647,137 @@ let vue = new Vue({
                 })
         },
 
+        openPlanner() {
+
+            this.plannerMessages = [];
+
+            for(let i = 0; i < this.messages.length; i++) {
+
+                for(let j = 0; j < this.messages[i].collection.length; j++) {
+
+                    if(!this.selected.find(e => e.id === this.messages[i].collection[j].stack_id))
+                        continue;
+
+                    if(this.plannerMessages.length) {
+                        if(this.plannerMessages[this.plannerMessages.length - 1].user.id === this.messages[i].user.id) {
+                            if(this.plannerMessages[this.plannerMessages.length - 1].collection[this.plannerMessages[this.plannerMessages.length - 1].collection.length - 1].from_id === this.messages[i].collection[j].from_id) {
+                                this.plannerMessages[this.plannerMessages.length - 1].collection.push(this.messages[i].collection[j])
+                                continue;
+                            }
+                        }
+                    }
+
+                    this.plannerMessages.push({});
+                    this.plannerMessages[this.plannerMessages.length - 1].user       = this.messages[i].user;
+                    this.plannerMessages[this.plannerMessages.length - 1].collection = [];
+                    this.plannerMessages[this.plannerMessages.length - 1].collection.push(this.messages[i].collection[j]);
+                }
+            }
+
+            this.plannerInType = [];
+
+            this.plannerInType.push({id: 1, type: 'Клиентский запрос'});
+            this.plannerInType.push({id: 2, type: 'Клиентский запрос 2'});
+            this.plannerInType.push({id: 3, type: 'Клиентский запрос 3'});
+        },
+
+        createPlanner() {
+
+            let formData    = new FormData(),
+                this_clone  = this,
+                form        = $("#form-planner"),
+                header      = form.find('[name="header"]').val(),
+                data        = form.serializeArray();
+
+            // Reset error message
+            this.plannerError = false;
+
+            // Check the field
+            for(let i = 0; i < data.length; i++) {
+                if(!data[i].value || data[i].value.length < 3) {
+                    this.plannerError = true;
+                } else
+                    formData.append(data[i].name, data[i].value);
+
+            }
+
+            // Check the type
+            if(!this.plannerOneType)
+                this.plannerError = true;
+
+            // Refund if the error
+            if(this.plannerError === true)
+                return;
+
+            // Sort the selected messages
+            for(let i = 0, m = []; i < this.selected.length; i ++) {
+                m[i] = this.selected[i].id;
+
+                if(i === this.selected.length - 1) {
+                    formData.append('selected', JSON.stringify(m));
+                }
+            }
+
+            // Add data to send
+            formData.append('type', this.plannerOneType);
+            formData.append('user', this.profile.user.id);
+
+            // Send to server
+            axios.post('task/create?transport=task', formData)
+                 .then(function (response) {
+                    if(response.status === 200){
+                        if(response.data.status) {
+                            this_clone.createAmaran(settings.notice.success_planner, header);
+                            this_clone.clearSelected();
+                        }
+                    }
+                 })
+                 .catch(error => {
+                     this_clone.createAmaran(settings.notice.error_task_create, header);
+                 })
+        },
+
+        clearSelected() {
+            this.plannerMessages = [];
+            this.selected = [];
+            this.plannerError = false;
+            this.plannerOneType = '';
+            $('.in-message').removeClass('in-message_selected');
+            $('#form-planner').find("input[type=text], textarea").val('');
+            $('#form-planner').find("button").removeClass('selected');
+            $('#send-taskmanager').modal('hide');
+        },
+
+        createAmaran(notice, title) {
+
+            $.amaran({
+                content:{
+                    title   : notice,
+                    message : title
+                },
+                theme:'tumblr'
+            });
+
+        },
+
+        createDatePicker() {
+            $('[name="datetime"]').datetimepicker({
+                locale: 'ru',
+                format: 'YYYY-MM-DD HH:mm:ss'
+            });
+        },
+
+        /**
+         * TITLE        : View method
+         * DESCRIPTION  : declension
+         *
+         */
+        declOfNum(number) {
+            let titles = ['сообщение', 'сообщения', 'сообщений'];
+            let cases = [2, 0, 1, 1, 1, 2];
+            return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
+        },
+
         /**
          * TITLE        : View method
          * DESCRIPTION  : Scroll down
@@ -646,7 +800,7 @@ let vue = new Vue({
 
         // Get user information
         axios.post('users/get?transport=users')
-            .then(response => {
+             .then(response => {
                 if(response.status === 200){
                     console.log('Пользовательские даные получены')
 
@@ -655,10 +809,10 @@ let vue = new Vue({
                 } else {
                     window.location = "/"
                 }
-            })
-            .catch(error => {
+             })
+             .catch(error => {
                 console.error(error);
-            })
+             })
     },
 
     /**
@@ -675,15 +829,15 @@ let vue = new Vue({
 
         // Get list users
         axios.post('users/list?transport=users')
-            .then(response => {
+             .then(response => {
                 if(response.status === 200) {
                     console.log('Получен список пользователей')
                     this.usersList = response.data;
                 }
-            })
-            .catch(error => {
+             })
+             .catch(error => {
                 console.log(error);
-            })
+             })
     }
 })
 
@@ -695,8 +849,19 @@ let vue = new Vue({
 Vue.component('message-stack', {
     props: ['item', 'user', 'index'],
     inheritAttrs: false,
+    methods: {
+        selectedMessage(id) {
+            if(vue.selected.find(e => e.id === id)) {
+                $(event.target).closest('.in-message').removeClass('in-message_selected');
+                vue.selected = vue.selected.filter(e => e.id !== id);
+            } else {
+                $(event.target).closest('.in-message').addClass('in-message_selected');
+                vue.selected.push({id: id});
+            }
+        }
+    },
     template:
-        `<div class="message-stack"
+     `<div class="message-stack"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
                      'mess-out' : item.user.roles === 'BOOKER',
                      'error'    : item.success    === false
@@ -707,7 +872,7 @@ Vue.component('message-stack', {
         </div>
         <div class="message-stack-content">
             <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id">
-                <div class="select-message">
+                <div class="select-message" @click="selectedMessage(value.stack_id)">
                     <span><i class="ion-checkmark-circled"></i></span>
                 </div>
                 <div class="text-message in-message_media" v-if="value.upload.length">
@@ -723,7 +888,7 @@ Vue.component('message-stack', {
                                 <span class="label-icon"><i class="ion-android-document"></i></span>
                                 <span class="label-text">
                                     <span>{{file.original_name}}</span>
-                                    <small class="text-muted">34kb</small>
+                                    <small class="text-muted">{{file.size}}</small>
                                 </span>  
                             </a>
                         </div>       
@@ -752,6 +917,51 @@ Vue.component('message-stack', {
             <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
         </div>     
     </div>`
+})
+
+Vue.component('planner-message', {
+    props: ['item', 'user'],
+    template:
+        `<div class="message-stack" 
+              :class="{'mess-in'  : item.user.roles === 'GUEST', 
+                       'mess-out' : item.user.roles === 'BOOKER'}"
+         >
+            <div class="message-stack-photo" v-if="item.user.roles === 'GUEST'">
+                <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
+            </div>
+            <div class="message-stack-content">
+                <div class="in-message" v-for="(value, key) in item.collection">
+                    <div class="text-message">
+                        <span class="body-message">{{value.body}}</span>
+                        <div class="info-message">
+                            <span>{{value.datetime}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
+                <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
+            </div> 
+        </div>`
+})
+
+Vue.component('planner-attachment', {
+    props: ['item', 'user'],
+    template:
+        `<div>
+            <div class="box-item" v-for="(value, key) in item.collection" v-if="value.upload.length">
+                <a class="item-attachment" v-for="(file, index) in value.upload" v-bind:href="file.thumb">
+                    <span class="label-icon" v-bind:data-msgid="file.name">
+                        <i class="ion-image" v-if="file.type.match(/image*/)"></i>
+                        <i class="ion-android-document" v-else></i>
+                    </span> 
+                    <span class="label-text">
+                        <span>{{file.original_name}}</span> 
+                        <small class="text-muted">{{file.size}}</small>
+                    </span>
+                </a>
+            </div>   
+        </div>`
 })
 
 Vue.component('attachment-view', {
@@ -829,7 +1039,7 @@ Vue.component('profile-file', {
             <div class="list-item" v-for="(file, index) in item.uploads">
                 <div class="list-left">
                     <span class="w-56 avatar">
-                        <img alt="." src="img/a3.jpg">
+                        <img alt="." src="img/ic_document.png">
                     </span>
                 </div>
                 <div class="list-body">
@@ -840,6 +1050,29 @@ Vue.component('profile-file', {
             </div>
         </div>`
 })
+
+Vue.component('planner-type', {
+    props: ['item'],
+    methods: {
+        click(evt) {
+
+            let button    = $(evt.target).closest('button'),
+                attribute = button.data('type');
+
+            $('.btn-type-task').removeClass('selected');
+
+            vue.plannerOneType = attribute;
+            button.addClass('selected');
+        }
+    },
+    template:
+        `<button type="button" class="btn btn-type-task m-b-sm" v-bind:data-type="item.id" @click="click($event)">
+            <i class="fa fa-plus pull-left"></i>
+            {{item.type}}
+        </button>`
+})
+
+
 
 
 
