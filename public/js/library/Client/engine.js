@@ -54,13 +54,13 @@ var app = (function($) {
 		
 		$('.row-tap').on('click', function() {
 			
-			var tab = $(this).data('tab');
+			/*var tab = $(this).data('tab');
 			
 			$(this).closest('.row-tab').find('.row-tap').removeClass('active');
 			$(this).addClass('active');
 			
 			$(this).closest('.row-main').find('.row-tab').removeClass('visible');
-			$('#'+tab).addClass('visible');
+			$('#'+tab).addClass('visible');*/
 		});
 	}
 

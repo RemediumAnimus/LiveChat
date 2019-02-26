@@ -23,10 +23,30 @@ const vue = new Vue({
         previews      : [],
         uploads       : [],
         offsetMessage : 0,
+        triggerDev    : true,
         triggerUpload : false,
         triggerScroll : false,
         triggerLoad   : true,
-        heightBox     : 0
+        heightBox     : 0,
+        startLoader   : false,
+        offsetPlanner : {
+            client: 0,
+            booker: 0
+        },
+        plannerList   : {
+            client: {
+                complete  : [],
+                incomplete: []
+            },
+            booker: {
+                complete  : [],
+                incomplete: []
+            }
+        },
+        triggerPlanner: {
+            client: false,
+            booker: false
+        }
     },
     methods: {
 
@@ -202,6 +222,9 @@ const vue = new Vue({
                                 console.log('ошибка')
                             }
 
+                             // Get list planner
+                             this_clone.initializePlanner();
+
                             socket.emit('message:update', {user: this_clone.user, update_from: false});
 
                          })
@@ -215,6 +238,71 @@ const vue = new Vue({
                     this.initializeConnection();
                 }
             })
+        },
+
+        /**
+         * TITLE        : Planner method
+         * DESCRIPTION  : Initialize list task
+         *
+         */
+        initializePlanner() {
+
+            this.getListPlanner(0, this.offsetPlanner.client);
+            this.getListPlanner(1, this.offsetPlanner.booker);
+        },
+
+        /**
+         * TITLE        : Planner method
+         * DESCRIPTION  : Get planner list
+         *
+         */
+        getListPlanner(type, offset) {
+
+            let this_clone = this;
+
+            axios.post('task/get?transport=planner&type='+type+'', {offset: offset})
+                .then(function (response) {
+                    if(response.status === 200){
+                        if(response.data.result) {
+                            switch(type) {
+                                case 0:
+                                    if(response.data.result.complete.length) {
+                                        this_clone.plannerList.client.complete.push(response.data.result.complete);
+                                    }
+                                    if(response.data.result.incomplete.length) {
+                                        for(let i = 0; i < response.data.result.incomplete.length; i++) {
+                                            this_clone.plannerList.client.incomplete.push(response.data.result.incomplete[i]);
+                                        }
+                                    }
+                                    this_clone.triggerPlanner.client = true;
+                                    break;
+                                case 1:
+                                    if(response.data.result.complete.length) {
+                                        this_clone.plannerList.booker.complete.push(response.data.result.complete);
+                                    }
+                                    if(response.data.result.incomplete.length) {
+                                        this_clone.plannerList.booker.incomplete.push(response.data.result.incomplete);
+                                    }
+                                    this_clone.triggerPlanner.booker = true;
+                                    break;
+                            }
+                        }
+                        else {
+                            switch(type) {
+                                case 0:
+                                    this_clone.triggerPlanner.client = true;
+                                    break;
+                                case 1:
+                                    this_clone.triggerPlanner.booker = true;
+                                    break;
+                            }
+                        }
+                    }
+                    console.log(this_clone.plannerList)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
         },
 
         /**
@@ -464,6 +552,17 @@ const vue = new Vue({
             $('#'+page).removeClass('visible');
         },
 
+        changeTab(event) {
+            let tap = $(event.target).closest('.row-tap'),
+                tab = tap.data('tab');
+
+            tap.closest('.row-tab').find('.row-tap').removeClass('active');
+            tap.addClass('active');
+
+            tap.closest('.row-main').find('.row-tab').removeClass('visible');
+            $('#'+tab).addClass('visible');
+        },
+
 
         /**
          * TITLE        : View method
@@ -483,6 +582,7 @@ const vue = new Vue({
      *
      */
     mounted() {
+        let this_clone = this;
         axios.post('users/get', {}).then(response => {
             if(response.status === 200){
                 this.user = response.data;
@@ -495,6 +595,10 @@ const vue = new Vue({
             alert('Указаны не валидные данные!')
         })
         window.autosize(this.$refs.textarea);
+
+        setTimeout(function() {
+            this_clone.startLoader = true;
+        }, 1000)
     }
 })
 
@@ -580,6 +684,44 @@ Vue.component('attachment-view', {
                 </div>
                 <div class="in-preview-preloader" v-else>
                     <span><i class="fa fa-circle-o-notch fa-spin fa-fw"></i></span>
+                </div>
+            </div>
+        </div>`
+});
+
+Vue.component('incomplete-task', {
+    props: ['item'],
+    methods: {
+        openNewTab(evt) {
+            vue.openNewTab(evt)
+        }
+    },
+    template:
+        `<div class="row-item icon-link" data-page="detail" v-on:click="openNewTab">
+            <div class="row-pic">
+                <img src="img/ic-my_task.svg" v-if="!item.whose">
+                <img src="img/ic-booker_task.svg" v-else="item.whose">
+            </div>
+            <div class="row-body">
+                <div class="row-header">
+                    <span>{{item.header}}</span>
+                </div>
+                <div class="row-text">
+                    <span>{{item.data_create}}</span>
+                </div>
+            </div>
+        </div>`
+});
+Vue.component('complete-task', {
+    props: ['item'],
+    template:
+        `<div class="row-item">
+            <div class="row-pic">
+                <img src="img/ic-ok.svg">
+            </div>
+            <div class="row-body">
+                <div class="row-header">
+                    <span>{{item.header}}</span>
                 </div>
             </div>
         </div>`

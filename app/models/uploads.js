@@ -200,10 +200,11 @@ const profile = function (room_id, type, offset, done){
  * DESCRIPTION  : Get`s message datetime format(d.m)
  *
  */
-const formatdate = function (datetime) {
+const formatdate = function (datetime, fullDate) {
 
     let newDate = '';
     let newDay  = datetime.getDate();
+    let newYear = datetime.getFullYear();
 
     if(new Date().getMonth() === datetime.getMonth()) {
         if(new Date().getDate() === datetime.getDate()) {
@@ -225,6 +226,10 @@ const formatdate = function (datetime) {
         case 11: newDate = declension(newDay, ['ноябрь', 'ноября', 'ноября']);          break;
         case 12: newDate = declension(newDay, ['декабрь', 'декабря', 'декабря']);       break;
     }
+
+    if(fullDate) {
+        return newDay+ ' ' +newDate+ ' ' +newYear;
+    }
     return newDay+ ' ' +newDate;
 
     function declension(number, titles) {
@@ -239,5 +244,6 @@ module.exports = {
     save,
     get,
     remove,
-    profile
+    profile,
+    formatdate
 };

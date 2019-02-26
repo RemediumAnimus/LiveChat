@@ -457,4 +457,34 @@ router.post("/task/create", (req, res) => {
 
 });
 
+/**
+ * TITLE        : Planner router
+ * DESCRIPTION  : Get list for planner
+ *
+ */
+router.post("/task/get", (req, res) => {
+
+    if (Object.keys(req.user).length === 0) {
+        return res.status(403).json({status: false, err: 'Access denied!'});
+    }
+
+    let objectUser      = req.user.id,
+        objectType      = req.query.type,
+        objectOffset    = req.body.offset,
+        objectRoom      = req.user.room_id;
+
+    Planners.getList(objectUser, objectRoom, objectType, objectOffset, function(err, result) {
+        if(err) {
+            return res.status(500).json({status: false, result: []});
+        }
+        if (result) {
+            return res.status(200).json({status: true, result: result});
+        }
+        else {
+            return res.status(200).json({status: false, result: []});
+        }
+    })
+
+});
+
 module.exports = router;
