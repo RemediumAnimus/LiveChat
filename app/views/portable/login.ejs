@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <!-- endbuild -->
+    <link rel="stylesheet" href="/css/portable/library/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/css/portable/main/login.css" type="text/css" />
+    <title>Клиенты ГБА: авторизация</title>
+</head>
+<body>
+
+<div class="container">
+    <div class="info">
+        <h1>Клиенты ГБА</h1><span>Интерфейс обновлен от 15 февраля 2019г. <i class="fa fa-thumbs-o-up"></i></span>
+    </div>
+</div>
+<div class="form">
+    <div class="thumbnail"><img src="img/shape.svg"/></div>
+    <form class="register-form">
+        <input type="text" placeholder="Логин"/>
+        <input type="password" placeholder="Пароль"/>
+        <input type="text" placeholder="Электронный адрес"/>
+        <button>Зарегистрироваться</button>
+        <p class="message">Уже зарегистрированы? <a @click="showForm()">Войти в аккаунт</a></p>
+    </form>
+    <form class="login-form" @submit.prevent="login()">
+        <input type="text" ref="username" placeholder="Логин"/>
+        <input type="password"  ref="password"placeholder="Пароль"/>
+        <button type="submit">Войти</button>
+        <p class="message">Не зарегистрированы? <a @click="showForm()">Создать аккаунт</a></p>
+    </form>
+</div>
+
+
+<form class="login-form-operator" @submit.prevent="login" style="position: relative">
+    <input ref="username" type="hidden" value="operator">
+    <input ref="password" type="hidden" value="12345">
+    <button class="btn" type="submit">Авторизоваться оператором</button>
+</form>
+
+<form class="login-form-client1" @submit.prevent="login" style="position: relative">
+    <input ref="username" type="hidden" value="client1">
+    <input ref="password" type="hidden" value="12345">
+    <button class="btn" type="submit">Артём Кузьминский</button>
+</form>
+
+<form class="login-form-client2" @submit.prevent="login" style="position: relative">
+    <input ref="username" type="hidden" value="client2">
+    <input ref="password" type="hidden" value="12345">
+    <button class="btn" type="submit">Илья Никифоров</button>
+</form>
+
+
+<!-- jQuery -->
+<script src="js/portable/library/jquery.js"></script>
+
+<!-- Vue JS -->
+<script src="js/portable/library/vue.js"></script>
+
+<!-- Axios -->
+<script src="js/portable/library/axios.min.js"></script>
+
+<!-- Index -->
+<script src="js/portable/main/login.js"></script>
+
+</body>
+</html>

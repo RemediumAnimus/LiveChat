@@ -113,6 +113,7 @@ const ioEvents = function(io) {
         socket.on('message:update', (object, callback) => {
 
             io.to(object.user.room).emit('message:read_all', object);
+
             messages.updateReadAll(object.user.id, object.update_from);
         });
 

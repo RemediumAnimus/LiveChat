@@ -31,7 +31,7 @@ router.get('/', function(req, res, next) {
         res.redirect('/chat');
     }
     else {
-        res.render('login');
+        res.render(config.chat.template.login);
     }
 });
 
@@ -402,22 +402,18 @@ router.post('/messages/all', [User.isAuthenticated, function(req, res) {
     Messages.get(objectRoom, objectOffset, function(err, result) {
         if (err)
             return res.status(500).send(err);
-        if (result) {
-            if(objectUploads) {
-                Uploads.get(objectPassword, objectRoom, function(err, out) {
-                    if (out) {
-                        return res.status(200).json({status: true, result: result, attachments: out});
-                    }
-                    else {
-                        return res.status(200).json({status: true, result: result, attachments: []});
-                    }
-                })
-            }
-            else return res.status(200).json({status: true, result: result, attachments: []});
 
-        } else {
-            return res.status(200).send({status: false, result: []});
+        if(objectUploads) {
+            Uploads.get(objectPassword, objectRoom, function(err, out) {
+                if (out) {
+                    return res.status(200).json({status: true, result: result, attachments: out});
+                }
+                else {
+                    return res.status(200).json({status: true, result: result, attachments: []});
+                }
+            })
         }
+        else return res.status(200).json({status: true, result: result, attachments: []});
     })
 }])
 
@@ -475,13 +471,13 @@ router.post("/task/get", (req, res) => {
 
     Planners.getList(objectUser, objectRoom, objectType, objectOffset, function(err, result) {
         if(err) {
-            return res.status(500).json({status: false, result: []});
+            return res.status(500).json({status: false});
         }
         if (result) {
             return res.status(200).json({status: true, result: result});
         }
         else {
-            return res.status(200).json({status: false, result: []});
+            return res.status(200).json({status: false});
         }
     })
 

@@ -13,8 +13,9 @@
 			"operator": "BOOKER"
 		},
 		"template": {
-			"client": "chat_user",
-			"operator": "operator"
+			"client": "mobile/index",
+			"operator": "portable/index",
+			"login"	  : "portable/login"
 		},
 		"messages": {
 			"type": {
