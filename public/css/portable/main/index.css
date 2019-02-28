@@ -1113,7 +1113,7 @@
 }
 #notify > .in-message_new {
 	width: 300px;
-	background: #313131e6;
+	background: rgba(49, 49, 49, 0.8);
 	padding: 0.7rem;
 	border-radius: .3rem;
 	margin-bottom: .3rem;

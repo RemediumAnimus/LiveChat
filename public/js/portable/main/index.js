@@ -221,23 +221,29 @@ let vue = new Vue({
 
             socket.on('hiddenMessage:new', message => {
 
+                let this_clone = this;
+
+                const newMessage = function() {
+
+                    this_clone.newMessage.push({
+                        id:             0,
+                        display_name:   message.user.display_name,
+                        short_name:     message.user.short_name,
+                        body:           message.collection[message.collection.length - 1].body
+                    });
+
+                    let this_item  = this_clone.newMessage.length - 1;
+
+                    this_clone.newMessage[this_clone.newMessage.length - 1].id = this_item;
+                    setTimeout(function(){this_clone.newMessage.splice(this_item, 1)}, 5000)
+                }
+
                 this.usersList.forEach(function(elem) {
                     if (elem.id === message.user.id && !elem.attributes.current) {
                         elem.attributes.unread = elem.attributes.unread + 1;
+                        newMessage();
                     }
                 });
-
-                this.newMessage.push({
-                    id:             0,
-                    display_name:   message.user.display_name,
-                    short_name:     message.user.short_name,
-                    body:           message.collection[message.collection.length - 1].body
-                });
-
-                let this_clone = this,
-                    this_item  = this_clone.newMessage.length - 1;
-                this_clone.newMessage[this_clone.newMessage.length - 1].id = this_item;
-                setTimeout(function(){this_clone.newMessage.splice(this_item, 1)}, 5000)
             });
 
             socket.on('message:read', message => {
