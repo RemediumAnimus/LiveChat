@@ -551,8 +551,8 @@
 .app-body > .app-loader-inner > img {
 	width: 100px;
 	height: 100px;
-	-webkit-animation: pulsing 2s infinite;
-	animation: pulsing 2s infinite;
+	/*-webkit-animation: pulsing 2s infinite;
+	animation: pulsing 2s infinite;*/
 }
 .app-body > .app-body-inner > .row-col {
 	overflow: hidden;

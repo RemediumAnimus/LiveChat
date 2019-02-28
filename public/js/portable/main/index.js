@@ -232,10 +232,10 @@ let vue = new Vue({
                         body:           message.collection[message.collection.length - 1].body
                     });
 
-                    let this_item  = this_clone.newMessage.length - 1;
+                    let this_item  = this_clone.newMessage[this_clone.newMessage.length - 1].id;
 
                     this_clone.newMessage[this_clone.newMessage.length - 1].id = this_item;
-                    setTimeout(function(){this_clone.newMessage.splice(this_item, 1)}, 5000)
+                    setTimeout(function(){this_clone.newMessage.splice(this_clone.newMessage[this_clone.newMessage.length - 1], 1)}, 5000)
                 }
 
                 this.usersList.forEach(function(elem) {
