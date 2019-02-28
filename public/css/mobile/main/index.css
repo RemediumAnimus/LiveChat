@@ -226,18 +226,10 @@ body #app {
     align-items: center;
 }
 #preloader > .row-body > img {
-     width: 70px;
-     height: 70px;
+     width: 90px;
+     height: 90px;
      /*-webkit-animation: pulsing 2s infinite;
      animation: pulsing 2s infinite;*/
-}
-#preloader > .row-body > span {
-    padding: 1rem;
-    text-transform: none;
-    font-size: 22px;
-    font-family: SFUITheader;
-    line-height: 18px;
-    color: #292929;
 }
 
 /* CHAT HEADER */
@@ -528,6 +520,13 @@ body #app {
     background-color: #f4f7f9;
     border-radius: 12px;
 	padding: 5px;
+}
+#chat .row-content .box-message > .message-stack.mess-out > .message-stack-content > .in-message.in_message_notify > .text-message > .header-message {
+    color: #ff8414;
+    font-weight: 600;
+    line-height: 14px;
+    letter-spacing: -0.28px;
+    padding-bottom: 0.5rem;
 }
 
 /* CHAT FOOTER */
@@ -1003,7 +1002,7 @@ body #app {
 /* DETAIL HEADER */
 
 #detail {
-    background: #F8F8F8;
+    background: #FFFFFF;
 }
 #detail > .row-header {
     position: absolute;
@@ -1053,9 +1052,6 @@ body #app {
     text-align: center;
     padding: .5rem 1rem 0rem;
 }
-#detail > .row-footer {
-    border-top: 1px solid #d8d8d8;
-}
 #detail > .row-content {
     height: 100%;
 }
@@ -1073,27 +1069,24 @@ body #app {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
-#detail > .row-content > .row-body > .row-inner > .row-box {
-    padding: 1rem 0rem;
-    padding-bottom: 2rem;
-
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-header > label {
-    font-family: SFUIText;
-    font-size: 13px;
-    font-weight: 400;
-    padding: 0rem .7rem;
-    text-transform: uppercase;
-}
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-header > .row-list {
     background: #FFFFFF;
     padding: .7rem .7rem;
-    border-top: 1px solid #d8d8d8;
-    border-bottom: 1px solid #d8d8d8;
-    margin: 0px;
-    margin-top: .7rem;
     font-weight: normal;
     box-sizing: border-box;
+    position: relative;
+    margin-top: 0;
+    padding-top: 1rem;
+}
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-header > .row-list:after{
+    content: "";
+    background: #d8d8d8;
+    width: calc(100% - 0.7rem);
+    height: 1px;
+    position: absolute;
+    right: 0;
+    left: 0.7rem;
+    bottom: -1px;
 }
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-header > .row-list > li {
     display: flex;
@@ -1122,79 +1115,19 @@ body #app {
     font-weight: 400;
     text-transform: uppercase;
 }
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body {
-    margin-top: 1rem;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > label {
-    font-family: SFUIText;
-    font-size: 13px;
-    font-weight: 400;
-    padding: 0rem .7rem;
-    text-transform: uppercase;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list {
-    background: #FFFFFF;
-    border-top: 1px solid #d8d8d8;
-    border-bottom: 1px solid #d8d8d8;
-    margin-top: .7rem;
-}
 #detail > .row-content > .row-body > .row-inner > .row-box .row-error {
-    color: #878b9e;
+    color: #292929;
     font-family: SFUIText;
     font-weight: 400;
     font-size: 15px;
     padding: .7rem;
 }
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item {
-    display: flex;
-    align-items: center;
-    padding: 0.5rem .7rem;
-    position: relative;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item:after {
-    content: "";
-    background: #efefef;
-    width: calc(100% - 0.7rem);
-    height: 1px;
-    position: absolute;
-    right: 0;
-    left: 0.7rem;
-    bottom: -1px;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item:last-child:after {
-    display: none;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item:last-child {
-    margin-bottom: 0;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item > .row-pic {
-    padding-right: .7rem;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item > .row-pic > img {
-    width: 44px;
-    vertical-align: middle;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item > .row-body {
-     display: flex;
-     flex-direction: column;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item > .row-body > .row-header {
-    line-height: 24px;
-    color: #292929;
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-text  {
+    color: #878b9e;
     font-family: SFUIText;
-    font-weight: 500;
-    letter-spacing: -0.36px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-body > .row-list > .row-item > .row-body > .row-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #717171;
-    width: 100%;
-    font-size: 14px;
+    font-weight: 400;
+    font-size: 15px;
+    padding: .7rem;
 }
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-comment {
     margin-top: 1rem;
@@ -1205,12 +1138,15 @@ body #app {
     font-weight: 400;
     padding: 0rem .7rem;
     text-transform: uppercase;
+    color: #878b9e;
 }
-#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list {
-    background: #FFFFFF;
-    border-top: 1px solid #d8d8d8;
-    border-bottom: 1px solid #d8d8d8;
-    margin-top: .7rem;
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-preloader {
+    position: absolute;
+    left: 45%;
+    top: 60%;
+    padding: .7rem;
+    text-align: center;
+    color: #878b9e;
 }
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item {
      display: flex;
@@ -1232,14 +1168,55 @@ body #app {
      color: #878b9e;
      padding-left: .3rem;
 }
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body {
+    padding-bottom: 0.7rem;
+}
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body:last-child {
+    padding-bottom: 0;
+}
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list {
-    padding: 0.5rem 0;
+
 }
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list > li {
    display: block;
+    padding: 0.5rem 0;
 }
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list img {
     width: 100%
+}
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list > .item-attachment {
+     display: flex;
+     align-items: center;
+}
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list > .item-attachment > .label-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    white-space: nowrap;
+    vertical-align: baseline;
+    font-weight: bold;
+    background-color: #2196f3;
+    color: #fff;
+    border-radius: 500px;
+    padding: 5px 9px;
+}
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list > .item-attachment > .label-text {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list > .item-attachment > .label-text > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list > .item-attachment > .label-text > small {
+    text-transform: uppercase;
 }
 
 .row-developer {

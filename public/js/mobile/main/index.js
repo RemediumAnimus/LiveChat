@@ -76,7 +76,11 @@ const vue = new Vue({
         triggerPlanner: {
             client: false,
             booker: false
-        }
+        },
+        openPlanner: {
+            comment: []
+        },
+        plannerTrigger: true
     },
     methods: {
 
@@ -273,9 +277,33 @@ const vue = new Vue({
          *
          */
         initializePlanner() {
+            let this_clone = this;
+            axios.post('task/list?transport=planner&type=all')
+                 .then(function (response) {
+                    if(response.status === 200){
+                        if(response.data.status) {
 
-            this.getListPlanner(0, this.offsetPlanner.client);
-            this.getListPlanner(1, this.offsetPlanner.booker);
+                            this_clone.plannerList.client.complete   = response.data.result[0].complete.length
+                                                                     ? response.data.result[0].complete
+                                                                     : [];
+
+                            this_clone.plannerList.client.incomplete = response.data.result[0].incomplete.length
+                                                                     ? response.data.result[0].incomplete
+                                                                     : [];
+
+                            this_clone.plannerList.booker.complete   = response.data.result[1].complete.length
+                                                                     ? response.data.result[1].complete
+                                                                     : [];
+
+                            this_clone.plannerList.booker.incomplete = response.data.result[1].incomplete.length
+                                                                     ? response.data.result[1].incomplete
+                                                                     : [];
+                        }
+                    }
+                 })
+                 .catch(error => {
+                    console.log(error)
+                 })
         },
 
         /**
@@ -287,14 +315,16 @@ const vue = new Vue({
 
             let this_clone = this;
 
-            axios.post('task/get?transport=planner&type='+type+'', {offset: offset})
-                .then(function (response) {
+            axios.post('task/download?transport=planner&type='+type+'', {offset: offset})
+                 .then(function (response) {
                     if(response.status === 200){
                         if(response.data.result) {
                             switch(type) {
                                 case 0:
                                     if(response.data.result.complete.length) {
-                                        this_clone.plannerList.client.complete.push(response.data.result.complete);
+                                        for(let i = 0; i < response.data.result.complete.length; i++) {
+                                            this_clone.plannerList.client.complete.push(response.data.result.complete[i]);
+                                        }
                                     }
                                     if(response.data.result.incomplete.length) {
                                         for(let i = 0; i < response.data.result.incomplete.length; i++) {
@@ -305,10 +335,14 @@ const vue = new Vue({
                                     break;
                                 case 1:
                                     if(response.data.result.complete.length) {
-                                        this_clone.plannerList.booker.complete.push(response.data.result.complete);
+                                        for(let i = 0; i < response.data.result.complete.length; i++) {
+                                            this_clone.plannerList.booker.complete.push(response.data.result.complete[i]);
+                                        }
                                     }
                                     if(response.data.result.incomplete.length) {
-                                        this_clone.plannerList.booker.incomplete.push(response.data.result.incomplete);
+                                        for(let i = 0; i < response.data.result.incomplete.length; i++) {
+                                            this_clone.plannerList.booker.incomplete.push(response.data.result.incomplete[i]);
+                                        }
                                     }
                                     this_clone.triggerPlanner.booker = true;
                                     break;
@@ -325,10 +359,10 @@ const vue = new Vue({
                             }
                         }
                     }
-                })
-                .catch(error => {
+                 })
+                 .catch(error => {
                     console.log(error)
-                })
+                 })
         },
 
         /**
@@ -636,12 +670,13 @@ Vue.component('message-stack', {
 <div class="message-stack"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
                      'mess-out' : item.user.roles === 'BOOKER',
+                     'mess-out' : item.user.roles === 'SYSTEM',
                      'error'    : item.success    === false
                     }"
     >
     <div class="message-stack-photo">AK</div>
     <div class="message-stack-content">
-        <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id">
+        <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'message'">
             <div class="text-message in-message_media" v-if="value.upload.length">
                 <div class="body-message">
                     <span v-if="value.body">{{value.body}}</span>
@@ -677,6 +712,15 @@ Vue.component('message-stack', {
                 <span class="status-text" v-else>
                     <span>Отправлено</span><img src="img/ic-accepted.svg">
                 </span>
+            </div>
+        </div>
+        <div class="in-message in_message_notify" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'notify'">
+            <div class="text-message">
+                <div class="header-message">У бухгалтера новая задача</div>
+                <span class="body-message">{{value.body}}</span>
+                <div class="info-message">
+                    <span>{{value.datetime}}</span>
+                </div>
             </div>
         </div>  
     </div>
@@ -715,12 +759,38 @@ Vue.component('attachment-view', {
 Vue.component('incomplete-task', {
     props: ['item'],
     methods: {
-        openNewTab(evt) {
-            vue.openNewTab(evt)
+        openNewTab(evt, id) {
+            vue.plannerTrigger = true;
+            let tab  = $(evt.target).closest('.row-tab').attr('id'),
+                type = $(evt.target).closest('.row-list').data('type'),
+                info = vue.plannerList[tab][type].find(t => t.id === id);
+
+            if(info) {
+                vue.openPlanner = info;
+                this.loadComment(id);
+            }
+            vue.openNewTab(evt);
+        },
+        loadComment(id) {
+            vue.openPlanner.comment = [];
+            vue.plannerTrigger = false;
+            /*
+            axios.post('task/comment?transport=planner', {id: id, offset: 0})
+                 .then(function (response) {
+                     if (response.status === 200) {
+                         if (response.data.status) {
+                             vue.openPlanner.comment = response.data.result;
+                             vue.plannerTrigger = false;
+                         }
+                     }
+                 }).catch(error => {
+                    console.log(error);
+                 })
+            */
         }
     },
     template:
-        `<div class="row-item icon-link" data-page="detail" v-on:click="openNewTab">
+        `<div class="row-item icon-link" data-page="detail" v-on:click="openNewTab($event, item.id)">
             <div class="row-pic">
                 <img src="img/ic-my_task.svg" v-if="!item.whose">
                 <img src="img/ic-booker_task.svg" v-else="item.whose">
@@ -749,3 +819,40 @@ Vue.component('complete-task', {
             </div>
         </div>`
 });
+
+/**
+ * TITLE        : Component registration
+ * DESCRIPTION  : Registers a component in a vue instance
+ *
+ */
+Vue.component('planner-stack', {
+    props: ['item', 'user', 'index'],
+    template: `
+                <div class="row-item">
+                    <div class="row-header">
+                        <span class="violet" v-if="item.user.id === user.id">{{item.user.display_name}}</span>
+                        <span v-else>Исполнитель</span>
+                        <span>{{item.collection[item.collection.length - 1].datetime}}</span>
+                    </div>
+                    <div class="row-body" v-for="(value, key) in item.collection">
+                        <div class="row-text" v-if="!value.upload.length">
+                            <span>{{value.body}}</span>
+                        </div>
+                        <div class="row-list" v-if="value.upload.length">
+                            <span>{{value.body}}</span>
+                            <li v-for="(file, index) in value.upload" v-if="file.type.match(/image*/)">
+                                <img class="img" v-if="file.thumb_xs" v-bind:src="file.thumb_xs"></img>
+                                <img class="img" v-else-if="file.thumb_sm" v-bind:src="file.thumb_sm"></img>
+                                <img class="img" v-else v-bind:src="file.thumb"></img>
+                            </li>
+                            <li class="item-attachment" v-for="(file, index) in value.upload" v-if="!file.type.match(/image*/)">
+                                <span class="label-icon"><i class="fa fa-file"></i></span>
+                                <span class="label-text">
+                                    <span>{{file.original_name}}</span> 
+                                    <small>{{file.size}}</small>
+                                </span>
+                            </li>
+                        </div>
+                    </div>
+                </div>`
+})

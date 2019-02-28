@@ -16,21 +16,22 @@ const filesize  = require('filesize');
  * DESCRIPTION  : Creates a new message
  *
  */
-const save = function (from_id, room_id, type, body, upload_id, stack_id, done) {
+const save = function (from_id, room_id, type, category, body, upload_id, stack_id, done) {
 
     let queryString = 'INSERT INTO messages (`from_id`,       ' +
         '                                    `room_id`,       ' +
         '                                    `stack_id`,      ' +
         '                                    `type`,          ' +
+        '                                    `category`,      ' +
         '                                    `body`)          ' +
-        'VALUES                             (?, ?, ?, ?, ?)   ' ;
+        'VALUES                             (?, ?, ?, ?, ?, ?)' ;
 
     if(type !== config.chat.messages.type.text)
     {
         body = null;
     }
 
-    mysql.query(sql.format(queryString, [from_id, room_id, stack_id, type, body]), function(err, result){
+    mysql.query(sql.format(queryString, [from_id, room_id, stack_id, type, category, body]), function(err, result){
         if (err)
             return done(err);
         if (!result.insertId) {
@@ -68,6 +69,7 @@ const get = function (room_id, offset, done) {
         '                       m.`from_id`,                    ' +
         '                       m.`body`,                       ' +
         '                       m.`type`,                       ' +
+        '                       m.`category`,                   ' +
         '                       m.`stack_id`,                   ' +
         '                       m.`datetime`,                   ' +
         '                       m.`is_read`,                    ' +
@@ -111,10 +113,9 @@ const get = function (room_id, offset, done) {
             }
 
             // If an object with such a stack exists in the array
+            if(i > 0 && objectPrev.collection[objectMessagePrev].stack_id === result[i].stack_id && objectPrev.collection[objectMessagePrev].category === result[i].category) {
 
-            if(i > 0 && objectPrev.collection[objectMessagePrev].stack_id === result[i].stack_id) {
-
-                if(result[i].type !== config.chat.messages.type.text) {
+                if(result[i].type === config.chat.messages.type.image || result[i].type === config.chat.messages.type.document) {
 
                     objectPrev.collection[objectMessagePrev].upload.unshift({
                         id              : result[i].up_id,
@@ -135,6 +136,7 @@ const get = function (room_id, offset, done) {
                     objectPrev.collection[objectMessagePrev].id        = result[i].id;
                     objectPrev.collection[objectMessagePrev].body      = result[i].body;
                     objectPrev.collection[objectMessagePrev].type      = result[i].type;
+                    objectPrev.collection[objectMessagePrev].category  = result[i].category;
                     objectPrev.collection[objectMessagePrev].stack_id  = result[i].stack_id;
                     objectPrev.collection[objectMessagePrev].is_read   = result[i].is_read;
                 }
@@ -144,24 +146,9 @@ const get = function (room_id, offset, done) {
 
             if(i > 0 && objectPrev.collection[objectMessagePrev].upload.length === 0) {
 
-                if(result[i].from_id === objectPrev.collection[objectMessagePrev].from_id) {
+                if(result[i].from_id === objectPrev.collection[objectMessagePrev].from_id && result[i].category === objectPrev.collection[objectMessagePrev].category) {
 
-                    if(result[i].type === config.chat.messages.type.text) {
-
-                        objectPrev.collection.unshift({
-                            id          : result[i].id,
-                            from_id     : result[i].from_id,
-                            datetime    : result[i].datetime,
-                            body        : result[i].body,
-                            type        : result[i].type,
-                            stack_id    : result[i].stack_id,
-                            is_read     : result[i].is_read,
-                            upload      : []
-                        });
-
-                        continue;
-                    }
-                    else {
+                    if(result[i].type === config.chat.messages.type.image || result[i].type === config.chat.messages.type.document) {
 
                         objectPrev.collection[0].upload.unshift({
                             id              : result[i].up_id,
@@ -175,6 +162,22 @@ const get = function (room_id, offset, done) {
                             thumb_sm        : result[i].name_sm
                                             ? getPath(room_id, result[i].name_sm, result[i].ext)
                                             : result[i].name_sm
+                        });
+
+                        continue;
+                    }
+                    else {
+
+                        objectPrev.collection.unshift({
+                            id          : result[i].id,
+                            from_id     : result[i].from_id,
+                            datetime    : result[i].datetime,
+                            body        : result[i].body,
+                            type        : result[i].type,
+                            category    : result[i].category,
+                            stack_id    : result[i].stack_id,
+                            is_read     : result[i].is_read,
+                            upload      : []
                         });
 
                         continue;
@@ -199,12 +202,13 @@ const get = function (room_id, offset, done) {
                 datetime        : result[i].datetime,
                 body            : result[i].body,
                 type            : result[i].type,
+                category        : result[i].category,
                 stack_id        : result[i].stack_id,
                 is_read         : result[i].is_read,
                 upload          : []
             });
 
-            if(result[i].type !== config.chat.messages.type.text) {
+            if(result[i].type === config.chat.messages.type.image || result[i].type === config.chat.messages.type.document) {
 
                 object[i].collection[object[i].collection.length - 1].upload.unshift({
                     id              : result[i].up_id,

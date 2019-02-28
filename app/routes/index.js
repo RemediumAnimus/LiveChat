@@ -403,6 +403,10 @@ router.post('/messages/all', [User.isAuthenticated, function(req, res) {
         if (err)
             return res.status(500).send(err);
 
+        if(!result.length) {
+            return res.status(200).json({status: false, result: [], attachments: []});
+        }
+
         if(objectUploads) {
             Uploads.get(objectPassword, objectRoom, function(err, out) {
                 if (out) {
@@ -458,7 +462,7 @@ router.post("/task/create", (req, res) => {
  * DESCRIPTION  : Get list for planner
  *
  */
-router.post("/task/get", (req, res) => {
+router.post("/task/download", (req, res) => {
 
     if (Object.keys(req.user).length === 0) {
         return res.status(403).json({status: false, err: 'Access denied!'});
@@ -469,7 +473,64 @@ router.post("/task/get", (req, res) => {
         objectOffset    = req.body.offset,
         objectRoom      = req.user.room_id;
 
-    Planners.getList(objectUser, objectRoom, objectType, objectOffset, function(err, result) {
+    Planners.download(objectUser, objectRoom, objectType, objectOffset, function(err, result) {
+        if(err) {
+            return res.status(500).json({status: false});
+        }
+        if (result) {
+            return res.status(200).json({status: true, result: result});
+        }
+        else {
+            return res.status(200).json({status: false});
+        }
+    })
+
+});
+
+/**
+ * TITLE        : Planner router
+ * DESCRIPTION  : Get list for planner start loading
+ *
+ */
+router.post("/task/list", (req, res) => {
+
+    if (Object.keys(req.user).length === 0) {
+        return res.status(403).json({status: false, err: 'Access denied!'});
+    }
+
+    let objectUser      = req.user.id,
+        objectRoom      = req.user.room_id,
+        objectType      = [0, 1];
+
+    Planners.list(objectUser, objectRoom, objectType, function(err, result) {
+        if(err) {
+            return res.status(500).json({status: false});
+        }
+        if (result) {
+            return res.status(200).json({status: true, result: result});
+        }
+        else {
+            return res.status(200).json({status: false});
+        }
+    })
+
+});
+
+/**
+ * TITLE        : Planner router
+ * DESCRIPTION  : Get list for planner start loading
+ *
+ */
+router.post("/task/comment", (req, res) => {
+
+    if (Object.keys(req.user).length === 0) {
+        return res.status(403).json({status: false, err: 'Access denied!'});
+    }
+
+    let objectItem = req.body.id,
+        objectRoom = req.user.room;
+
+    Planners.getComment(objectItem, objectRoom, function(err, result) {
         if(err) {
             return res.status(500).json({status: false});
         }

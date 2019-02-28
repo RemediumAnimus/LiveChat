@@ -208,8 +208,10 @@ const formatdate = function (datetime, fullDate) {
 
     if(new Date().getMonth() === datetime.getMonth()) {
         if(new Date().getDate() === datetime.getDate()) {
-            newDate = 'Сегодня';
-            return newDate;
+            if(!fullDate) {
+                newDate = 'Сегодня';
+                return newDate;
+            }
         }
     }
     switch(datetime.getMonth()) {

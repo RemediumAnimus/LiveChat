@@ -302,8 +302,8 @@
       awesomeTheme: function(data) {
         return "<i class=\"icon " + data.icon + " icon-large\"></i><p class=\"bold\">" + data.title + "</p><p><span>" + data.message + "</span><span class=\"light\">" + data.info + "</span></p>";
       },
-      userTheme: function(data) {
-        return "<div class=\"icon\"><img src=\"" + data.img + "\" alt=\"\" /></div><div class=\"info\"><b>" + data.user + "</b>" + data.message + "</div>";
+      messageTheme: function(data) {
+        return "<div class=\"row-icon\"><img src=\"" + data.img + "\" alt=\"\" /></div><div class=\"row-body\"><label>" + data.user + "</label><span>" + data.message + "</span></div>";
       },
       colorfulTheme: function(data) {
         var bgcolor, color;

@@ -840,13 +840,20 @@
 	transition: left 0.3s;
 	left: 0px;
 }
-
 .box-message .in-message.in-message_selected .select-message {
 	opacity: 1;
 }
 .box-message .in-message.in-message_selected .select-message i {
 	color: rgba(33, 150, 243, 0.8);
 }
+.box-message .in-message.in-message_notify > .text-message > .header-message {
+	color: #ff8414;
+	font-weight: 600;
+	line-height: 14px;
+	letter-spacing: -0.28px;
+	padding-bottom: 0.5rem;
+}
+
 .navbar-message-count {
 	font-size: 1rem;
 }

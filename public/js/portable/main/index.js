@@ -34,6 +34,19 @@ const settings = {
 let vue = new Vue({
     el: '#app',
     data: {
+        config      : {
+            message: {
+                type: {
+                    text: "text",
+                    image: "image",
+                    document: "document"
+                },
+                category: {
+                    message: "message",
+                    notify: "notify"
+                }
+            }
+        },
         message     : '',
         search      : '',
         messages    : [],
@@ -85,7 +98,7 @@ let vue = new Vue({
 
             const text = {
                 text  : this.message,
-                type  : 'text'
+                type  : this.config.message.type.text
             };
 
             if(this.message.length > 0) {
@@ -95,7 +108,7 @@ let vue = new Vue({
             // Body message
             const message = {
                 id          : this.user.id,
-                text        : this.message,
+                category    : this.config.message.category.message,
                 messages    : this.uploads,
             }
 
@@ -780,14 +793,34 @@ let vue = new Vue({
                  .then(function (response) {
                     if(response.status === 200){
                         if(response.data.status) {
-                            this_clone.createAmaran(settings.notice.success_planner, header);
+                            this_clone.sendNotify(header);
                             this_clone.clearSelected();
                         }
                     }
                  })
                  .catch(error => {
-                     this_clone.createAmaran(settings.notice.error_task_create, header);
+                     console.log(error)
                  })
+        },
+
+        sendNotify(header) {
+
+            // Body message
+            const message = {
+                id          : 1,
+                category    : this.config.message.category.notify,
+                messages    : [{
+                    text: header,
+                    type: this.config.message.type.text
+                }],
+            };
+
+            // Sending a new message
+            socket.emit('message:create', message, err => {
+                if (err) {
+                    console.error(err)
+                }
+            })
         },
 
         clearSelected() {
@@ -799,18 +832,6 @@ let vue = new Vue({
             $('#form-planner').find("input[type=text], textarea").val('');
             $('#form-planner').find("button").removeClass('selected');
             $('#send-taskmanager').modal('hide');
-        },
-
-        createAmaran(notice, title) {
-
-            $.amaran({
-                content:{
-                    title   : notice,
-                    message : title
-                },
-                theme:'tumblr'
-            });
-
         },
 
         createDatePicker() {
@@ -914,7 +935,7 @@ Vue.component('message-stack', {
     template:
      `<div class="message-stack"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
-                     'mess-out' : item.user.roles === 'BOOKER',
+                     'mess-out' : item.user.roles === 'BOOKER' || item.user.roles === 'SYSTEM',
                      'error'    : item.success    === false
                     }"
      >
@@ -922,7 +943,7 @@ Vue.component('message-stack', {
             <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
         </div>
         <div class="message-stack-content">
-            <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id">
+            <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'message'">
                 <div class="select-message" @click="selectedMessage(value.stack_id)">
                     <span><i class="ion-checkmark-circled"></i></span>
                 </div>
@@ -963,10 +984,22 @@ Vue.component('message-stack', {
                     </div>
                 </div>
             </div>
+            <div class="in-message in-message_notify" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'notify'">
+                <div class="text-message">
+                    <div class="header-message">У бухгалтера новая задача</div>
+                    <span class="body-message">{{value.body}}</span>
+                    <div class="info-message">
+                        <span>{{value.datetime}}</span>
+                    </div>
+                </div>
+            </div> 
         </div>    
         <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
             <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
-        </div>     
+        </div>    
+        <div class="message-stack-photo" v-if="item.user.roles === 'SYSTEM'">
+            <span class="w-40 avatar img-circle"><img src="img/shape.svg"></span>
+        </div>   
     </div>`
 })
 

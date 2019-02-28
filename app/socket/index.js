@@ -64,8 +64,12 @@ const ioEvents = function(io) {
 
                     let type = messages.type(data.messages[i].type);
 
+                    if(data.category === config.chat.messages.category.notify) {
+                        user.id = config.user.system;
+                    }
+
                     // Save the message in the database
-                    messages.save(user.id, user.room, type, data.text, data.messages[i].id, stack, function(err, result) {
+                    messages.save(user.id, user.room, type, data.category, data.messages[i].text, data.messages[i].id, stack, function(err, result) {
 
                         // Create`s a collection of data
                         let collectionData                  = {};
@@ -78,6 +82,7 @@ const ioEvents = function(io) {
                             is_read  : 0,
                             stack_id : stack,
                             type     : type,
+                            category : data.category,
                             upload   : []
                         }];
 

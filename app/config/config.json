@@ -22,8 +22,15 @@
 				"text"  	: "text",
 				"image" 	: "image",
 				"document"  : "document"
+			},
+			"category": {
+				"message": "message",
+				"notify": "notify"
 			}
 		}
+	},
+	"user": {
+		"system": 1
 	},
 	"path": {
 		"uploadView": "http://localhost:3000/upload/"

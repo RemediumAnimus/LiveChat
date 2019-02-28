@@ -300,23 +300,22 @@
 
 .amaran.user {
     width: 300px;
-    min-height: 100px;
+    min-height: 80px;
     background: #f3f3f3;
     color: #222;
     margin: 15px;
     font-family: "Open Sans", Helvetica, Arial, sans-serif;
     font-size: 13px;
     font-weight: 300;
-    box-shadow: 1px 1px 1px #000;
+    box-shadow: 0px 0px 1px 1px #b7b9ba;
     border-radius: 0;
     padding: 0
 }
 
 .amaran.user .icon {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     position: relative;
-    background: #000;
     float: left
 }
 
@@ -326,7 +325,9 @@
 
 .amaran.user .info {
     padding-left: 110px;
-    padding-top: 10px
+    height: 80px;
+    color: rgb(33, 33, 33);
+    background-color: #f4f7f9;
 }
 
 .amaran.user b {
@@ -347,4 +348,42 @@
 .amaran.user.green {
     background: #78ba00;
     color: #fff
+}
+
+
+.amaran.message {
+    width: 300px;
+    min-height: 80px;
+    background: #f3f3f3;
+    color: #222;
+    margin: 15px;
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    box-shadow: 0px 0px 1px 1px #b7b9ba;
+    border-radius: 0;
+    padding: 0
+}
+
+.amaran.message > .row-icon {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    float: left
+}
+
+.amaran.message img {
+    max-width: 100%
+}
+
+.amaran.message .info {
+    padding-left: 110px;
+    height: 80px;
+    color: rgb(33, 33, 33);
+    background-color: #f4f7f9;
+}
+
+.amaran.message > .row-body {
+    display: block;
+    font-size: 16px
 }

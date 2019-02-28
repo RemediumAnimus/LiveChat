@@ -22,7 +22,6 @@
         <div class="row-main" id="preloader" v-if="!startLoader">
              <div class="row-body">
                   <img src="img/shape.svg">
-                 <span>Главбух Ассистент</span>
              </div>
         </div>
         <!-- END LOADER PAGE -->
@@ -140,7 +139,7 @@
                     </div>
                 </div>
                 <div class="row-tab">
-                    <div class="row-tap active" data-tab="my" v-on:click="changeTab">
+                    <div class="row-tap active" data-tab="client" v-on:click="changeTab">
                         <span>Для меня</span>
                     </div>
                     <div class="row-tap" data-tab="booker" v-on:click="changeTab">
@@ -151,10 +150,10 @@
             <div class="row-content">
                 <div class="row-body">
                     <div class="row-inner">
-                        <div class="row-tab visible" id="my">
+                        <div class="row-tab visible" id="client">
                             <div class="row-box">
                                 <span class="row-label">Предстоящие задачи</span>
-                                <div class="row-list" v-if="plannerList.client.incomplete.length">
+                                <div class="row-list" data-type="incomplete" v-if="plannerList.client.incomplete.length">
                                     <incomplete-task
                                         v-for="(p, idx) in plannerList.client.incomplete"
                                         :item="p"
@@ -169,7 +168,7 @@
                             </div>
                             <div class="row-box">
                                 <span class="row-label">Выполненные дела</span>
-                                <div class="row-list accepted" v-if="plannerList.client.complete.length">
+                                <div class="row-list accepted" data-type="complete" v-if="plannerList.client.complete.length">
                                     <complete-task
                                         v-for="(p, idx) in plannerList.client.complete"
                                         :item="p"
@@ -186,7 +185,7 @@
                         <div class="row-tab" id="booker">
                             <div class="row-box">
                                 <span class="row-label">Предстоящие задачи</span>
-                                <div class="row-list" v-if="plannerList.booker.incomplete.length">
+                                <div class="row-list" data-type="incomplete" v-if="plannerList.booker.incomplete.length">
                                     <incomplete-task
                                             v-for="(p, idx) in plannerList.booker.incomplete"
                                             :item="p"
@@ -201,7 +200,7 @@
                             </div>
                             <div class="row-box">
                                 <span class="row-label">Выполненные дела</span>
-                                <div class="row-list" v-if="plannerList.booker.complete.length">
+                                <div class="row-list" data-type="complete" v-if="plannerList.booker.complete.length">
                                     <complete-task
                                             v-for="(p, idx) in plannerList.booker.complete"
                                             :item="p"
@@ -231,66 +230,48 @@
                     </div>
                     <div class="row-text">
                         <img src="img/ic-my_task.svg">
-                        <span>Собственная задача для клиента от Бухгалтера</span>
+                        <span>{{openPlanner.header}}</span>
                     </div>
                 </div>
             </div>
             <div class="row-content">
                 <div class="row-body">
                     <div class="row-inner">
-                        <div class="row-box" v-if="triggerDev" style="height: 100%">
-                            <div class="row-developer">
-                                <i class="fa fa-wrench" aria-hidden="true"></i>
-                                <span>Данный раздел находится в режиме разработки.</span>
-                            </div>
-                        </div>
-                        <div class="row-box" v-else>
+                        <div class="row-box">
                             <div class="row-header">
-                                <label>Информация по задаче</label>
                                 <ul class="row-list">
                                     <li>
                                         <div class="list-header">Номер задачи</div>
-                                        <div class="list-text">785</div>
+                                        <div class="list-text">{{openPlanner.id}}</div>
                                     </li>
                                     <li>
                                         <div class="list-header">Задача поставлена</div>
-                                        <div class="list-text">15 Ноя 2018</div>
+                                        <div class="list-text">{{openPlanner.data_create}}</div>
                                     </li>
                                     <li>
                                         <div class="list-header">Статус задачи</div>
-                                        <div class="list-text"> В работе</div>
+                                        <div class="list-text" v-if="openPlanner.status === 1"> В работе</div>
+                                        <div class="list-text" v-else> Завершена</div>
                                     </li>
                                 </ul>
                             </div>
-                            <div class="row-body">
-                                <label>Вложения</label>
-                                <div class="row-list">
-                                    <!--<div class="row-error">Вложения отсутствуют</div>-->
-                                    <div class="row-item">
-                                        <div class="row-pic">
-                                            <img src="img/ic-file.svg">
-                                        </div>
-                                        <div class="row-body">
-                                            <div class="row-header"><span>Текстовый файл(1)</span></div>
-                                            <div class="row-text"><span>15KB</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="row-item">
-                                        <div class="row-pic">
-                                            <img src="img/ic-file.svg">
-                                        </div>
-                                        <div class="row-body">
-                                            <div class="row-header"><span>Текстовый файл(2)</span></div>
-                                            <div class="row-text"><span>12KB</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="row-comment">
                                 <label>Комментарии к задаче</label>
-                                <div class="row-list">
-                                    <!--<div class="row-error">Комментарии отсутствуют</div>-->
-                                    <div class="row-item">
+                                <div class="row-preloader" v-if="plannerTrigger">
+                                    <span><i class="fa fa-circle-o-notch fa-spin fa-fw"></i></span>
+                                </div>
+                                <div class="row-list" v-else>
+
+                                    <div class="row-error" v-if="!openPlanner.comment.length">Комментарии отсутствуют</div>
+                                    <planner-stack
+                                            v-for="(m, idx) in openPlanner.comment"
+                                            :item="m"
+                                            :user="user"
+                                            :index="idx"
+                                            :key="idx"
+                                            v-else
+                                    ></planner-stack>
+                                    <!--<div class="row-item">
                                         <div class="row-header">
                                             <span>Исполнитель</span>
                                             <span>18.12 в 11:21</span>
@@ -312,14 +293,14 @@
                                                 <li><img src="" class="img"></li>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>-->
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row-footer" v-if="!triggerDev">
+            <div class="row-footer" v-show="!plannerTrigger">
                 <div class="row-button">
                     <div class="row-icon">
                         <input type="file" multiple="multiple">
