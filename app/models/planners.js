@@ -98,11 +98,10 @@ const list = function (user_id, room_id, type, done) {
         mysql.query(sql.format(queryString, [user_id, type[i]]), function (err, result) {
 
             objectArr[i] = {};
+            objectArr[i].complete   = [];
+            objectArr[i].incomplete = [];
 
             if(result.length) {
-
-                objectArr[i].complete   = [];
-                objectArr[i].incomplete = [];
 
                 for (let j = 0; j < result.length; j++) {
 

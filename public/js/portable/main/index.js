@@ -81,7 +81,8 @@ let vue = new Vue({
         plannerMessages  : [],
         plannerInType    : [],
         plannerOneType   : '',
-        plannerError     : false
+        plannerError     : false,
+        newMessage       : []
     },
     methods: {
         /**
@@ -219,11 +220,24 @@ let vue = new Vue({
             })
 
             socket.on('hiddenMessage:new', message => {
+
                 this.usersList.forEach(function(elem) {
                     if (elem.id === message.user.id && !elem.attributes.current) {
                         elem.attributes.unread = elem.attributes.unread + 1;
                     }
-                })
+                });
+
+                this.newMessage.push({
+                    id:             0,
+                    display_name:   message.user.display_name,
+                    short_name:     message.user.short_name,
+                    body:           message.collection[message.collection.length - 1].body
+                });
+
+                let this_clone = this,
+                    this_item  = this_clone.newMessage.length - 1;
+                this_clone.newMessage[this_clone.newMessage.length - 1].id = this_item;
+                setTimeout(function(){this_clone.newMessage.splice(this_item, 1)}, 5000)
             });
 
             socket.on('message:read', message => {
@@ -823,6 +837,10 @@ let vue = new Vue({
             })
         },
 
+        newMessageNotify() {
+
+        },
+
         clearSelected() {
             this.plannerMessages = [];
             this.selected = [];
@@ -1163,6 +1181,33 @@ Vue.component('planner-type', {
         </button>`
 })
 
+Vue.component('new-message', {
+    props: ['item'],
+    methods: {
+        closeNotify(id) {
+            vue.newMessage.splice(id, 1);
+        }
+    },
+    template:
+        `<transition name="in-new">
+            <div class="in-message_new">
+                <div class="in-header">
+                    <span class="in-header_text">Новое сообщение</span>
+                    <span class="in-header_close" @click="closeNotify(item.id)"><i class="fa fa-times"></i></span>
+                </div>
+                <div class="in-content">
+                     <div class="in-photo">
+                        <span class="w-48 avatar w-default img-circle">{{item.short_name}}</span>
+                     </div>
+                    <div class="in-body">
+                        <span class="in-title">{{item.display_name}}</span>
+                        <span class="in-text" v-if="item.body">{{item.body}}</span>
+                        <span class="in-text" v-else>Прислал новое сообщение</span>
+                    </div>
+                </div>
+            </div>
+        </transition>`
+})
 
 
 

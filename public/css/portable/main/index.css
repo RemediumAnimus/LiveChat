@@ -1101,3 +1101,57 @@
 
     
 /** END LEFT MENU **/
+
+
+#notify {
+	position: absolute;
+	width: auto;
+	height: auto;
+	background: none;
+	right: .5rem;
+	bottom: .5rem;
+}
+#notify > .in-message_new {
+	width: 300px;
+	background: #313131e6;
+	padding: 0.7rem;
+	border-radius: .3rem;
+	margin-bottom: .3rem;
+	box-shadow: 0 2px 3px rgba(0,0,0,.2);
+}
+#notify > .in-message_new :last-child {
+	margin-bottom: 0;
+}
+#notify > .in-message_new > .in-header {
+	display: flex;
+	justify-content: space-between;
+}
+#notify > .in-message_new > .in-header > .in-header_text {
+	color: #FFFFFF;
+	font-weight: 600;
+}
+#notify > .in-message_new > .in-header > .in-header_close {
+	 color: #b7b9ba;
+}
+#notify > .in-message_new > .in-header > .in-header_close:hover {
+	color: #FFFFFF;
+}
+#notify > .in-message_new > .in-content {
+	display: flex;
+	padding-top: .5rem;
+}
+#notify > .in-message_new > .in-content > .in-photo {
+	float: left;
+}
+#notify > .in-message_new > .in-content > .in-body {
+	display: flex;
+	flex-direction: column;
+	padding-left: 0.5rem;
+}
+#notify > .in-message_new > .in-content > .in-body > .in-title {
+	font-weight: 600;
+	color: #2196F3;
+}
+#notify > .in-message_new > .in-content > .in-body > .in-text {
+	color: #FFFFFF;
+}

@@ -28,8 +28,6 @@
   <link rel="stylesheet" href="/css/portable/library/bootstrap/dist/css/bootstrap.min.css" type="text/css" />
   <link rel="stylesheet" href="/css/portable/library/datetimepicker/datetimepicker.min.css" type="text/css" />
   <link rel="stylesheet" href="/css/portable/library/ekko-lightbox/ekko-lightbox.css" type="text/css" />
-  <link rel="stylesheet" href="/css/portable/library/amaran/amaran.min.css" type="text/css" />
-  <link rel="stylesheet" href="/css/portable/library/amaran/animate.min.css" type="text/css" />
 
   <!-- build:css css/styles/app.min.css -->
   <link rel="stylesheet" href="/css/portable/main/font.css" type="text/css" />
@@ -631,6 +629,18 @@
 	</div>
 	<!-- ############ SWITHCHER END-->
 
+	<!-- ############ SWITHCHER START-->
+	<div id="notify" v-if="newMessage.length">
+
+			<new-message
+					v-for="(m, idx) in newMessage"
+					:item="m"
+					:key="idx"
+			></new-message>
+
+	</div>
+	<!-- ############ SWITHCHER END-->
+
   <!-- ############ LAYOUT END-->
   </div>
 
@@ -666,7 +676,6 @@
   <script src="js/portable/library/ui-toggle-class.js"></script>
   <script src="js/portable/library/ui-nav.js"></script>
   <script src="js/portable/library/file.size.js"></script>
-  <script src="js/portable/library/jquery.amaran.js"></script>
 
   <script src="js/portable/main/app.js"></script>
   <script src="js/portable/main/index.js"></script>

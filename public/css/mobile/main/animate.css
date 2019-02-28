@@ -52,3 +52,9 @@
         display: none;
     }
 }
+.in-new-enter-active, .in-new-leave-active {
+    transition: opacity .5s;
+}
+.in-new-enter, .in-new-leave-to  {
+    opacity: 0;
+}

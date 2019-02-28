@@ -45,6 +45,19 @@ Vue.component('message-welcome', {
 const vue = new Vue({
     el: '#app',
     data: {
+        config      : {
+            message: {
+                type: {
+                    text: "text",
+                    image: "image",
+                    document: "document"
+                },
+                category: {
+                    message: "message",
+                    notify: "notify"
+                }
+            }
+        },
         message       : '',
         messages      : [],
         user          : {},
@@ -98,7 +111,7 @@ const vue = new Vue({
 
             const text = {
                 text  : this.message,
-                type  : 'text'
+                type  : this.config.message.type.text
             };
 
             if(this.message.length > 0) {
@@ -108,7 +121,7 @@ const vue = new Vue({
             // Body message
             const message = {
                 id          : this.user.id,
-                text        : this.message,
+                category    : this.config.message.category.message,
                 messages    : this.uploads,
             }
 
