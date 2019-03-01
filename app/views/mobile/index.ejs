@@ -56,6 +56,7 @@
                                 :item="m"
                                 :user="user"
                                 :index="idx"
+                                :config="config"
                                 :key="idx"
                             ></message-stack>
                         </div>
@@ -69,29 +70,41 @@
             </div>
 
             <div class="row-footer" ref="footer">
+                <div class="row-reply" v-if="Object.keys(replyMessage).length !== 0">
+                    <div class="row-icon">
+                        <img src="img/ic-quote_arrow.svg"/>
+                    </div>
+                    <div class="row-body">
+                        <span class="row-header">По задаче</span>
+                        <span class="row-text">{{replyMessage.body}}</span>
+                    </div>
+                    <div class="row-icon" @click="replyClose()">
+                        <img src="img/ic-quote_close.svg"/>
+                    </div>
+                </div>
                 <div class="row-button">
                     <div class="row-icon">
                         <input type="file" multiple @change="initializeUploadFile($event)">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="22" height="24" viewBox="0 0 22 24"><defs><path id="6r4ua" d="M24.2 643l9.66-9.88a3.05 3.05 0 0 0 0-4.24 2.88 2.88 0 0 0-4.14 0l-10.34 10.6a5.08 5.08 0 0 0 0 7.06 4.8 4.8 0 0 0 6.9 0l10.34-10.6 1.38 1.41-10.34 10.6a6.71 6.71 0 0 1-9.66 0 7.12 7.12 0 0 1 0-9.89l10.34-10.6a4.8 4.8 0 0 1 6.9 0 5.08 5.08 0 0 1 0 7.07l-9.65 9.89a2.88 2.88 0 0 1-4.14 0 3.05 3.05 0 0 1 0-4.24L30.4 631l1.38 1.4-8.96 9.2a1.02 1.02 0 0 0 0 1.4c.38.4 1 .4 1.38 0z"/></defs><g><g transform="translate(-16 -626)"><use fill="#a8abb9" xlink:href="#6r4ua"/></g></g></svg>
-                        <span class="icon-count" v-if="previews.length">{{previews.length}}</span>
+                        <img src="img/ic-attach_active.svg" v-if="previews.length"/>
+                        <img src="img/ic-attach_disabled.svg" v-else/>
+                        <!--<span class="icon-count" v-if="previews.length">{{previews.length}}</span>-->
                     </div>
                     <div class="row-text">
                         <div class="row-inline" :class="{active: previews.length}" v-show="previews.length">
                             <div class="row-wrapper">
                                 <div class="row-scroll" ref="attachments">
-                                    <attachment-view
-                                        v-for="(p, idx) in previews"
-                                        :item="p"
-                                        :key="idx"
-                                    ></attachment-view>
+                                    <view-file
+                                            v-for="(m, idx) in previews"
+                                            :item="m"
+                                            :key="idx"
+                                    ></view-file>
                                 </div>
                             </div>
                         </div>
                         <textarea type="text" class="send-message" placeholder="Написать сообщение" v-model.trim="message" @keydown.enter="sendMessage" ref="textarea"></textarea>
                     </div>
                     <div class="row-icon" @click="sendMessage">
-                        <svg v-if="message.length || previews.length" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 30 30"><defs><path id="povfa" d="M323 638a15 15 0 1 1 30 0 15 15 0 0 1-30 0z"/><path id="povfb" d="M338.95 645a1 1 0 0 1-2 0v-11.6l-3.25 3.25a1 1 0 0 1-1.41-1.41l4.95-4.95a1 1 0 0 1 1.41 0l4.95 4.95a1 1 0 0 1-1.41 1.41l-3.24-3.24z"/></defs><g><g transform="translate(-323 -623)"><use fill="#2dc970" xlink:href="#povfa"/></g><g transform="translate(-323 -623)"><use fill="#fafafa" xlink:href="#povfb"/></g></g></svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 30 30"><defs><path id="povfa" d="M323 638a15 15 0 1 1 30 0 15 15 0 0 1-30 0z"/><path id="povfb" d="M338.95 645a1 1 0 0 1-2 0v-11.6l-3.25 3.25a1 1 0 0 1-1.41-1.41l4.95-4.95a1 1 0 0 1 1.41 0l4.95 4.95a1 1 0 0 1-1.41 1.41l-3.24-3.24z"/></defs><g><g transform="translate(-323 -623)"><use fill="#9799a2a3" xlink:href="#povfa"/></g><g transform="translate(-323 -623)"><use fill="#fafafa" xlink:href="#povfb"/></g></g></svg>
+                        <img src="img/ic-send_message.svg"/>
                     </div>
                 </div>
             </div>
@@ -229,7 +242,8 @@
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="18" viewBox="0 0 12 21"><defs><path id="xww7a" d="M12.62 42.5l7.94-7.94a1.5 1.5 0 1 0-2.12-2.12l-9 9a1.5 1.5 0 0 0 0 2.12l9 9a1.5 1.5 0 1 0 2.12-2.12z"></path></defs><g><g transform="translate(-9 -32)"><use fill="#a8abb9" xlink:href="#xww7a"></use></g></g></svg>
                     </div>
                     <div class="row-text">
-                        <img src="img/ic-my_task.svg">
+                        <img src="img/ic-booker_task.svg" v-if="openPlanner.whose">
+                        <img src="img/ic-my_task.svg" v-else>
                         <span>{{openPlanner.header}}</span>
                     </div>
                 </div>

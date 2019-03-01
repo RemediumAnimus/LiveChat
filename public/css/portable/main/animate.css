@@ -53,3 +53,11 @@
         display: none;
     }
 }
+
+.new-message-enter-active, .new-message-leave-active {
+    transition: all 0.5s;
+}
+.new-message-enter, .new-message-leave-to {
+    opacity: 0;
+    transform: translateY(100%);
+}

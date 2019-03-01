@@ -150,24 +150,26 @@ const get = function (room_id, offset, done) {
 
                     if(result[i].type === config.chat.messages.type.image || result[i].type === config.chat.messages.type.document) {
 
-                        objectPrev.collection[0].upload.unshift({
-                            id              : result[i].up_id,
-                            type            : result[i].up_type,
-                            size            : filesize(result[i].up_size),
-                            original_name   : result[i].original_name,
-                            thumb           : getPath(room_id, result[i].name, result[i].ext),
-                            thumb_xs        : result[i].name_xs
-                                            ? getPath(room_id, result[i].name_xs, result[i].ext)
-                                            : result[i].name_xs,
-                            thumb_sm        : result[i].name_sm
-                                            ? getPath(room_id, result[i].name_sm, result[i].ext)
-                                            : result[i].name_sm
-                        });
+                        if(result[i].stack_id === objectPrev.collection[objectMessagePrev].stack_id) {
 
-                        continue;
+                            objectPrev.collection[0].upload.unshift({
+                                id              : result[i].up_id,
+                                type            : result[i].up_type,
+                                size            : filesize(result[i].up_size),
+                                original_name   : result[i].original_name,
+                                thumb           : getPath(room_id, result[i].name, result[i].ext),
+                                thumb_xs        : result[i].name_xs
+                                                ? getPath(room_id, result[i].name_xs, result[i].ext)
+                                                : result[i].name_xs,
+                                thumb_sm        : result[i].name_sm
+                                                ? getPath(room_id, result[i].name_sm, result[i].ext)
+                                                : result[i].name_sm
+                            });
+
+                            continue;
+                        }
                     }
                     else {
-
                         objectPrev.collection.unshift({
                             id          : result[i].id,
                             from_id     : result[i].from_id,

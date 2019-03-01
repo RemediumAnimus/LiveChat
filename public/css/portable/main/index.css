@@ -547,6 +547,7 @@
 	justify-content: center;
 	align-items: center;
 	background: #f4f7f9;
+    z-index: 9999;
 }
 .app-body > .app-loader-inner > img {
 	width: 100px;
@@ -892,6 +893,7 @@
 .message-stack .in-message_media > .body-message img  {
 	width: 100%;
 	border-radius: 0.33rem;
+    height: 196px;
 }
 .message-stack.mess-in .in-message_media > .body-message > div:nth-last-child(1) > img  {
 	border-bottom-right-radius: 17px;
@@ -1111,7 +1113,7 @@
 	right: .5rem;
 	bottom: .5rem;
 }
-#notify > .in-message_new {
+#notify .in-message_new {
 	width: 300px;
 	background: rgba(49, 49, 49, 0.8);
 	padding: 0.7rem;
@@ -1119,39 +1121,39 @@
 	margin-bottom: .3rem;
 	box-shadow: 0 2px 3px rgba(0,0,0,.2);
 }
-#notify > .in-message_new :last-child {
+#notify .in-message_new :last-child {
 	margin-bottom: 0;
 }
-#notify > .in-message_new > .in-header {
+#notify .in-message_new > .in-header {
 	display: flex;
 	justify-content: space-between;
 }
-#notify > .in-message_new > .in-header > .in-header_text {
+#notify .in-message_new > .in-header > .in-header_text {
 	color: #FFFFFF;
 	font-weight: 600;
 }
-#notify > .in-message_new > .in-header > .in-header_close {
+#notify .in-message_new > .in-header > .in-header_close {
 	 color: #b7b9ba;
 }
-#notify > .in-message_new > .in-header > .in-header_close:hover {
+#notify .in-message_new > .in-header > .in-header_close:hover {
 	color: #FFFFFF;
 }
-#notify > .in-message_new > .in-content {
+#notify .in-message_new > .in-content {
 	display: flex;
 	padding-top: .5rem;
 }
-#notify > .in-message_new > .in-content > .in-photo {
+#notify .in-message_new > .in-content > .in-photo {
 	float: left;
 }
-#notify > .in-message_new > .in-content > .in-body {
+#notify .in-message_new > .in-content > .in-body {
 	display: flex;
 	flex-direction: column;
 	padding-left: 0.5rem;
 }
-#notify > .in-message_new > .in-content > .in-body > .in-title {
+#notify .in-message_new > .in-content > .in-body > .in-title {
 	font-weight: 600;
 	color: #2196F3;
 }
-#notify > .in-message_new > .in-content > .in-body > .in-text {
+#notify .in-message_new > .in-content > .in-body > .in-text {
 	color: #FFFFFF;
 }

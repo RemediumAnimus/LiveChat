@@ -75,6 +75,38 @@ const getAllUsers = function () {
     return userModel.filter(u => u.roles === config.chat.roles.client)
 }
 
+
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : Gets user data
+ *
+ */
+const addSystem = function () {
+    let queryString = 'SELECT   u.`id`,           ' +
+        '                       u.`first_name`,   ' +
+        '                       u.`last_name`,    ' +
+        '                       u.`roles`         ' +
+        'FROM  users u                            ' +
+        'WHERE u.id = ?                           ' ;
+
+    mysql.query(sql.format(queryString, [config.user.system.id]), function(err, result){
+
+        if (!result.length || err) {
+            return null;
+        }
+
+        result.forEach(function(index) {
+
+            index.display_name       = getReadbleName(index.first_name, index.last_name);
+            index.short_name         = getShortName(index.first_name, index.last_name);
+            index.attributes         = {};
+        });
+
+        // All is well, return successful user
+        userModel.push(result[0]);
+    });
+}
+
 /**
  * TITLE        : User method
  * DESCRIPTION  : Get by lists users
@@ -258,6 +290,23 @@ const getShortName = function (firstName, lastName) {
     return firstName.substr(0, 1).toUpperCase() + lastName.substr(0, 1).toUpperCase();
 }
 
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : Add system user in collection
+ *
+ */
+addSystem();
+
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : Get user system
+ *
+ */
+const getSystem = function () {
+    return userModel.find(u => u.id === config.user.system.id)
+}
+
+
 module.exports = {
     add,
     get,
@@ -271,5 +320,5 @@ module.exports = {
     getInfoProfile,
     getReadbleName,
     getShortName,
-    getCntUpload
+    getSystem
 };

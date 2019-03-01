@@ -43,7 +43,7 @@ let vue = new Vue({
                 },
                 category: {
                     message: "message",
-                    notify: "notify"
+                    planner: "planner"
                 }
             }
         },
@@ -223,25 +223,29 @@ let vue = new Vue({
 
                 let this_clone = this;
 
-                const newMessage = function() {
+                const closeMessage = function(id) {
 
-                    this_clone.newMessage.push({
-                        id:             0,
-                        display_name:   message.user.display_name,
-                        short_name:     message.user.short_name,
-                        body:           message.collection[message.collection.length - 1].body
-                    });
-
-                    let this_item  = this_clone.newMessage[this_clone.newMessage.length - 1].id;
-
-                    this_clone.newMessage[this_clone.newMessage.length - 1].id = this_item;
-                    setTimeout(function(){this_clone.newMessage.splice(this_clone.newMessage[this_clone.newMessage.length - 1], 1)}, 5000)
-                }
+                    setTimeout(function(){
+                        for(let i = 0; i < this_clone.newMessage.length; i ++) {
+                            if(this_clone.newMessage[i].id === id) {
+                                this_clone.newMessage.splice(i, 1);
+                            }
+                        }
+                    }, 5000)
+                };
 
                 this.usersList.forEach(function(elem) {
                     if (elem.id === message.user.id && !elem.attributes.current) {
                         elem.attributes.unread = elem.attributes.unread + 1;
-                        newMessage();
+
+                        this_clone.newMessage.push({
+                            id:             message.collection[message.collection.length - 1].id,
+                            display_name:   message.user.display_name,
+                            short_name:     message.user.short_name,
+                            body:           message.collection[message.collection.length - 1].body
+                        });
+
+                        closeMessage(message.collection[message.collection.length - 1].id);
                     }
                 });
             });
@@ -376,8 +380,8 @@ let vue = new Vue({
                                 let box         = this_clone.$refs.messages,
                                     boxHeight   = box.scrollHeight,
                                     scrollStart = box.scrollTop < 200
-                                        ? (this_clone.heightBox + box.scrollTop)
-                                        : (this_clone.heightBox - box.scrollTop);
+                                                ? (this_clone.heightBox + box.scrollTop)
+                                                : (this_clone.heightBox - box.scrollTop);
 
                                 box.scrollTop = boxHeight - scrollStart;
 
@@ -813,7 +817,7 @@ let vue = new Vue({
                  .then(function (response) {
                     if(response.status === 200){
                         if(response.data.status) {
-                            this_clone.sendNotify(header);
+                            this_clone.newPlanner(response.data.result);
                             this_clone.clearSelected();
                         }
                     }
@@ -823,14 +827,14 @@ let vue = new Vue({
                  })
         },
 
-        sendNotify(header) {
+        newPlanner(data) {
 
             // Body message
             const message = {
                 id          : 1,
-                category    : this.config.message.category.notify,
+                category    : this.config.message.category.planner,
                 messages    : [{
-                    text: header,
+                    text: data.header,
                     type: this.config.message.type.text
                 }],
             };
@@ -841,10 +845,24 @@ let vue = new Vue({
                     console.error(err)
                 }
             })
+
+            data.room = this.user.room;
+
+            // Sending a new notice
+            socket.emit('planner:new', data, err => {
+                if (err) {
+                    console.error(err)
+                }
+            })
+
         },
 
-        newMessageNotify() {
-
+        closeNotify(id) {
+            for(let i = 0; i < this.newMessage.length; i++) {
+                if(this.newMessage[i].id === id) {
+                    this.newMessage.splice(i, 1)
+                }
+            }
         },
 
         clearSelected() {
@@ -887,7 +905,7 @@ let vue = new Vue({
                 node.scrollTop = node.scrollHeight;
                 $(node).parent().scrollTop(node.scrollHeight)
             })
-        }
+        },
     },
 
     /**
@@ -943,7 +961,7 @@ let vue = new Vue({
  *
  */
 Vue.component('message-stack', {
-    props: ['item', 'user', 'index'],
+    props: ['item', 'user', 'index', 'config'],
     inheritAttrs: false,
     methods: {
         selectedMessage(id) {
@@ -957,7 +975,7 @@ Vue.component('message-stack', {
         }
     },
     template:
-     `<div class="message-stack"
+        `<div class="message-stack"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
                      'mess-out' : item.user.roles === 'BOOKER' || item.user.roles === 'SYSTEM',
                      'error'    : item.success    === false
@@ -967,7 +985,7 @@ Vue.component('message-stack', {
             <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>
         </div>
         <div class="message-stack-content">
-            <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'message'">
+            <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === config.message.category.message">
                 <div class="select-message" @click="selectedMessage(value.stack_id)">
                     <span><i class="ion-checkmark-circled"></i></span>
                 </div>
@@ -1008,7 +1026,7 @@ Vue.component('message-stack', {
                     </div>
                 </div>
             </div>
-            <div class="in-message in-message_notify" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'notify'">
+            <div class="in-message in-message_notify" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === config.message.category.planner">
                 <div class="text-message">
                     <div class="header-message">У бухгалтера новая задача</div>
                     <span class="body-message">{{value.body}}</span>
@@ -1185,34 +1203,6 @@ Vue.component('planner-type', {
             <i class="fa fa-plus pull-left"></i>
             {{item.type}}
         </button>`
-})
-
-Vue.component('new-message', {
-    props: ['item'],
-    methods: {
-        closeNotify(id) {
-            vue.newMessage.splice(id, 1);
-        }
-    },
-    template:
-        `<transition name="in-new">
-            <div class="in-message_new">
-                <div class="in-header">
-                    <span class="in-header_text">Новое сообщение</span>
-                    <span class="in-header_close" @click="closeNotify(item.id)"><i class="fa fa-times"></i></span>
-                </div>
-                <div class="in-content">
-                     <div class="in-photo">
-                        <span class="w-48 avatar w-default img-circle">{{item.short_name}}</span>
-                     </div>
-                    <div class="in-body">
-                        <span class="in-title">{{item.display_name}}</span>
-                        <span class="in-text" v-if="item.body">{{item.body}}</span>
-                        <span class="in-text" v-else>Прислал новое сообщение</span>
-                    </div>
-                </div>
-            </div>
-        </transition>`
 })
 
 

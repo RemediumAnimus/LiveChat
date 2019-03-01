@@ -62,14 +62,15 @@ const ioEvents = function(io) {
                 // Write a new message to the database
                 for(let i = 0; i < data.messages.length; i++) {
 
-                    let type = messages.type(data.messages[i].type);
+                    let objectType = messages.type(data.messages[i].type),
+                        objectRoom = user.room;
 
-                    if(data.category === config.chat.messages.category.notify) {
-                        user.id = config.user.system;
+                    if(data.category === config.chat.messages.category.planner) {
+                        user = users.getSystem();
                     }
 
                     // Save the message in the database
-                    messages.save(user.id, user.room, type, data.category, data.messages[i].text, data.messages[i].id, stack, function(err, result) {
+                    messages.save(user.id, objectRoom, objectType, data.category, data.messages[i].text, data.messages[i].id, stack, function(err, result) {
 
                         // Create`s a collection of data
                         let collectionData                  = {};
@@ -81,12 +82,12 @@ const ioEvents = function(io) {
                             from_id  : user.id,
                             is_read  : 0,
                             stack_id : stack,
-                            type     : type,
+                            type     : objectType,
                             category : data.category,
                             upload   : []
                         }];
 
-                        if(type !== config.chat.messages.type.text) {
+                        if(objectType === config.chat.messages.type.image || objectType === config.chat.messages.type.document) {
 
                             collectionData.collection[0].body       = null;
                             collectionData.collection[0].upload[0]  = data.messages[i];
@@ -104,7 +105,7 @@ const ioEvents = function(io) {
                             collectionData.collection[0].id = result;
 
                             // Send the message to all users who are attached to sockets
-                            io.to(user.room).emit('message:new', collectionData);
+                            io.to(objectRoom).emit('message:new', collectionData);
                             socket.broadcast.emit('hiddenMessage:new', collectionData);
                         }
                     })
@@ -126,6 +127,11 @@ const ioEvents = function(io) {
 
             io.to(message.user.room).emit('message:read', message);
             messages.update_read(message.collection[0].id);
+        });
+
+        socket.on('planner:new', (object, callback) => {
+
+            io.to(object.room).emit('planner:new', object);
         });
 
         // Hearing events to get users

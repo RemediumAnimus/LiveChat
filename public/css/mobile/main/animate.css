@@ -52,9 +52,62 @@
         display: none;
     }
 }
-.in-new-enter-active, .in-new-leave-active {
-    transition: opacity .5s;
+
+@keyframes show-status {
+    0% {
+        opacity: 0;
+    }
+
+    99% {
+        opacity: 0.1;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
-.in-new-enter, .in-new-leave-to  {
-    opacity: 0;
+
+@keyframes new-message {
+    0% {
+        top: calc(var(--msg-content-height) - var(--msg1-height));
+        left: -4em;
+        transform: scale(0);
+    }
+    5% {
+        top: calc(var(--msg-content-height) - var(--msg1-height));
+        left: 0;
+        transform: scale(1);
+    }
+    12% {
+        top: calc(var(--msg-content-height) - var(--msg1-height));
+    }
+    17% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height));
+    }
+    30% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height));
+    }
+    35% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) - var(--msg3-height));
+    }
+    49% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) - var(--msg3-height));
+    }
+    54% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) - var(--msg3-height) - var(--msg-spacing) - var(--msg4-height));
+    }
+    70% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) - var(--msg3-height) - var(--msg-spacing) - var(--msg4-height));
+    }
+    75% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) - var(--msg3-height) - var(--msg-spacing) - var(--msg4-height) - var(--msg-spacing) - var(--msg5-height));
+    }
+    95% {
+        top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) - var(--msg3-height) - var(--msg-spacing) - var(--msg4-height) - var(--msg-spacing) - var(--msg5-height));
+    }
+    100% {
+        top: 0;
+        left: 0;
+    }
 }
+

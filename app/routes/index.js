@@ -226,7 +226,7 @@ router.post('/upload/loading', function(req, res) {
     let objectResize     = objectType.match(/image.*/)
         ? true
         : false;
-
+console.log(objectUploadPath)
     // Use the mv() method to place the file somewhere on your server
     objectFile.mv(objectUploadPath, function(err) {
         if (err)

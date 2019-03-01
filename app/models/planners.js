@@ -37,10 +37,24 @@ const save = function (user_id, operator_id, header, description, comment, date_
             return done(null, false);
         }
 
+        let object              = {};
+            object.id           = result.insertId;
+            object.user_id      = user_id;
+            object.operator_id  = operator_id;
+            object.header       = header;
+            object.description  = description;
+            object.comment      = comment;
+            object.data_create  = Uploads.formatdate(new Date(), true);
+            object.data_end     = Uploads.formatdate(new Date(date_end), true);
+            object.type_id      = type_id;
+            object.whose        = 1;
+            object.progress     = 0;
+            object.status       = 1;
+
         if(!selected.length) {
 
             // All is well, return successful
-            return done(null, result.insertId);
+            return done(null, object);
         }
 
         let string = '';
@@ -62,7 +76,7 @@ const save = function (user_id, operator_id, header, description, comment, date_
                 return done(err);
 
             // All is well, return successful
-            return done(null, result.insertId);
+            return done(null, object);
         });
     });
 }
@@ -106,6 +120,7 @@ const list = function (user_id, room_id, type, done) {
                 for (let j = 0; j < result.length; j++) {
 
                     result[j].data_create = Uploads.formatdate(result[j].data_create, true);
+                    result[j].data_end    = Uploads.formatdate(result[j].data_end, true);
 
                     if (result[j].status === 3) {
                         objectArr[objectCnt].complete.push(result[i]);

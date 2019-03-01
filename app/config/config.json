@@ -25,12 +25,14 @@
 			},
 			"category": {
 				"message": "message",
-				"notify": "notify"
+				"planner": "planner"
 			}
 		}
 	},
 	"user": {
-		"system": 1
+		"system": {
+			"id": 1
+		}
 	},
 	"path": {
 		"uploadView": "http://localhost:3000/upload/"

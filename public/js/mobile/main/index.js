@@ -54,7 +54,7 @@ const vue = new Vue({
                 },
                 category: {
                     message: "message",
-                    notify: "notify"
+                    planner: "planner"
                 }
             }
         },
@@ -93,7 +93,8 @@ const vue = new Vue({
         openPlanner: {
             comment: []
         },
-        plannerTrigger: true
+        plannerTrigger: true,
+        replyMessage: {}
     },
     methods: {
 
@@ -201,6 +202,18 @@ const vue = new Vue({
                     }
                 }
 
+            })
+
+            socket.on('planner:new', info => {
+                delete(info.room);
+                switch(info.whose) {
+                    case 0:
+                        this.plannerList.client.incomplete.unshift(info);
+                        break;
+                    case 1:
+                        this.plannerList.booker.incomplete.unshift(info);
+                        break;
+                }
             })
         },
 
@@ -453,7 +466,11 @@ const vue = new Vue({
             let this_clone  = this;
 
             // Clear information from array
-            this.previews = this.previews.filter(u => u.id !== id);
+            for (let i = 0; i < this.previews.length; i++) {
+                if(this.previews[i].id === id) {
+                    this.previews.splice(i, 1)
+                }
+            }
             this.uploads  = this.uploads.filter(u => u.id !== id);
 
             // Delete attachments from date base
@@ -636,6 +653,11 @@ const vue = new Vue({
             $('#'+tab).addClass('visible');
         },
 
+        replyClose() {
+          this.replyMessage = {};
+          this.resizeHeight();
+        },
+
 
         /**
          * TITLE        : View method
@@ -668,7 +690,6 @@ const vue = new Vue({
             alert('Указаны не валидные данные!')
         })
         window.autosize(this.$refs.textarea);
-
     }
 })
 
@@ -678,18 +699,30 @@ const vue = new Vue({
  *
  */
 Vue.component('message-stack', {
-    props: ['item', 'user', 'index'],
+    props: ['item', 'user', 'index', 'config'],
+    methods: {
+        replyMessage(id, item) {
+            for (let i = vue.messages.length - 1; i >= 0; i--) {
+                for (let j = vue.messages[i].collection.length - 1; j >= 0; j--) {
+                    if(vue.messages[i].collection[j].id === id) {
+                        vue.replyMessage = vue.messages[i].collection[j];
+                        vue.resizeHeight();
+                    }
+                }
+            }
+
+        }
+    },
     template: `
 <div class="message-stack"
             :class="{'mess-in'  : item.user.roles === 'GUEST', 
-                     'mess-out' : item.user.roles === 'BOOKER',
-                     'mess-out' : item.user.roles === 'SYSTEM',
+                     'mess-out' : item.user.roles === 'BOOKER' || item.user.roles === 'SYSTEM',
                      'error'    : item.success    === false
                     }"
     >
     <div class="message-stack-photo">AK</div>
     <div class="message-stack-content">
-        <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'message'">
+        <div class="in-message" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === config.message.category.message">
             <div class="text-message in-message_media" v-if="value.upload.length">
                 <div class="body-message">
                     <span v-if="value.body">{{value.body}}</span>
@@ -703,7 +736,7 @@ Vue.component('message-stack', {
                             <span class="label-icon"><i class="fa fa-file"></i></span>
                             <span class="label-text">
                                 <span>{{file.original_name}}</span>
-                                <small>34kb</small>
+                                <small>{{file.size}}</small>
                             </span>  
                         </a>
                     </div>   
@@ -727,7 +760,7 @@ Vue.component('message-stack', {
                 </span>
             </div>
         </div>
-        <div class="in-message in_message_notify" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === 'notify'">
+        <div class="in-message in-message_notice" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === config.message.category.planner">
             <div class="text-message">
                 <div class="header-message">У бухгалтера новая задача</div>
                 <span class="body-message">{{value.body}}</span>
@@ -735,39 +768,13 @@ Vue.component('message-stack', {
                     <span>{{value.datetime}}</span>
                 </div>
             </div>
+            <div class="reply-message" @click="replyMessage(value.id)">
+                <img src="img/ic-reply.svg"/>
+            </div>
         </div>  
     </div>
 </div>`
 })
-
-Vue.component('attachment-view', {
-    props: ['item'],
-    inheritAttrs: false,
-    methods: {
-        previewRemove(id) {
-            vue.previewRemove(id);
-        }
-    },
-    template:
-        `<div class="in-preview-item">
-            <div class="in-item">
-                <div class="in-preview-src" v-if="item.blob">
-                    <img v-bind:src="item.blob"> 
-                </div>
-                <div class="in-preview-file" v-else>
-                       <span class="label-icon"><i class="fa fa-file"></i></span>
-                       <span class="label-name">{{item.name}}</span>
-                       <span class="label-size">{{item.size}}</span>
-                </div>
-                <div class="in-preview-close" v-if="item.status === 1" @click="previewRemove(item.id)">
-                    <img src="img/ic-close.png"/>
-                </div>
-                <div class="in-preview-preloader" v-else>
-                    <span><i class="fa fa-circle-o-notch fa-spin fa-fw"></i></span>
-                </div>
-            </div>
-        </div>`
-});
 
 Vue.component('incomplete-task', {
     props: ['item'],
@@ -779,6 +786,7 @@ Vue.component('incomplete-task', {
                 info = vue.plannerList[tab][type].find(t => t.id === id);
 
             if(info) {
+                console.log(info)
                 vue.openPlanner = info;
                 this.loadComment(id);
             }
@@ -865,6 +873,38 @@ Vue.component('planner-stack', {
                                     <small>{{file.size}}</small>
                                 </span>
                             </li>
+                        </div>
+                    </div>
+                </div>`
+})
+
+/**
+ * TITLE        : Component registration
+ * DESCRIPTION  : Registers a component in a vue instance
+ *
+ */
+Vue.component('view-file', {
+    props: ['item'],
+    methods: {
+        close(id) {
+            vue.previewRemove(id)
+        }
+    },
+    template: `<div class="in-preview-item">
+                    <div class="in-item">
+                        <div class="in-preview-src" v-if="item.blob">
+                            <img v-bind:src="item.blob">
+                        </div>
+                        <div class="in-preview-file" v-else>
+                            <span class="label-icon"><i class="fa fa-file"></i></span>
+                            <span class="label-name">{{item.name}}</span>
+                            <span class="label-size">{{item.size}}</span>
+                        </div>
+                        <div class="in-preview-close" v-if="item.status === 1" @click="close(item.id)">
+                            <img src="img/ic-close.svg"/>
+                        </div>
+                        <div class="in-preview-preloader" v-else>
+                            <span><i class="fa fa-circle-o-notch fa-spin fa-fw"></i></span>
                         </div>
                     </div>
                 </div>`
