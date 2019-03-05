@@ -25,7 +25,8 @@
 			},
 			"category": {
 				"message": "message",
-				"planner": "planner"
+				"planner": "planner",
+				"comment": "comment"
 			}
 		}
 	},

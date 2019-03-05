@@ -743,6 +743,10 @@
 	background-color: #2196f3;
 	color: #fff;
 	-webkit-user-select: none;
+	animation-iteration-count: 1;
+	animation-duration: 5s;
+	animation-fill-mode: forwards;
+	animation-name: new-message;
 }
 .box-message .mess-in .message-stack-content > div:nth-last-child(1) .text-message {
 	border-bottom-left-radius: 0px;
@@ -853,6 +857,53 @@
 	line-height: 14px;
 	letter-spacing: -0.28px;
 	padding-bottom: 0.5rem;
+}
+.box-message .in-message.in-message_comment > .text-message > .header-message {
+	display: flex;
+	padding-bottom: 0.5rem;
+}
+.box-message .in-message.in-message_comment > .text-message > .header-message > .header-icon {
+	display: flex;
+	align-items: flex-start;
+	padding-right: 8px;
+}
+.box-message .in-message.in-message_comment > .text-message > .header-message > .header-body {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.box-message .message-stack .in-message.in-message_comment > .text-message > .header-message > .header-body > span {
+	opacity: 0.8;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 16px;
+	letter-spacing: -0.28px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.box-message .message-stack.mess-in .in-message.in-message_comment > .text-message > .header-message > .header-body > span {
+	color: #FFFFFF;
+}
+.box-message .message-stack.mess-in .in-message.in-message_comment > .text-message > .body-message > .item-attachment {
+	display: flex;
+	width: 100%;
+	align-items: center;
+}
+.box-message .message-stack .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	padding: 0.3rem 0;
+	padding-bottom: 0;
+}
+.box-message .message-stack .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment > .label-icon {
+	padding: 0;
+}
+.box-message .message-stack .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment > .label-icon > img {
+	border-radius: 500px;
+	width: 100%;
+	height: 100%
 }
 
 .navbar-message-count {

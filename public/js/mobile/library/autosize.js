@@ -122,6 +122,7 @@
 		}
 
 		function resize() {
+
 			if (ta.scrollHeight === 0) {
 				// If the scrollHeight is 0, then the element probably has display:none or is detached from the DOM.
 				return;
@@ -134,7 +135,7 @@
 			ta.style.height = ta.scrollHeight + heightOffset + 'px';
 
 			// resize inner page (scroll message)
-            var mesTop = innerResize()
+            var mesTop = innerResize(ta)
 
 			// used to check if an update is actually necessary on window.resize
 			clientWidth = ta.clientWidth;
@@ -193,14 +194,14 @@
 			}
 		};
 
-		var innerResize = function innerResize() {
+		var innerResize = function innerResize(ta) {
 
-			let boxFooter 	 = document.querySelector('.row-footer'),
-                boxInner  	 = document.querySelector('.row-inner'),
+			let boxFooter 	 = $(ta).closest('.row-footer'),
+                boxInner  	 = boxFooter.closest('.row-main').find('.row-inner')[0],
                 heightPage   = boxInner.scrollHeight,
                 heightScroll = parseInt(boxInner.scrollTop) + parseInt(window.getComputedStyle(boxInner, null).height);
 
-            boxInner.style.bottom =  window.getComputedStyle(boxFooter, null).height;
+            boxInner.style.bottom =  window.getComputedStyle(boxFooter[0], null).height;
 
             if (heightPage - heightScroll < 30) {
                 boxInner.scrollTop =  boxInner.scrollHeight;

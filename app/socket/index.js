@@ -63,28 +63,34 @@ const ioEvents = function(io) {
                 for(let i = 0; i < data.messages.length; i++) {
 
                     let objectType = messages.type(data.messages[i].type),
-                        objectRoom = user.room;
+                        objectRoom = user.room,
+                        objectTask = null;
+
+                    if(Object.keys(data.planner).length !== 0) {
+                        objectTask  = data.planner.id;
+                    }
 
                     if(data.category === config.chat.messages.category.planner) {
                         user = users.getSystem();
                     }
 
                     // Save the message in the database
-                    messages.save(user.id, objectRoom, objectType, data.category, data.messages[i].text, data.messages[i].id, stack, function(err, result) {
+                    messages.save(user.id, objectRoom, objectTask, objectType, data.category, data.messages[i].text, data.messages[i].id, stack, function(err, result) {
 
                         // Create`s a collection of data
                         let collectionData                  = {};
                         collectionData.user                 = user;
 
                         collectionData.collection           = [{
-                            body     : data.messages[i].text,
-                            datetime : messages.time(new Date()),
-                            from_id  : user.id,
-                            is_read  : 0,
-                            stack_id : stack,
-                            type     : objectType,
-                            category : data.category,
-                            upload   : []
+                            body        : data.messages[i].text,
+                            datetime    : messages.time(new Date()),
+                            from_id     : user.id,
+                            is_read     : 0,
+                            stack_id    : stack,
+                            type        : objectType,
+                            category    : data.category,
+                            upload      : [],
+                            planner     : data.planner
                         }];
 
                         if(objectType === config.chat.messages.type.image || objectType === config.chat.messages.type.document) {

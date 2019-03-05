@@ -545,6 +545,93 @@ body #app {
     align-self: center;
     padding-left: 1rem;
 }
+#chat .row-content .box-message > .message-stack> .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > span  {
+    padding: 0rem;
+}
+#chat .row-content .box-message > .message-stack> .message-stack-content > .in-message.in-message_comment > .text-message > .header-message {
+    display: flex;
+    padding-bottom: 0.5rem;
+}
+#chat .row-content .box-message > .message-stack> .message-stack-content > .in-message.in-message_comment > .text-message > .header-message > .header-icon {
+    display: flex;
+    align-items: flex-start;
+    padding-right: 8px;
+}
+#chat .row-content .box-message > .message-stack> .message-stack-content > .in-message.in-message_comment > .text-message > .header-message > .header-body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+#chat .row-content .box-message > .message-stack> .message-stack-content > .in-message.in-message_comment > .text-message > .header-message > .header-body > span {
+    opacity: 0.8;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: -0.28px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+#chat .row-content .box-message > .message-stack.mess-in > .message-stack-content > .in-message.in-message_comment > .text-message > .header-message > .header-body > span {
+    color: #FFFFFF;
+}
+#chat .row-content .box-message > .message-stack.mess-out > .message-stack-content > .in-message.in-message_comment > .text-message > .header-message > .header-body > span {
+    color: #222222;
+}
+#chat .row-content .box-message > .message-stack.mess-out > .message-stack-content > .in-message.in-message_comment > .text-message > .header-message > .header-body > span:first-child {
+    color: #ff8414;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .comment-media {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 0.2rem 0rem;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media:last-child {
+    padding-bottom: 0;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment .label-icon {
+    display: flex;
+    width: 44px;
+    height: 44px;
+    border: 2px solid #fff;
+    border-radius: 3px;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment .label-icon > .img {
+    height: 100%;
+    width: 40px;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment .label-text {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    padding-left: 0.5rem;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment .label-text > span {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#chat .row-content .box-message > .message-stack > .message-stack-content > .in-message.in-message_comment > .text-message > .body-message > .message-media > .item-attachment .label-text > small {
+    opacity: 0.6;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+    letter-spacing: -0.28px;
+}
 
 /* CHAT FOOTER */
 .row-footer {
@@ -738,8 +825,8 @@ body #app {
 	display: flex;
     justify-content: center;
     align-items: center;
-    width: 28px;
-    height: 28px;
+    width: 35px;
+    height: 35px;
     white-space: nowrap;
     vertical-align: baseline;
     font-weight: bold;
@@ -750,17 +837,20 @@ body #app {
     padding-left: 1px;
 	font-size: 0.85rem;
 }
+.row-footer .row-scroll > .in-preview-item > .in-item > .in-preview-file > .label-icon > i{
+    font-size: 18px;
+}
 .row-footer .row-scroll > .in-preview-item > .in-item > .in-preview-file .label-name {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	color: #7a7a7a;
-	font-size: 0.75rem;
+	font-size: 0.85rem;
 	padding: .25rem;
 }
 .row-footer .row-scroll > .in-preview-item > .in-item > .in-preview-file .label-size {
 	color: #7a7a7a;
-	font-size: 0.75rem;
+	font-size: 0.85rem;
 	padding: .25rem;
 	padding-top: 0;
 }
@@ -769,7 +859,7 @@ body #app {
     top: 0;
     left: 0;
     font-size: 1.2rem;
-    color: rgba(122, 122, 122, 0.7);
+    color: rgba(66, 66, 66, 0.85);
     width: 100%;
     height: 100%;
     display: flex;
@@ -1243,8 +1333,9 @@ body #app {
 
 }
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list > li {
-   display: block;
+    display: block;
     padding: 0.5rem 0;
+    padding-bottom: 0;
 }
 #detail > .row-content > .row-body > .row-inner > .row-box > .row-comment > .row-list > .row-item > .row-body > .row-list img {
     width: 100%

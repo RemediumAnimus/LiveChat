@@ -207,13 +207,18 @@ router.post('/upload/loading', function(req, res) {
     let objectFile      = req.files.file;
     let objectUser      = req.user;
     let objectRoom      = req.body.room;
-
+    let objectPlanner   = req.body.planner
+                        ? req.body.planner
+                        : false;
     let objectOrigName  = objectFile.name;
     let objectType      = objectFile.mimetype;
     let objectExt       = path.extname(objectOrigName);
     let objectName      = crypto.randomBytes(20).toString('hex');
     let objectSize      = 0;
-    let objectPassword  = crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex');
+
+    let objectPassword  = !objectPlanner
+                        ? crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom)).digest('hex')
+                        : crypto.createHmac('sha256', String(objectUser.id+'_'+objectRoom+'_'+objectPlanner)).digest('hex');
 
     let objectNameXS    = null;
     let objectNameSM    = null;
@@ -224,9 +229,10 @@ router.post('/upload/loading', function(req, res) {
 
     let objectUploadPath = 'upload/'+objectRoom+'/'+objectName+objectExt+'';
     let objectResize     = objectType.match(/image.*/)
-        ? true
-        : false;
-console.log(objectUploadPath)
+                         ? true
+                         : false;
+
+
     // Use the mv() method to place the file somewhere on your server
     objectFile.mv(objectUploadPath, function(err) {
         if (err)
@@ -527,10 +533,11 @@ router.post("/task/comment", (req, res) => {
         return res.status(403).json({status: false, err: 'Access denied!'});
     }
 
-    let objectItem = req.body.id,
-        objectRoom = req.user.room;
+    let objectItem   = req.body.id,
+        objectRoom   = req.user.room,
+        objectOffset = req.body.offset;
 
-    Planners.getComment(objectItem, objectRoom, function(err, result) {
+    Planners.getComment(objectItem, objectRoom, objectOffset, function(err, result) {
         if(err) {
             return res.status(500).json({status: false});
         }
@@ -543,5 +550,32 @@ router.post("/task/comment", (req, res) => {
     })
 
 });
+/**
+ * TITLE        : Planner router
+ * DESCRIPTION  : Get list uploads for planner
+ *
+ */
+router.post("/task/attachments", (req, res) => {
+
+    if (Object.keys(req.user).length === 0) {
+        return res.status(403).json({status: false, err: 'Access denied!'});
+    }
+
+    let objectRoom      = req.body.room;
+    let objectItem      = req.body.id;
+    let objectUser      = req.user.id;
+    let objectPassword  = crypto.createHmac('sha256', String(objectUser+'_'+objectRoom+'_'+objectItem)).digest('hex');
+
+    Uploads.get(objectPassword, objectRoom, function(err, out) {
+        if (out) {
+            return res.status(200).json({status: true, attachments: out});
+        }
+        else {
+            return res.status(200).json({status: false, attachments: []});
+        }
+    })
+
+});
+
 
 module.exports = router;

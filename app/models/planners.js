@@ -89,15 +89,11 @@ const list = function (user_id, room_id, type, done) {
      *
      */
     let queryString = 'SELECT   p.`id`,                   ' +
-        '                       p.`user_id`,              ' +
-        '                       p.`operator_id`,          ' +
-        '                       p.`type_id`,              ' +
         '                       p.`header`,               ' +
         '                       p.`description`,          ' +
         '                       p.`data_create`,          ' +
         '                       p.`data_end`,             ' +
         '                       p.`whose`,                ' +
-        '                       p.`progress`,             ' +
         '                       p.`status`                ' +
         'FROM   planners p                                ' +
         'WHERE  p.user_id = ? AND p.whose = ?             ' +
@@ -124,10 +120,12 @@ const list = function (user_id, room_id, type, done) {
 
                     if (result[j].status === 3) {
                         objectArr[objectCnt].complete.push(result[i]);
+                        objectArr[objectCnt].complete[objectArr[objectCnt].complete.length - 1].comment = [];
                         continue;
                     }
 
                     objectArr[i].incomplete.push(result[j]);
+                    objectArr[objectCnt].incomplete[objectArr[objectCnt].incomplete.length - 1].comment = [];
                 }
             }
 
@@ -198,37 +196,47 @@ const download = function (user_id, room_id, type, offset, done){
     });
 }
 
-const getComment = function(id, room_id, done) {
+const getComment = function(id, room_id, offset, done) {
 
     let object      = [],
-        queryString = 'SELECT       m.`id`,                         ' +
-        '                           m.`from_id`,                    ' +
-        '                           m.`body`,                       ' +
-        '                           m.`type`,                       ' +
-        '                           m.`stack_id`,                   ' +
-        '                           m.`datetime`,                   ' +
-        '                           m.`is_read`,                    ' +
-        '                           u.`id`      u_id,               ' +
-        '                           u.`first_name` u_first_name,    ' +
-        '                           u.`last_name`  u_last_name,     ' +
-        '                           u.`company`  u_company,         ' +
-        '                           u.`roles`   u_roles,            ' +
-        '                           up.`id`     up_id ,             ' +
-        '                           up.`id`     up_id ,             ' +
-        '                           up.`original_name`,             ' +
-        '                           up.`name`,                      ' +
-        '                           up.`name_xs`,                   ' +
-        '                           up.`name_sm`,                   ' +
-        '                           up.`type`   up_type,            ' +
-        '                           up.`size`   up_size,            ' +
-        '                           up.`ext`                        ' +
-        'FROM  planner_messages pm                                  ' +
-        'INNER JOIN messages m ON pm.id_stack = m.stack_id          ' +
-        'INNER JOIN users u ON m.from_id = u.id                     ' +
-        'LEFT  JOIN uploads up ON m.id = up.id_message              ' +
-        'WHERE pm.id_planner = ?                                    ' ;
+        queryString = 'SELECT   m.`id`,                         ' +
+            '                       m.`from_id`,                    ' +
+            '                       m.`planner_id`,                 ' +
+            '                       m.`body`,                       ' +
+            '                       m.`type`,                       ' +
+            '                       m.`category`,                   ' +
+            '                       m.`stack_id`,                   ' +
+            '                       m.`datetime`,                   ' +
+            '                       m.`is_read`,                    ' +
+            '                       u.`id`      u_id,               ' +
+            '                       u.`first_name` u_first_name,    ' +
+            '                       u.`last_name`  u_last_name,     ' +
+            '                       u.`company`  u_company,         ' +
+            '                       u.`roles`   u_roles,            ' +
+            '                       up.`id`     up_id ,             ' +
+            '                       up.`original_name`,             ' +
+            '                       up.`name`,                      ' +
+            '                       up.`name_xs`,                   ' +
+            '                       up.`name_sm`,                   ' +
+            '                       up.`type`   up_type,            ' +
+            '                       up.`size`   up_size,            ' +
+            '                       up.`ext`,                       ' +
+            '                       p.`id`  pl_id,                  ' +
+            '                       p.`header`  pl_header,          ' +
+            '                       p.`description` pl_description, ' +
+            '                       p.`data_create` pl_data_create, ' +
+            '                       p.`data_end` pl_data_end,       ' +
+            '                       p.`whose` pl_whose,             ' +
+            '                       p.`status` pl_status            ' +
+            'FROM   messages m                                      ' +
+            'INNER  JOIN users u ON m.from_id = u.id                ' +
+            'INNER  JOIN planners p ON m.planner_id = p.id          ' +
+            'LEFT   JOIN uploads up ON m.id = up.id_message         ' +
+            'WHERE  p.id = ? AND m.category = ?                     ' +
+            'ORDER  BY m.id DESC, m.stack_id                        ' +
+            'LIMIT  5 OFFSET ?                                     ' ;
 
-   mysql.query(sql.format(queryString, [id]), function(err, result) {
+   mysql.query(sql.format(queryString, [id, 'comment', offset]), function(err, result) {
 
         if(err)
             return done (err, null);
@@ -277,13 +285,13 @@ const getComment = function(id, room_id, done) {
                 continue;
             }
 
-            if(i > 0 && objectPrev.collection[objectMessagePrev].upload.length === 0) {
+            /*if(i > 0 && objectPrev.collection[objectMessagePrev].upload.length === 0) {
 
                 if(result[i].from_id === objectPrev.collection[objectMessagePrev].from_id) {
 
                     if(result[i].type === config.chat.messages.type.text) {
 
-                        objectPrev.collection.unshift({
+                        objectPrev.collection.push({
                             id          : result[i].id,
                             from_id     : result[i].from_id,
                             datetime    : result[i].datetime,
@@ -298,7 +306,7 @@ const getComment = function(id, room_id, done) {
                     }
                     else {
 
-                        objectPrev.collection[0].upload.unshift({
+                        objectPrev.collection[0].upload.push({
                             id              : result[i].up_id,
                             type            : result[i].up_type,
                             size            : filesize(result[i].up_size),
@@ -315,7 +323,7 @@ const getComment = function(id, room_id, done) {
                         continue;
                     }
                 }
-            }
+            }*/
 
             // Create`s an object
             object[i]                       = {};
@@ -328,7 +336,7 @@ const getComment = function(id, room_id, done) {
             object[i].user.roles            = result[i].u_roles;
             object[i].collection            = [];
 
-            object[i].collection.unshift({
+            object[i].collection.push({
                 id              : result[i].id,
                 from_id         : result[i].from_id,
                 datetime        : result[i].datetime,
@@ -341,7 +349,7 @@ const getComment = function(id, room_id, done) {
 
             if(result[i].type !== config.chat.messages.type.text) {
 
-                object[i].collection[object[i].collection.length - 1].upload.unshift({
+                object[i].collection[object[i].collection.length - 1].upload.push({
                     id              : result[i].up_id,
                     type            : result[i].up_type,
                     size            : filesize(result[i].up_size),

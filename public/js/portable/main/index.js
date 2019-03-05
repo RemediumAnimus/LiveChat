@@ -43,7 +43,8 @@ let vue = new Vue({
                 },
                 category: {
                     message: "message",
-                    planner: "planner"
+                    planner: "planner",
+                    comment: "comment"
                 }
             }
         },
@@ -73,6 +74,7 @@ let vue = new Vue({
         },
         profileShow  : false,
         offsetMessage: 0,
+        limitMessages: 30,
         loading      : {
             innerBox     : 0,
             startBox     : 0,
@@ -111,6 +113,7 @@ let vue = new Vue({
                 id          : this.user.id,
                 category    : this.config.message.category.message,
                 messages    : this.uploads,
+                planner     : {}
             }
 
             // Sending a new message
@@ -182,12 +185,12 @@ let vue = new Vue({
                        newAssistant.short_name     = message.user.short_name;
 
                        this.profile.assistants.push(newAssistant);
-                     //  this.getProfileAssistant(this.user.room, this.user.id);
                    }
                 }
 
                 if(outMessages.length && outMessages[lastOutMessages].collection[outMessages[lastOutMessages].collection.length - 1].from_id === inMessage.collection[0].from_id &&
-                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id) {
+                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].stack_id !== inMessage.collection[0].stack_id &&
+                   outMessages[outMessages.length - 1].collection[outMessages[outMessages.length - 1].collection.length - 1].category === inMessage.collection[0].category) {
 
                     outMessages[outMessages.length - 1].collection.push(inMessage.collection[0]);
                 }
@@ -321,7 +324,7 @@ let vue = new Vue({
         loadingMessage() {
 
             let this_clone      = this;
-            this.offsetMessage  = this.offsetMessage + 10;
+            this.offsetMessage  = this.offsetMessage + this.limitMessages;
 
             axios.post('messages/all?transport=messages', {'room_id': this.user.room, 'offset': this.offsetMessage})
                  .then(function (response) {
@@ -837,6 +840,9 @@ let vue = new Vue({
                     text: data.header,
                     type: this.config.message.type.text
                 }],
+                planner     : {
+                    id: data.id
+                }
             };
 
             // Sending a new message
@@ -1035,6 +1041,52 @@ Vue.component('message-stack', {
                     </div>
                 </div>
             </div> 
+            <div class="in-message in-message_comment" v-for="(value, key) in item.collection" v-bind:data-msgid="value.stack_id" v-if="value.category === config.message.category.comment">
+                <div class="text-message">
+                    <div class="header-message">
+                        <div class="header-icon">
+                            <img src="img/ic-quote_arrow.svg">
+                        </div>
+                        <div class="header-body">
+                            <span>По задаче</span>
+                            <span>{{value.planner.header}}</span>
+                        </div>
+                    </div>
+                    <div class="body-message" v-if="value.upload.length">
+                        <span v-if="value.body">{{value.body}}</span>
+                        <div class="message-media" v-for="(file, index) in value.upload">
+                            <a v-bind:href="file.name" class="item-attachment">
+                                <span class="label-icon" v-if="file.type.match(/image*/)">
+                                    <img class="img" v-if="file.thumb_xs" v-bind:src="file.thumb_xs"></img>
+                                    <img class="img" v-else-if="file.thumb_sm" v-bind:src="file.thumb_sm"></img>
+                                    <img class="img" v-else v-bind:src="file.thumb"></img>
+                                </span>
+                                <span class="label-icon" v-else>
+                                    <i class="ion-android-document"></i>
+                                </span>
+                                <span class="label-text">
+                                    <span>{{file.original_name}}</span>
+                                    <small>{{file.size}}</small>
+                                </span>  
+                            </a>
+                        </div>   
+                    </div>
+                    <div class="body-message" v-else>
+                        <span>{{value.body}}</span>
+                    </div>
+                    <div class="info-message">
+                        <span>{{value.datetime}}</span>
+                    </div>
+                </div>
+                <div class="row-status" v-if="user.id === value.from_id">
+                    <span class="status-text" v-if="value.is_read" v-bind:data-msgid="value.is_read">
+                        <span>Прочитано</span><img src="img/accepted_ok.svg">
+                    </span>
+                    <span class="status-text" v-else>
+                        <span>Отправлено</span><img src="img/ic-accepted.svg">
+                    </span>
+                </div>
+            </div>
         </div>    
         <div class="message-stack-photo" v-if="item.user.roles === 'BOOKER'">
             <span class="w-40 avatar img-circle">{{item.user.short_name}}</span>

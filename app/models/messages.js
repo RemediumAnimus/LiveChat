@@ -8,7 +8,7 @@ const mysql     = require('../database');
 const sql       = require('sqlstring');
 const config    = require('../config');
 const users     = require('../models/users');
-const fs        = require('fs');
+const uploads   = require('../models/uploads');
 const filesize  = require('filesize');
 
 /**
@@ -16,22 +16,23 @@ const filesize  = require('filesize');
  * DESCRIPTION  : Creates a new message
  *
  */
-const save = function (from_id, room_id, type, category, body, upload_id, stack_id, done) {
+const save = function (from_id, room_id, planner_id, type, category, body, upload_id, stack_id, done) {
 
-    let queryString = 'INSERT INTO messages (`from_id`,       ' +
-        '                                    `room_id`,       ' +
-        '                                    `stack_id`,      ' +
-        '                                    `type`,          ' +
-        '                                    `category`,      ' +
-        '                                    `body`)          ' +
-        'VALUES                             (?, ?, ?, ?, ?, ?)' ;
+    let queryString = 'INSERT INTO messages (`from_id`,         ' +
+        '                                    `room_id`,         ' +
+        '                                    `planner_id`,      ' +
+        '                                    `stack_id`,        ' +
+        '                                    `type`,            ' +
+        '                                    `category`,        ' +
+        '                                    `body`)            ' +
+        'VALUES                             (?, ?, ?, ?, ?, ?, ?)' ;
 
     if(type !== config.chat.messages.type.text)
     {
         body = null;
     }
 
-    mysql.query(sql.format(queryString, [from_id, room_id, stack_id, type, category, body]), function(err, result){
+    mysql.query(sql.format(queryString, [from_id, room_id, planner_id, stack_id, type, category, body]), function(err, result){
         if (err)
             return done(err);
         if (!result.insertId) {
@@ -67,6 +68,7 @@ const get = function (room_id, offset, done) {
 
     let queryString = 'SELECT   m.`id`,                         ' +
         '                       m.`from_id`,                    ' +
+        '                       m.`planner_id`,                 ' +
         '                       m.`body`,                       ' +
         '                       m.`type`,                       ' +
         '                       m.`category`,                   ' +
@@ -85,12 +87,20 @@ const get = function (room_id, offset, done) {
         '                       up.`name_sm`,                   ' +
         '                       up.`type`   up_type,            ' +
         '                       up.`size`   up_size,            ' +
-        '                       up.`ext`                        ' +
+        '                       up.`ext`,                       ' +
+        '                       p.`id`  pl_id,                  ' +
+        '                       p.`header`  pl_header,          ' +
+        '                       p.`description` pl_description, ' +
+        '                       p.`data_create` pl_data_create, ' +
+        '                       p.`data_end` pl_data_end,       ' +
+        '                       p.`whose` pl_whose,             ' +
+        '                       p.`status` pl_status            ' +
         'FROM   messages m                                      ' +
         'INNER  JOIN users u ON m.from_id = u.id                ' +
         'LEFT   JOIN uploads up ON m.id = up.id_message         ' +
+        'LEFT   JOIN planners p ON m.planner_id = p.id          ' +
         'WHERE  room_id = ? ORDER BY m.id DESC, m.stack_id      ' +
-        'LIMIT  10 OFFSET ?                                     ' ;
+        'LIMIT  30 OFFSET ?                                     ' ;
 
     mysql.query(sql.format(queryString, [room_id, offset]), function(err, result){
         if (err)
@@ -109,7 +119,8 @@ const get = function (room_id, offset, done) {
 
             if(i > 0) {
                 objectPrev          = object[object.length - 1],
-                objectMessagePrev   = objectPrev.collection.length - 1;
+                objectMessagePrev   = 0;
+                //objectMessagePrev   = objectPrev.collection.length - 1;
             }
 
             // If an object with such a stack exists in the array
@@ -179,8 +190,22 @@ const get = function (room_id, offset, done) {
                             category    : result[i].category,
                             stack_id    : result[i].stack_id,
                             is_read     : result[i].is_read,
-                            upload      : []
+                            upload      : [],
+                            planner     : {}
                         });
+
+                        if(result[i].category === config.chat.messages.category.comment || result[i].category === config.chat.messages.category.planner) {
+
+                            objectPrev.collection[0].planner = {
+                                id              : result[i].pl_id,
+                                header          : result[i].pl_header,
+                                description     : result[i].pl_description,
+                                data_create     : result[i].pl_data_create,
+                                data_end        : result[i].pl_data_end,
+                                whose           : result[i].pl_whose,
+                                status          : result[i].pl_status
+                            };
+                        }
 
                         continue;
                     }
@@ -207,7 +232,8 @@ const get = function (room_id, offset, done) {
                 category        : result[i].category,
                 stack_id        : result[i].stack_id,
                 is_read         : result[i].is_read,
-                upload          : []
+                upload          : [],
+                planner         : {}
             });
 
             if(result[i].type === config.chat.messages.type.image || result[i].type === config.chat.messages.type.document) {
@@ -225,6 +251,19 @@ const get = function (room_id, offset, done) {
                                     ? getPath(room_id, result[i].name_sm, result[i].ext)
                                     : result[i].name_sm
                 });
+            }
+
+            if(result[i].category === config.chat.messages.category.comment || result[i].category === config.chat.messages.category.planner) {
+
+                object[i].collection[object[i].collection.length - 1].planner = {
+                    id              : result[i].pl_id,
+                    header          : result[i].pl_header,
+                    description     : result[i].pl_description,
+                    data_create     : result[i].pl_data_create,
+                    data_end        : result[i].pl_data_end,
+                    whose           : result[i].pl_whose,
+                    status          : result[i].pl_status
+                };
             }
         }
         // Remove`s null values
