@@ -141,6 +141,7 @@ let vue = new Vue({
 
             // Listen to the user status update event.
             socket.on('users:status', user => {
+
                 for(let j = 0; j < this.usersList.length; j++) {
                     if(this.usersList[j].id === user.id) {
                         if(this.usersList[j].attributes.online === true){
@@ -149,6 +150,12 @@ let vue = new Vue({
                            this.usersList[j].attributes.online = true;
                         }
                     }
+                }
+
+                if(!this.usersList.find(u => u.id === user.id)) {
+
+                    user.attributes.online = true;
+                    this.usersList.push(user)
                 }
             })
 
@@ -841,7 +848,14 @@ let vue = new Vue({
                     type: this.config.message.type.text
                 }],
                 planner     : {
-                    id: data.id
+                    id:             data.id,
+                    header:         data.header,
+                    description:    data.description,
+                    comment:        data.comment,
+                    data_create:    data.data_create,
+                    data_end:       data.data_end,
+                    whose:          data.whose,
+                    status:         data.status
                 }
             };
 
@@ -1005,7 +1019,8 @@ Vue.component('message-stack', {
                         </div>
                         <div v-for="(file, index) in value.upload" v-if="!file.type.match(/image*/)">
                             <a v-bind:href="file.name" class="item-attachment">
-                                <span class="label-icon"><i class="ion-android-document"></i></span>
+                                <span class="label-icon" v-if="item.user.roles === 'GUEST'"><img src="img/ic-file_portable_white.svg"/></span>
+                                <span class="label-icon" v-else><img src="img/ic-file_portable.svg"/></span>
                                 <span class="label-text">
                                     <span>{{file.original_name}}</span>
                                     <small class="text-muted">{{file.size}}</small>
@@ -1062,7 +1077,8 @@ Vue.component('message-stack', {
                                     <img class="img" v-else v-bind:src="file.thumb"></img>
                                 </span>
                                 <span class="label-icon" v-else>
-                                    <i class="ion-android-document"></i>
+                                    <img class="img" src="img/ic-file_portable_white.svg" v-if="item.user.roles === 'GUEST'"></img>
+                                    <img class="img" src="img/ic-file_portable.svg" v-else></img>
                                 </span>
                                 <span class="label-text">
                                     <span>{{file.original_name}}</span>

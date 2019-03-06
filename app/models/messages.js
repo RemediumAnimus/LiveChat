@@ -8,7 +8,7 @@ const mysql     = require('../database');
 const sql       = require('sqlstring');
 const config    = require('../config');
 const users     = require('../models/users');
-const uploads   = require('../models/uploads');
+const General   = require('../models/General');
 const filesize  = require('filesize');
 
 /**
@@ -200,8 +200,8 @@ const get = function (room_id, offset, done) {
                                 id              : result[i].pl_id,
                                 header          : result[i].pl_header,
                                 description     : result[i].pl_description,
-                                data_create     : result[i].pl_data_create,
-                                data_end        : result[i].pl_data_end,
+                                data_create     : General.formatdate(result[i].pl_data_create, true),
+                                data_end        : General.formatdate(result[i].pl_data_end, true),
                                 whose           : result[i].pl_whose,
                                 status          : result[i].pl_status
                             };
@@ -259,8 +259,8 @@ const get = function (room_id, offset, done) {
                     id              : result[i].pl_id,
                     header          : result[i].pl_header,
                     description     : result[i].pl_description,
-                    data_create     : result[i].pl_data_create,
-                    data_end        : result[i].pl_data_end,
+                    data_create     : General.formatdate(result[i].pl_data_create, true),
+                    data_end        : General.formatdate(result[i].pl_data_end, true),
                     whose           : result[i].pl_whose,
                     status          : result[i].pl_status
                 };

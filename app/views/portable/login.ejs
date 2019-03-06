@@ -29,30 +29,11 @@
     </form>
     <form class="login-form" @submit.prevent="login()">
         <input type="text" ref="username" placeholder="Логин"/>
-        <input type="password"  ref="password"placeholder="Пароль"/>
+        <input type="password" ref="password" placeholder="Пароль"/>
         <button type="submit">Войти</button>
         <p class="message">Не зарегистрированы? <a @click="showForm()">Создать аккаунт</a></p>
     </form>
 </div>
-
-
-<form class="login-form-operator" @submit.prevent="login" style="position: relative">
-    <input ref="username" type="hidden" value="operator">
-    <input ref="password" type="hidden" value="12345">
-    <button class="btn" type="submit">Авторизоваться оператором</button>
-</form>
-
-<form class="login-form-client1" @submit.prevent="login" style="position: relative">
-    <input ref="username" type="hidden" value="client1">
-    <input ref="password" type="hidden" value="12345">
-    <button class="btn" type="submit">Артём Кузьминский</button>
-</form>
-
-<form class="login-form-client2" @submit.prevent="login" style="position: relative">
-    <input ref="username" type="hidden" value="client2">
-    <input ref="password" type="hidden" value="12345">
-    <button class="btn" type="submit">Илья Никифоров</button>
-</form>
 
 
 <!-- jQuery -->

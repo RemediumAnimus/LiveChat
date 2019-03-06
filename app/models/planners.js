@@ -9,7 +9,7 @@ const sql        = require('sqlstring');
 
 const Messages   = require('../models/messages');
 const Users      = require('../models/users');
-const Uploads    = require('../models/uploads');
+const General    = require('../models/general');
 const filesize   = require('filesize');
 const config     = require('../config');
 
@@ -44,8 +44,8 @@ const save = function (user_id, operator_id, header, description, comment, date_
             object.header       = header;
             object.description  = description;
             object.comment      = comment;
-            object.data_create  = Uploads.formatdate(new Date(), true);
-            object.data_end     = Uploads.formatdate(new Date(date_end), true);
+            object.data_create  = General.formatdate(new Date(), true);
+            object.data_end     = General.formatdate(new Date(date_end), true);
             object.type_id      = type_id;
             object.whose        = 1;
             object.progress     = 0;
@@ -115,8 +115,8 @@ const list = function (user_id, room_id, type, done) {
 
                 for (let j = 0; j < result.length; j++) {
 
-                    result[j].data_create = Uploads.formatdate(result[j].data_create, true);
-                    result[j].data_end    = Uploads.formatdate(result[j].data_end, true);
+                    result[j].data_create = General.formatdate(result[j].data_create, true);
+                    result[j].data_end    = General.formatdate(result[j].data_end, true);
 
                     if (result[j].status === 3) {
                         objectArr[objectCnt].complete.push(result[i]);
@@ -179,7 +179,7 @@ const download = function (user_id, room_id, type, offset, done){
 
         for (let i = 0; i < result.length; i++){
 
-            result[i].data_create = Uploads.formatdate(result[i].data_create, true);
+            result[i].data_create = General.formatdate(result[i].data_create, true);
 
             if(result[i].status === 3) {
                 list.complete.push(result[i]);
@@ -284,46 +284,6 @@ const getComment = function(id, room_id, offset, done) {
 
                 continue;
             }
-
-            /*if(i > 0 && objectPrev.collection[objectMessagePrev].upload.length === 0) {
-
-                if(result[i].from_id === objectPrev.collection[objectMessagePrev].from_id) {
-
-                    if(result[i].type === config.chat.messages.type.text) {
-
-                        objectPrev.collection.push({
-                            id          : result[i].id,
-                            from_id     : result[i].from_id,
-                            datetime    : result[i].datetime,
-                            body        : result[i].body,
-                            type        : result[i].type,
-                            stack_id    : result[i].stack_id,
-                            is_read     : result[i].is_read,
-                            upload      : []
-                        });
-
-                        continue;
-                    }
-                    else {
-
-                        objectPrev.collection[0].upload.push({
-                            id              : result[i].up_id,
-                            type            : result[i].up_type,
-                            size            : filesize(result[i].up_size),
-                            original_name   : result[i].original_name,
-                            thumb           : Messages.getPath(room_id, result[i].name, result[i].ext),
-                            thumb_xs        : result[i].name_xs
-                                            ? Messages.getPath(room_id, result[i].name_xs, result[i].ext)
-                                            : result[i].name_xs,
-                            thumb_sm        : result[i].name_sm
-                                            ? Messages.getPath(room_id, result[i].name_sm, result[i].ext)
-                                            : result[i].name_sm
-                        });
-
-                        continue;
-                    }
-                }
-            }*/
 
             // Create`s an object
             object[i]                       = {};

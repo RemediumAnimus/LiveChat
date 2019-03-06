@@ -10,6 +10,7 @@ const path       = require('path')
 const crypto     = require('crypto');
 const fs         = require('fs');
 const router 	 = express.Router();
+const md5        = require('md5');
 
 const User       = require('../models/users');
 const Uploads    = require('../models/uploads');
@@ -17,7 +18,6 @@ const Images     = require('../models/images');
 const Messages   = require('../models/messages');
 const Planners   = require('../models/planners');
 const config     = require('../config');
-
 
 /**
  * TITLE        : Home page
@@ -31,7 +31,23 @@ router.get('/', function(req, res, next) {
         res.redirect('/chat');
     }
     else {
-        res.render(config.chat.template.login);
+        res.render(config.chat.template.login.client);
+    }
+});
+
+/**
+ * TITLE        : Home page
+ * DESCRIPTION  : Redirects to the chat page if the user is logged in
+ *
+ */
+router.get('/operator', function(req, res, next) {
+
+    // If user is already logged in, then redirect to chat page
+    if(req.isAuthenticated()){
+        res.redirect('/chat');
+    }
+    else {
+        res.render(config.chat.template.login.operator);
     }
 });
 
@@ -53,6 +69,7 @@ router.get('/chat', [User.isAuthenticated, function(req, res) {
         case config.chat.roles.client:
             template = config.chat.template.client;
             break;
+        default: template = config.chat.template.client;
     }
 
     // Generates a pattern
@@ -60,31 +77,125 @@ router.get('/chat', [User.isAuthenticated, function(req, res) {
 }]);
 
 /**
+ * TITLE        : Chat router
+ * DESCRIPTION  : Login for operator
+ *
+ */
+router.post('/auth', function(req, res, next) {
+
+    passport.authenticate('local-login', function (err, user) {
+
+        if (err) {
+            return res.status(200).json({status: false, error: err});
+        }
+        if (!user) {
+            return res.status(200).json({status: false, error: 'User is not found...'});
+        }
+        if(user.roles !== config.chat.roles.operator) {
+            return res.status(200).json({status: false, error: 'User is not found...'});
+        }
+        req.logIn(user, function(err) {
+            if (err) {
+                return res.status(200).json({status: false, error: 'Could not log in user...'});
+            }
+            res.status(200).json({status: true, error: false});
+        });
+    })(req, res, next);
+});
+
+/**
  * TITLE        : Login user
  * DESCRIPTION  : Redirects to the chat page if the user is logged in
  *
  */
 router.post('/login', function(req, res, next) {
-    passport.authenticate('local-login', function (err, user, info) {
-        if (err) {
-            return res.status(401).json(err);
-        }
-        if (user) {
 
-            req.logIn(user, function(err) {
-                 if (err) {
-                    return res.status(500).json({
-                        err: 'Could not log in user!'
-                    });
+    let appid       = encodeURIComponent('10729'),
+        format      = encodeURIComponent("json"),
+        deviceid    = encodeURIComponent("12356789n"),
+        useragent   = encodeURIComponent("androidphone."),
+        rand        = encodeURIComponent(new Date()),
+        secret      = encodeURIComponent("qA7redrL5L"),
+        method 	    = encodeURIComponent('login'),
+        password 	= encodeURIComponent(req.body.password),
+        login  	    = req.body.username.toLowerCase();
+
+        let sig     = md5("appid"+appid.toLowerCase()+'deviceid'+deviceid.toLowerCase()+'format'+format.toLowerCase()+'login'+login.toLowerCase()+'method'+method.toLowerCase()+'pass'+password.toLowerCase()+appid+secret),
+        request     = "appid="+appid+"&deviceid="+deviceid+"&format="+format+"&login="+login+"&method="+method+"&pass="+password+"&rand="+rand+"&useragent="+useragent+'com.ut.android.action1.0'+"&sig="+sig+"";
+
+        User.searchAction(sig, request, function(err, data) {
+
+            if(err) {
+                return res.status(200).json({status: false, error: 'Authorization error...'});
+            }
+            if(!data.Token) {
+                return res.status(200).json({status: false, error: 'Сlient not found...'});
+            }
+
+            sig     = md5("appid"+appid+'fieldsemail,birthdate,city,branch,createdate,fillprofile,firstname,middlename,lastname,gender,id,lastmodify,login,phone,phonesubmitted,post,region,regionguid,staff,tzid,urlreferrer,xssidentifierformat'+format+'methodgetprofile2token'+data.Token+appid+secret);
+            request = "appid="+appid+"&format="+format+"&fields=Email,Birthdate,City,Branch,Createdate,Fillprofile,Firstname,Middlename,Lastname,Gender,Id,Lastmodify,Login,Phone,Phonesubmitted,Post,Region,Regionguid,Staff,Tzid,UrlReferrer,Xssidentifier&method=getprofile2&token="+data.Token+"&sig="+sig+"";
+
+            User.searchAction(sig, request, function(err, result) {
+
+                if(!result.Fields){
+                    return res.status(200).json({status: false, error: 'No data was found for the specified client...'});
                 }
-                res.status(200).json({
-                    status: 'Login successful!'
-                });
-            });
-        } else {
-            res.status(401).json(info);
-        }
-    })(req, res, next);
+
+                let object = {};
+                    object.email     = result.Fields.Email;
+                    object.firstname = result.Fields.Firstname;
+                    object.lastname  = result.Fields.Lastname;
+                    object.roles     = config.chat.roles.client;
+                    object.token     = data.Token;
+
+                passport.authenticate('local-login', function (err, user) {
+
+                    if (err) {
+                        return res.status(200).json({status: false, error: err});
+                    }
+                    if (!user) {
+
+                        User.insertUser(object.email, req.body.password, object.firstname, object.lastname, null, object.roles, function(err, out) {
+
+                            if(err) {
+                                return res.status(200).json({status: false, error: err});
+                            }
+                            if(!out) {
+                                return res.status(200).json({status: false, error: 'Error creating new user...'});
+                            }
+
+                            passport.authenticate('local-login', function (err, newuser) {
+                                if (err) {
+                                    return res.status(200).json({status: false, error: err});
+                                }
+                                if (!newuser) {
+                                    return res.status(200).json({status: false, error: 'Authorization error by new user...'});
+                                }
+                                if(newuser.roles !== config.chat.roles.client) {
+                                    return res.status(200).json({status: false, error: 'User is not found...'});
+                                }
+                                req.logIn(newuser, function(err) {
+                                    if (err) {
+                                        return res.status(500).json({status: false, error: 'Could not log in user...'});
+                                    }
+                                    res.status(200).json({status: true, error: false});
+                                });
+                            })(req, res, next);
+                        })
+                    } else {
+                        if(user.roles !== config.chat.roles.client) {
+                            return res.status(200).json({status: false, error: 'User is not found...'});
+                        }
+                        req.logIn(user, function(err) {
+                            if (err) {
+                                return res.status(500).json({status: false, error: 'Could not log in user...'});
+                            }
+                            res.status(200).json({status: true, error: false});
+                        });
+                    }
+                })(req, res, next);
+            })
+        })
 })
 
 /**

@@ -62,7 +62,7 @@ const init = function(){
             '                       u.`password`            ' +
             'FROM  users u                                  ' +
             'LEFT  JOIN `rooms` r ON u.`id` = r.`id_user`   ' +
-            'WHERE u.`email` = ?                            ' ;
+            'WHERE u.`email` = ?				            ' ;
 
 		mysql.query(sql.format(queryString, [email]), function(err, rows){
 			if (err)

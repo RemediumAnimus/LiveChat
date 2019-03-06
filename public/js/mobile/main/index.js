@@ -240,7 +240,9 @@ const vue = new Vue({
                         if(plannerMessages.length && plannerMessages[0].collection[0].stack_id !== inMessage.collection[0].stack_id) {
                             plannerMessages.unshift(inMessage);
                         }
-
+                        if(!plannerMessages.length) {
+                            plannerMessages.unshift(inMessage);
+                        }
                     }
                 }
 
@@ -993,7 +995,8 @@ Vue.component('message-stack', {
                     </div>
                     <div class="message-file" v-for="(file, index) in value.upload" v-if="!file.type.match(/image*/)">
                         <a v-bind:href="file.name" class="item-attachment">
-                            <span class="label-icon"><i class="fa fa-file"></i></span>
+                            <span class="label-icon" v-if="item.user.roles === 'GUEST'"><img src="img/ic-file_mobile_white.svg"/></span>
+                            <span class="label-icon" v-else><img src="img/ic-file_mobile.svg"/></span>
                             <span class="label-text">
                                 <span>{{file.original_name}}</span>
                                 <small>{{file.size}}</small>
@@ -1048,12 +1051,13 @@ Vue.component('message-stack', {
                     <div class="message-media" v-for="(file, index) in value.upload">
                         <a v-bind:href="file.name" class="item-attachment">
                             <span class="label-icon" v-if="file.type.match(/image*/)">
-                                <img class="img" v-if="file.thumb_xs" v-bind:src="file.thumb_xs"></img>
-                                <img class="img" v-else-if="file.thumb_sm" v-bind:src="file.thumb_sm"></img>
-                                <img class="img" v-else v-bind:src="file.thumb"></img>
+                                <img class="img img-border" v-if="file.thumb_xs" v-bind:src="file.thumb_xs"></img>
+                                <img class="img img-border" v-else-if="file.thumb_sm" v-bind:src="file.thumb_sm"></img>
+                                <img class="img img-border" v-else v-bind:src="file.thumb"></img>
                             </span>
                             <span class="label-icon" v-else>
-                                <img class="img" src="img/ic-file.svg"></img>
+                                <img class="img" src="img/ic-file_mobile_white.svg" v-if="item.user.roles === 'GUEST'"></img>
+                                <img class="img" src="img/ic-file_mobile.svg" v-else></img>
                             </span>
                             <span class="label-text">
                                 <span>{{file.original_name}}</span>

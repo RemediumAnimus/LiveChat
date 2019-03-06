@@ -15,7 +15,10 @@
 		"template": {
 			"client": "mobile/index",
 			"operator": "portable/index",
-			"login"	  : "portable/login"
+			"login"	  : {
+				"client": "mobile/login",
+				"operator": "portable/login"
+			}
 		},
 		"messages": {
 			"type": {

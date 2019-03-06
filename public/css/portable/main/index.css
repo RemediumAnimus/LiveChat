@@ -1001,17 +1001,12 @@
 	white-space: nowrap;
 	vertical-align: baseline;
 	font-weight: bold;
-	background-color: #2196f3;
-	color: #fff;
-	border-radius: 500px;
-	padding: 5px 9px;
-}
-.message-stack.mess-in .text-message .item-attachment > .label-icon {
-	background-color: #FFFFFF;
-	color: #bdbdbd;
 }
 .message-stack .text-message .item-attachment > .label-icon > i {
 	font-size: 1.33rem;
+}
+.message-stack .text-message .item-attachment > .label-icon > img {
+    height: 100%;
 }
 .message-stack .text-message .item-attachment > .label-text {
 	display: flex;

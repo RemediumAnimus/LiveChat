@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+    <title>Главбух Ассистент</title>
+    <meta charset="utf-8">
+    <meta http-equiv="x-rim-auto-match" content="none">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/css/mobile/main/login.css" type="text/css" />
+</head>
+<body>
+<div class="box" id="app">
+    <div class="container">
+        <div class="logo">
+            <img src="img/logo_with_text.svg">
+        </div>
+        <form @submit.prevent="login()">
+            <div class="item-section">
+                <div class="item-field">
+                    <div class="block-field">
+                        <label>Email</label>
+                        <input type="text" ref="username" data-warning="warning-email" placeholder="example@provider.ru">
+                    </div>
+                </div>
+                <div class="item-field">
+                    <div class="block-field">
+                        <label>Пароль</label>
+                        <input type="password" ref="password" data-warning="warning-password" placeholder="обязательно" style="-webkit-text-security: square;">
+                    </div>
+                </div>
+                <div class="label-warning"><span>Неверный адрес электронной почты или пароль</span></div>
+            </div>
+            <div class="item-section">
+                <a class="btn-send">
+                    <span><img src="img/ic-logo_btn.svg"></span>
+                    <p>Войти</p>
+                    <input type="submit" class="send">
+                </a>
+            </div>
+            <!--<div class="item-section">
+                <a href="https://id2.action-media.ru/Account/Registration?appid=10729" class="btn-recall">Зарегистрироваться</a>
+            </div>-->
+            <div class="item-section">
+                <a href="https://id2.action-media.ru/Logon" class="btn-recall">Напомнить пароль</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="js/portable/library/jquery.js"></script>
+
+<!-- Vue JS -->
+<script src="js/portable/library/vue.js"></script>
+
+<!-- Axios -->
+<script src="js/portable/library/axios.min.js"></script>
+
+<!-- Index -->
+<script src="js/mobile/main/login.js"></script>
+
+</body>
+</html>

@@ -4,9 +4,11 @@
  * DESCRIPTION  : Declares variables
  *
  */
-const mysql             = require('../database');
-const config            = require('../config');
-const sql               = require('sqlstring');
+const mysql      = require('../database');
+const config     = require('../config');
+const sql        = require('sqlstring');
+const crypto     = require('crypto');
+const curl       = require('request-promise');
 
 let userModel = [];
 
@@ -33,6 +35,47 @@ const add = function (socket_id, data){
             'current'           : false
         }
     })
+}
+
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : Add user to database
+ *
+ */
+const insertUser = function (email, password, firstname, lastname, company, roles, done) {
+    password = crypto.createHmac('sha256', String(password)).digest('hex');
+    let queryString = 'INSERT INTO users (  email,      ' +
+        '                                   password,   ' +
+        '                                   first_name, ' +
+        '                                   last_name,  ' +
+        '                                   company,    ' +
+        '                                   roles)      ' +
+        'VALUES (?, ?, ?, ?, ?, ?)                      ' ;
+
+    mysql.query(sql.format(queryString, [email, password, firstname, lastname, company, roles]), function(err, result){
+
+        if(err) {
+            return done(err, null);
+        }
+        if (!result) {
+            return done(true, null);
+        }
+
+        queryString = 'INSERT INTO rooms (id_user)    ' +
+            'VALUES (?)                               ' ;
+
+        mysql.query(sql.format(queryString, [result.insertId]), function(err, result){
+
+            if(err) {
+                return done(err, null);
+            }
+            if (!result) {
+                return done(true, null);
+            }
+
+            return done(null, result.insertId);
+        });
+    });
 }
 
 /**
@@ -74,7 +117,6 @@ const getByRoom = function (room) {
 const getAllUsers = function () {
     return userModel.filter(u => u.roles === config.chat.roles.client)
 }
-
 
 /**
  * TITLE        : User method
@@ -220,34 +262,6 @@ const getInfoProfile = function (id_room, done) {
 
 /**
  * TITLE        : User method
- * DESCRIPTION  : Receive`s information on the number of investments in the dialog
- *
- */
-const getCntUpload = function (id_room, done) {
-
-    let queryString = 'SELECT count(*) sum, m.type FROM messages m  ' +
-        'INNER  JOIN uploads u ON m.id = u.id_message               ' +
-        'WHERE  m.room_id = ?                                       ' +
-        'GROUP  by m.type                                           ' ;
-
-    mysql.query(sql.format(queryString, [id_room]), function(err, result){
-        if(err)
-            return done(err, null);
-        if(!result)
-            return done(null, null);
-
-        let array = {};
-
-        for(let i = 0; i < result.length; i++) {
-            array[result[i].type] = result[i].sum;
-        }
-
-        return done(null, array);
-    });
-}
-
-/**
- * TITLE        : User method
  * DESCRIPTION  : A middleware allows user to get access to pages ONLY if the user is already logged in
  *
  */
@@ -306,9 +320,38 @@ const getSystem = function () {
     return userModel.find(u => u.id === config.user.system.id)
 }
 
+/**
+ * TITLE        : User method
+ * DESCRIPTION  : cURL id2
+ *
+ */
+const searchAction = function (sig, request, done) {
+
+    let options = {
+        method: 'POST',
+        uri: 'https://id2.action-media.ru/api/rest/mobile',
+        body: request,
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded'
+        }
+    };
+
+    curl(options)
+        .then(function (body) {
+            if(JSON.parse(body).Error.Code === 0)
+                return done(false, JSON.parse(body).Data)
+
+            return done('no token', null);
+        })
+        .catch(function (err) {
+            return done(err, null);
+        });
+}
+
 
 module.exports = {
     add,
+    insertUser,
     get,
     remove,
     getByRoom,
@@ -320,5 +363,6 @@ module.exports = {
     getInfoProfile,
     getReadbleName,
     getShortName,
-    getSystem
+    getSystem,
+    searchAction
 };

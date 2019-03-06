@@ -48,7 +48,7 @@
 		<div class="navside dk" data-layout="column">
 			<div class="navbar no-radius">
 				<!-- brand -->
-				<a href="index.html" class="navbar-brand">
+				<a href="/chat" class="navbar-brand">
 					<div data-ui-include="'img/logo.svg'"></div>
 					<img src="img/logo.svg" alt="." class="">
 					<span class="hidden-folded inline">Клиенты ГБА</span>
@@ -146,8 +146,11 @@
 														<div class="item-title">
 															<span class="_500">{{u.display_name}}</span>
 														</div>
-														<small class="block text-muted text-ellipsis">
+														<small class="block text-muted text-ellipsis" v-if="u.company">
 															{{u.company}}
+														</small>
+														<small class="block text-muted text-ellipsis" v-else>
+															Компания не задана
 														</small>
 													</div>
 												</div>
