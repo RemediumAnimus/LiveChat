@@ -27,7 +27,7 @@
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-crypto": "1.0.5",
-    "express-fileupload": "^1.1.1-alpha.1",
+    "express-fileupload": "^1.1.9",
     "express-request-id": "^1.4.1",
     "express-session": "^1.15.6",
     "filesize": "^4.0.0",
